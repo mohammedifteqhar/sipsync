@@ -7,7 +7,6 @@ from app import models, schemas
 
 router = APIRouter()
 
-# Default fallback key for local dev, overridden by environment variable in production
 MANAGER_API_KEY = os.getenv("MANAGER_API_KEY", "sipsync-admin-2026")
 
 def verify_manager_access(x_manager_key: Optional[str] = Header(None)):
@@ -19,18 +18,18 @@ def verify_manager_access(x_manager_key: Optional[str] = Header(None)):
         )
     return True
 
-@router.get("/", response_model=List[schemas.MenuItemResponse])
+@router.get("/")
 def get_public_menu(db: Session = Depends(get_db)):
-    """Public endpoint: Allows customers scanning table QRs to view active items."""
+    """Public endpoint: Returns all menu items."""
     return db.query(models.MenuItem).all()
 
-@router.patch("/{item_id}/toggle", response_model=schemas.MenuItemResponse)
+@router.patch("/{item_id}/toggle")
 def toggle_item_availability(
     item_id: int, 
     db: Session = Depends(get_db),
     _: bool = Depends(verify_manager_access)
 ):
-    """Protected endpoint: Only managers can 86 / toggle item stock."""
+    """Protected endpoint: Only managers can toggle item stock."""
     item = db.query(models.MenuItem).filter(models.MenuItem.id == item_id).first()
     if not item:
         raise HTTPException(
@@ -38,7 +37,8 @@ def toggle_item_availability(
             detail=f"Menu item with ID {item_id} does not exist."
         )
     
-    item.is_available = not item.is_available
+    # Correct column name: 'avail'
+    item.avail = not item.avail
     db.commit()
     db.refresh(item)
     return item
