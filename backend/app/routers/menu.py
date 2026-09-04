@@ -1,21 +1,44 @@
-from fastapi import APIRouter, Depends, HTTPException
+import os
+from fastapi import APIRouter, Depends, HTTPException, Header, status
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from app.database import get_db
-from app.models import MenuItem
-from app.schemas import MenuItemResponse, MenuItemCreate
+from app import models, schemas
 
-router = APIRouter(prefix="/api/menu", tags=["Menu"])
+router = APIRouter()
 
-@router.get("/", response_model=List[MenuItemResponse])
-def get_all_menu_items(db: Session = Depends(get_db)):
-    return db.query(MenuItem).all()
+# Default fallback key for local dev, overridden by environment variable in production
+MANAGER_API_KEY = os.getenv("MANAGER_API_KEY", "sipsync-admin-2026")
 
-@router.put("/{item_id}/toggle")
-def toggle_menu_item_availability(item_id: int, db: Session = Depends(get_db)):
-    item = db.query(MenuItem).filter(MenuItem.id == item_id).first()
+def verify_manager_access(x_manager_key: Optional[str] = Header(None)):
+    """Guards administrative endpoints against unauthorized public modification."""
+    if x_manager_key != MANAGER_API_KEY:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized: Valid manager access key required."
+        )
+    return True
+
+@router.get("/", response_model=List[schemas.MenuItemResponse])
+def get_public_menu(db: Session = Depends(get_db)):
+    """Public endpoint: Allows customers scanning table QRs to view active items."""
+    return db.query(models.MenuItem).all()
+
+@router.patch("/{item_id}/toggle", response_model=schemas.MenuItemResponse)
+def toggle_item_availability(
+    item_id: int, 
+    db: Session = Depends(get_db),
+    _: bool = Depends(verify_manager_access)
+):
+    """Protected endpoint: Only managers can 86 / toggle item stock."""
+    item = db.query(models.MenuItem).filter(models.MenuItem.id == item_id).first()
     if not item:
-        raise HTTPException(status_code=404, detail="Item not found")
-    item.avail = not item.avail
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail=f"Menu item with ID {item_id} does not exist."
+        )
+    
+    item.is_available = not item.is_available
     db.commit()
-    return {"message": "Availability updated", "id": item.id, "avail": item.avail}
+    db.refresh(item)
+    return item
