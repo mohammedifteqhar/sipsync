@@ -37,6 +37,57 @@
 html,body{height:100%;font-family:'Inter',sans-serif;font-size:14px;background:var(--bg);color:var(--text);line-height:1.5}
 input,select,button{font-family:inherit;font-size:inherit}
 
+/* ── 80mm Thermal Receipt & KOT Print Styling ── */
+#thermal-receipt-area {
+  display: none;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .shell, #payment-modal, #res-modal, #ai-chat-btn, #ai-chat-box {
+    display: none !important;
+  }
+  #thermal-receipt-area, #thermal-receipt-area * {
+    visibility: visible;
+  }
+  #thermal-receipt-area {
+    display: block !important;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 76mm; /* Exact printable width for standard 80mm rolls */
+    padding: 2mm 3mm;
+    margin: 0;
+    background: #fff;
+    color: #000;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    line-height: 1.35;
+  }
+  .receipt-center {
+    text-align: center;
+  }
+  .receipt-bold {
+    font-weight: 700;
+  }
+  .receipt-divider {
+    border-bottom: 1px dashed #000;
+    margin: 6px 0;
+  }
+  .receipt-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 3px;
+  }
+  .receipt-item-name {
+    flex: 1;
+    padding-right: 4px;
+    word-break: break-word;
+  }
+}
+
 /* ── Pulse Alert Animation ── */
 @keyframes pulseBadge {
   0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(184,115,51,0.6); }
@@ -496,6 +547,9 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
   </div>
 </div>
 
+<!-- ── OFF-SCREEN THERMAL RECEIPT / KOT PRINT STAGING ── -->
+<div id="thermal-receipt-area"></div>
+
 <script>
 const API_BASE = 'https://sipsync-api-k9tz.onrender.com/api';
 const MANAGER_KEY = 'sipsync-admin-2026';
@@ -503,9 +557,6 @@ const MANAGER_KEY = 'sipsync-admin-2026';
 // ── UPI Merchant Config ──
 const RESTAURANT_UPI_VPA = 'raidan@upi';
 const RESTAURANT_NAME = 'Raidan Restaurant';
-
-// Local storage mapping for payment methods per order: { [orderId]: 'UPI' | 'Cash' | 'Card' }
-const settledOrderMethods = {};
 
 // ══════════════════════════════════════════════════════
 //  UNIFIED AUDIO ENGINE (KITCHEN & MANAGER SOUNDS)
@@ -795,20 +846,102 @@ setInterval(() => {
 }, 5000);
 
 // ══════════════════════════════════════════════════════
-//  LIVE ORDERS & KITCHEN PIPELINE (WITH GREEN PAID BADGE)
+//  80MM THERMAL KOT & BILL PRINTING ENGINE
+// ══════════════════════════════════════════════════════
+function printKOT(orderId) {
+  const order = liveOrdersCache.find(o => o.id === orderId);
+  if (!order) return;
+
+  const printArea = document.getElementById('thermal-receipt-area');
+  const items = (order.items || '').split(',').map(i => i.trim()).filter(Boolean);
+  const now = new Date();
+  const timeStr = now.toLocaleDateString('en-IN', {day:'2-digit', month:'short'}) + ' ' +
+                  now.toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit', hour12:true});
+
+  printArea.innerHTML = `
+    <div class="receipt-center receipt-bold" style="font-size:16px;">KITCHEN ORDER TICKET (KOT)</div>
+    <div class="receipt-center" style="font-size:11px;">RAIDAN RESTAURANT — FRAZER TOWN</div>
+    <div class="receipt-divider"></div>
+    <div class="receipt-row"><span class="receipt-bold">TICKET:</span> <span>#${order.id}</span></div>
+    <div class="receipt-row"><span class="receipt-bold">SPOT:</span> <span class="receipt-bold" style="font-size:15px;">${order.type || 'Dine-In'}</span></div>
+    <div class="receipt-row"><span>GUEST:</span> <span>${order.customer || 'Diner'}</span></div>
+    <div class="receipt-row"><span>TIME:</span> <span>${timeStr}</span></div>
+    <div class="receipt-divider"></div>
+    <div class="receipt-row receipt-bold"><span>ITEM</span><span>QTY</span></div>
+    <div class="receipt-divider"></div>
+    ${items.map(it => `
+      <div class="receipt-row" style="margin:4px 0;">
+        <span class="receipt-item-name receipt-bold">${it}</span>
+        <span class="receipt-bold">[ 1 ]</span>
+      </div>
+    `).join('')}
+    <div class="receipt-divider"></div>
+    <div class="receipt-center" style="font-size:11px;margin-top:4px;">*** Expedite Fresh & Hot ***</div>
+  `;
+
+  window.print();
+}
+
+function printCustomerBill(orderId) {
+  const order = liveOrdersCache.find(o => o.id === orderId);
+  if (!order) return;
+
+  const printArea = document.getElementById('thermal-receipt-area');
+  const items = (order.items || '').split(',').map(i => i.trim()).filter(Boolean);
+  const now = new Date();
+  const timeStr = now.toLocaleDateString('en-IN', {day:'2-digit', month:'short'}) + ' ' +
+                  now.toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit', hour12:true});
+
+  printArea.innerHTML = `
+    <div class="receipt-center receipt-bold" style="font-size:16px;">RAIDAN RESTAURANT</div>
+    <div class="receipt-center" style="font-size:11px;">Authentic Yemeni Mandi & Arabic Cuisine</div>
+    <div class="receipt-center" style="font-size:10px;">Mosque Road, Frazer Town, Bengaluru</div>
+    <div class="receipt-center" style="font-size:10px;">Ph: +91 98450 12345</div>
+    <div class="receipt-divider"></div>
+    <div class="receipt-row"><span>INVOICE:</span> <span>#INV-${order.id}</span></div>
+    <div class="receipt-row"><span>TABLE / SPOT:</span> <span class="receipt-bold">${order.type || 'Dine-In'}</span></div>
+    <div class="receipt-row"><span>CUSTOMER:</span> <span>${order.customer || 'Guest Diner'}</span></div>
+    <div class="receipt-row"><span>DATE/TIME:</span> <span>${timeStr}</span></div>
+    <div class="receipt-divider"></div>
+    <div class="receipt-row receipt-bold"><span>ITEMS</span><span>STATUS</span></div>
+    <div class="receipt-divider"></div>
+    ${items.map(it => `
+      <div class="receipt-row" style="margin:3px 0;">
+        <span class="receipt-item-name">${it}</span>
+        <span>Included</span>
+      </div>
+    `).join('')}
+    <div class="receipt-divider"></div>
+    <div class="receipt-row receipt-bold" style="font-size:15px;">
+      <span>TOTAL AMOUNT:</span>
+      <span>₹${order.total}</span>
+    </div>
+    <div class="receipt-row" style="font-size:11px;color:#333;">
+      <span>Payment Status:</span>
+      <span>${(order.status || 'pending').toUpperCase()}</span>
+    </div>
+    <div class="receipt-divider"></div>
+    <div class="receipt-center" style="margin-top:6px;font-size:11px;">Shukran for dining with us!</div>
+    <div class="receipt-center" style="font-size:10px;">Visit Again · Follow @raidanrestaurant</div>
+  `;
+
+  window.print();
+}
+
+// ══════════════════════════════════════════════════════
+//  LIVE ORDERS & KITCHEN PIPELINE (WITH PRINT BUTTONS)
 // ══════════════════════════════════════════════════════
 let liveOrdersCache = [];
 let currentOrderFilter = 'all';
 let knownOrderIds = new Set();
 let isFirstOrderLoad = true;
 
-// Dynamic badge renderer: paid orders (Cash/UPI/Card) render with badge-green
-function orderStatusBadge(s, orderId){
+// Dynamic badge renderer: paid orders render strictly with badge-green and text "Paid (Paid)"
+function orderStatusBadge(s){
   const statusStr = (s || 'pending').toLowerCase();
   
   if (statusStr === 'paid') {
-    const method = settledOrderMethods[orderId] || 'Paid';
-    return `<span class="badge badge-green">Paid (${method})</span>`;
+    return `<span class="badge badge-green">Paid (Paid)</span>`;
   }
 
   const m = {
@@ -882,15 +1015,35 @@ async function loadLiveOrders(filter = currentOrderFilter) {
 
   tb.innerHTML = displayData.map(o => {
     const status = (o.status || 'pending').toLowerCase();
-    let actionBtn = '';
     
+    // Universal 80mm Print actions for each order
+    const printButtons = `
+      <button class="btn btn-ghost btn-sm" title="Print Kitchen Ticket" onclick="printKOT(${o.id})" style="padding:3px 7px;font-size:11px;">🖨️ KOT</button>
+      <button class="btn btn-ghost btn-sm" title="Print Customer Receipt" onclick="printCustomerBill(${o.id})" style="padding:3px 7px;font-size:11px;">🧾 Bill</button>
+    `;
+
+    let actionBtn = '';
     if (status === 'pending') {
-      actionBtn = `<button class="btn btn-primary btn-sm" onclick="advanceOrderStatus(${o.id}, 'served')">Mark Served</button>`;
+      actionBtn = `
+        <div style="display:flex;gap:4px;align-items:center;">
+          ${printButtons}
+          <button class="btn btn-primary btn-sm" onclick="advanceOrderStatus(${o.id}, 'served')">Mark Served</button>
+        </div>
+      `;
     } else if (status === 'served') {
-      actionBtn = `<button class="btn btn-primary btn-sm" style="background:var(--green);" onclick="openPaymentModal(${o.id})">Settle Bill</button>`;
+      actionBtn = `
+        <div style="display:flex;gap:4px;align-items:center;">
+          ${printButtons}
+          <button class="btn btn-primary btn-sm" style="background:var(--green);" onclick="openPaymentModal(${o.id})">Settle Bill</button>
+        </div>
+      `;
     } else {
-      const method = settledOrderMethods[o.id] || 'Settled';
-      actionBtn = `<span style="font-size:12px;color:var(--green);font-weight:600;">✓ ${method}</span>`;
+      actionBtn = `
+        <div style="display:flex;gap:4px;align-items:center;">
+          ${printButtons}
+          <span style="font-size:12px;color:var(--green);font-weight:600;margin-left:4px;">✓ Settled</span>
+        </div>
+      `;
     }
 
     return `
@@ -900,7 +1053,7 @@ async function loadLiveOrders(filter = currentOrderFilter) {
         <td class="td-muted" style="max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${o.items}">${o.items}</td>
         <td class="td-bold" style="color:var(--accent)">₹${o.total}</td>
         <td class="td-muted">${o.type || 'Dine-in'}</td>
-        <td>${orderStatusBadge(o.status, o.id)}</td>
+        <td>${orderStatusBadge(o.status)}</td>
         <td>${actionBtn}</td>
       </tr>
     `;
@@ -945,25 +1098,23 @@ let activePaymentOrder = null;
 let selectedPaymentMethod = 'UPI';
 
 const PAYMENTS = [
-  {id:'PAY-9101',orderId:'#6101',customer:'Zaid Khan',amount:1180,method:'UPI',status:'success',dt:'08 Sep, 13:22'},
-  {id:'PAY-9100',orderId:'#6100',customer:'Mohammed Tariq',amount:2200,method:'Card',status:'success',dt:'08 Sep, 13:40'},
-  {id:'PAY-9099',orderId:'#6099',customer:'Salman F.',amount:570,method:'UPI',status:'success',dt:'08 Sep, 12:45'},
-  {id:'PAY-9098',orderId:'#6098',customer:'Amina Bi',amount:1420,method:'Cash',status:'success',dt:'08 Sep, 12:30'},
+  {id:'PAY-9101',orderId:'#6101',customer:'Zaid Khan',amount:1180,method:'UPI',status:'paid',dt:'08 Sep, 13:22'},
+  {id:'PAY-9100',orderId:'#6100',customer:'Mohammed Tariq',amount:2200,method:'Card',status:'paid',dt:'08 Sep, 13:40'},
+  {id:'PAY-9099',orderId:'#6099',customer:'Salman F.',amount:570,method:'UPI',status:'paid',dt:'08 Sep, 12:45'},
+  {id:'PAY-9098',orderId:'#6098',customer:'Amina Bi',amount:1420,method:'Cash',status:'paid',dt:'08 Sep, 12:30'},
 ];
 
 function renderPaymentsTable() {
   const tb = document.getElementById('pay-tbody');
   if (!tb) return;
   tb.innerHTML = PAYMENTS.map(p => {
-    // Both success and custom payment channels display in green badge
-    const badge = p.status === 'success' ? 'badge-green' : p.status === 'pending' ? 'badge-yellow' : 'badge-red';
     return `<tr>
       <td class="td-mono td-muted">${p.id}</td>
       <td class="td-mono td-muted">${p.orderId}</td>
       <td class="td-bold">${p.customer}</td>
       <td class="td-bold">₹${p.amount}</td>
       <td class="td-bold" style="color:var(--green)">${p.method}</td>
-      <td><span class="badge ${badge}">Paid (${p.method})</span></td>
+      <td><span class="badge badge-green">Paid (Paid)</span></td>
       <td class="td-muted">${p.dt}</td>
     </tr>`;
   }).join('');
@@ -983,7 +1134,6 @@ function openPaymentModal(orderId) {
   document.getElementById('pay-modal-subtitle').textContent = `${order.customer || 'Diner'} · ${order.type || 'Table'}`;
   document.getElementById('pay-modal-amount').textContent = `₹${order.total}`;
 
-  // Default to UPI view
   document.getElementById('upi-section').style.display = 'flex';
   document.getElementById('offline-pay-section').style.display = 'none';
 
@@ -1064,20 +1214,15 @@ async function confirmPaymentSettlement() {
   const methodUsed = selectedPaymentMethod;
 
   try {
-    // 1. Record method locally so badge renders green as Paid (Cash), Paid (UPI), or Paid (Card)
-    settledOrderMethods[orderId] = methodUsed;
-
-    // 2. Advance status to 'paid'
     await advanceOrderStatus(orderId, 'paid');
 
-    // 3. Append to payments ledger
     PAYMENTS.unshift({
       id: `PAY-${Math.floor(1000 + Math.random() * 9000)}`,
       orderId: `#${orderId}`,
       customer: activePaymentOrder.customer || 'Guest',
       amount: activePaymentOrder.total,
       method: methodUsed,
-      status: 'success',
+      status: 'paid',
       dt: new Date().toLocaleDateString('en-IN', {day:'2-digit', month:'short'}) + ', ' + new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'})
     });
 
