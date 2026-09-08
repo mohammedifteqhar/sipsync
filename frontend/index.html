@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Brew & Co — Manager Dashboard</title>
+<title>Raidan Restaurant — Manager Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
@@ -78,7 +78,6 @@ input,select,button{font-family:inherit;font-size:inherit}
 /* ── Charts Grid ── */
 .charts-grid{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:22px}
 .chart-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px 20px}
-.chart-card-3col{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px}
 .chart-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px}
 .chart-sub{font-size:11.5px;color:var(--muted);margin-bottom:14px}
 .chart-wrap{position:relative;height:180px;overflow:hidden}
@@ -114,14 +113,31 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
 .btn-sm{padding:4px 10px;font-size:12px}
 
 /* ── Filter Tabs ── */
-.filter-tabs{display:flex;gap:4px;margin-bottom:14px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:4px;width:fit-content}
-.ftab{padding:5px 14px;border-radius:5px;cursor:pointer;font-size:12.5px;font-weight:500;color:var(--muted);transition:all .15s;user-select:none;border:none;background:transparent}
+.filter-tabs{display:flex;gap:6px;margin-bottom:16px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:5px;width:100%;overflow-x:auto;white-space:nowrap}
+.ftab{padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12.5px;font-weight:500;color:var(--muted);transition:all .15s;user-select:none;border:none;background:transparent;flex-shrink:0}
 .ftab.active{background:var(--accent);color:#fff}
 .ftab:hover:not(.active){background:var(--bg)}
 
 /* ── Page sections ── */
 [data-page]{display:none}
 [data-page].active{display:block}
+
+/* ── Menu Section Render ── */
+.menu-group-title{display:flex;align-items:center;gap:10px;margin:28px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.menu-group-title h3{font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.2px}
+.menu-group-count{font-size:11px;background:var(--accent-dim);color:var(--accent);font-weight:600;padding:2px 8px;border-radius:12px}
+.menu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.menu-item-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;flex-direction:column;justify-content:space-between;transition:opacity .2s}
+.mi-name{font-size:13.5px;font-weight:600;margin-bottom:2px}
+.mi-cat{font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:4px;letter-spacing:.3px}
+.mi-price{font-size:17px;font-weight:700;color:var(--accent);margin:6px 0 10px}
+.mi-footer{display:flex;align-items:center;justify-content:space-between}
+.toggle{position:relative;width:38px;height:20px;display:inline-block}
+.toggle input{opacity:0;width:0;height:0;position:absolute}
+.toggle-slider{position:absolute;inset:0;background:#D0CECC;border-radius:20px;cursor:pointer;transition:.2s}
+.toggle-slider::before{content:'';position:absolute;width:14px;height:14px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+.toggle input:checked+.toggle-slider{background:var(--green)}
+.toggle input:checked+.toggle-slider::before{transform:translateX(18px)}
 
 /* ── AI Logs ── */
 .log-item{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:10px}
@@ -138,32 +154,18 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
 .msg-label{font-size:10.5px;color:var(--muted);margin-top:2px;align-self:flex-end;white-space:nowrap}
 .log-intent{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:500;padding:2px 8px;border-radius:4px;background:var(--blue-bg);color:var(--blue);margin-top:8px}
 
-/* ── Menu cards ── */
-.menu-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.menu-item-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px}
-.mi-name{font-size:14px;font-weight:600;margin-bottom:2px}
-.mi-cat{font-size:11.5px;color:var(--muted)}
-.mi-price{font-size:18px;font-weight:700;color:var(--accent);margin:8px 0}
-.mi-footer{display:flex;align-items:center;justify-content:space-between}
-.toggle{position:relative;width:38px;height:20px}
-.toggle input{opacity:0;width:0;height:0;position:absolute}
-.toggle-slider{position:absolute;inset:0;background:#D0CECC;border-radius:20px;cursor:pointer;transition:.2s}
-.toggle-slider::before{content:'';position:absolute;width:14px;height:14px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
-.toggle input:checked+.toggle-slider{background:var(--green)}
-.toggle input:checked+.toggle-slider::before{transform:translateX(18px)}
-
 /* ── Customers ── */
 .cust-row-info{display:flex;align-items:center;gap:10px}
 .cust-av{width:32px;height:32px;border-radius:50%;background:var(--accent-dim);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
 
-/* ── Campaign cards ── */
+/* ── Campaigns ── */
 .camp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
 .camp-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px}
 .camp-number{font-size:32px;font-weight:700;color:var(--accent);margin-bottom:4px}
 .camp-label{font-size:12px;color:var(--muted)}
 .camp-action{margin-top:14px}
 
-/* ── Empty / misc ── */
+/* ── Activity / Misc ── */
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px}
 .activity-item{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
 .activity-item:last-child{border:none}
@@ -171,7 +173,6 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
 .activity-text{font-size:13px;color:var(--text)}
 .activity-time{font-size:11.5px;color:var(--muted);margin-top:1px}
 
-/* scrollbar */
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:#D0CECC;border-radius:4px}
@@ -183,8 +184,8 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
 <!-- ── SIDEBAR ── -->
 <nav class="sidebar">
   <div class="sb-brand">
-    <div class="sb-brand-name">Brew &amp; Co</div>
-    <div class="sb-brand-tag">Cafe Management</div>
+    <div class="sb-brand-name">Raidan Restaurant</div>
+    <div class="sb-brand-tag">Frazer Town · Mosque Rd</div>
   </div>
 
   <div class="sb-section-label">Overview</div>
@@ -229,10 +230,10 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
 
   <div class="sb-footer">
     <div class="sb-avatar">
-      <div class="sb-ava-circle">RK</div>
+      <div class="sb-ava-circle">RR</div>
       <div>
-        <div class="sb-ava-name">Rajesh Kumar</div>
-        <div class="sb-ava-role">Cafe Manager</div>
+        <div class="sb-ava-name">Store Manager</div>
+        <div class="sb-ava-role">Floor &amp; Kitchen Control</div>
       </div>
     </div>
   </div>
@@ -245,14 +246,14 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
       <div class="page-title" id="page-title">Dashboard</div>
     </div>
     <div class="topbar-right">
-      <span class="topbar-badge">AI Active</span>
+      <span class="topbar-badge">Live System</span>
       <span class="topbar-time" id="clock"></span>
     </div>
   </div>
 
   <div class="content" id="main-content">
 
-    <!-- ████ DASHBOARD ████ -->
+    <!-- DASHBOARD -->
     <div data-page="dashboard" class="active">
       <div class="stats-row">
         <div class="stat-card">
@@ -261,31 +262,31 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
           <div class="stat-delta up">+4 from yesterday</div>
         </div>
         <div class="stat-card">
-          <div class="stat-value">₹18,340</div>
+          <div class="stat-value">₹38,420</div>
           <div class="stat-label">Revenue Today</div>
-          <div class="stat-delta up">+12% from yesterday</div>
+          <div class="stat-delta up">+18% from yesterday</div>
         </div>
         <div class="stat-card">
-          <div class="stat-value">7</div>
-          <div class="stat-label">Active Orders</div>
-          <div class="stat-delta dn">3 awaiting payment</div>
+          <div class="stat-value">9</div>
+          <div class="stat-label">Active Tables / Majlis</div>
+          <div class="stat-delta up">Floor 82% occupied</div>
         </div>
         <div class="stat-card">
           <div class="stat-value">63</div>
-          <div class="stat-label">AI Messages Today</div>
-          <div class="stat-delta up">94% handled automatically</div>
+          <div class="stat-label">AI Queries Today</div>
+          <div class="stat-delta up">94% auto-resolved</div>
         </div>
       </div>
 
       <div class="charts-grid">
         <div class="chart-card">
           <div class="chart-title">Revenue — Last 7 Days</div>
-          <div class="chart-sub">Daily total including dine-in, takeaway &amp; delivery</div>
+          <div class="chart-sub">Dine-in Majlis platters, family packs &amp; takeaways</div>
           <div class="chart-wrap"><canvas id="chartRevenue"></canvas></div>
         </div>
         <div class="chart-card">
-          <div class="chart-title">Orders by Category</div>
-          <div class="chart-sub">Today's order split</div>
+          <div class="chart-title">Sales by Section</div>
+          <div class="chart-sub">Current shift volume</div>
           <div class="chart-wrap"><canvas id="chartCategory"></canvas></div>
         </div>
       </div>
@@ -298,13 +299,13 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
         </div>
         <div class="chart-card">
           <div class="chart-title">Recent Activity</div>
-          <div class="chart-sub">Latest events across all channels</div>
+          <div class="chart-sub">Live operations across dining units</div>
           <div id="activity-feed"></div>
         </div>
       </div>
     </div>
 
-    <!-- ████ RESERVATIONS ████ -->
+    <!-- RESERVATIONS -->
     <div data-page="reservations">
       <div class="section-header">
         <div class="filter-tabs" id="res-tabs">
@@ -327,7 +328,7 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
       </div>
     </div>
 
-    <!-- ████ ORDERS ████ -->
+    <!-- ORDERS -->
     <div data-page="orders">
       <div class="section-header">
         <div class="filter-tabs">
@@ -346,13 +347,13 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
       </div>
     </div>
 
-    <!-- ████ PAYMENTS ████ -->
+    <!-- PAYMENTS -->
     <div data-page="payments">
       <div class="stats-row" style="grid-template-columns:repeat(4,1fr)">
-        <div class="stat-card"><div class="stat-value">₹4.2L</div><div class="stat-label">This Month Revenue</div><div class="stat-delta up">+18% vs last month</div></div>
-        <div class="stat-card"><div class="stat-value">₹12,400</div><div class="stat-label">Pending Collection</div><div class="stat-delta dn">8 unpaid orders</div></div>
-        <div class="stat-card"><div class="stat-value">247</div><div class="stat-label">Transactions</div><div class="stat-delta up">+31 this week</div></div>
-        <div class="stat-card"><div class="stat-value">₹712</div><div class="stat-label">Average Order Value</div><div class="stat-delta up">+5% vs last month</div></div>
+        <div class="stat-card"><div class="stat-value">₹6.8L</div><div class="stat-label">This Month Revenue</div><div class="stat-delta up">+21% vs last month</div></div>
+        <div class="stat-card"><div class="stat-value">₹8,400</div><div class="stat-label">Pending Collection</div><div class="stat-delta dn">3 unpaid orders</div></div>
+        <div class="stat-card"><div class="stat-value">312</div><div class="stat-label">Transactions</div><div class="stat-delta up">+45 this week</div></div>
+        <div class="stat-card"><div class="stat-value">₹1,140</div><div class="stat-label">Average Ticket Size</div><div class="stat-delta up">+12% vs last month</div></div>
       </div>
       <div class="table-card">
         <table>
@@ -362,28 +363,23 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
       </div>
     </div>
 
-    <!-- ████ MENU ████ -->
+    <!-- MENU (SECTION-GROUPED) -->
     <div data-page="menu">
       <div class="section-header">
         <div class="filter-tabs" id="menu-tabs">
-          <button class="ftab active" onclick="filterMenu('all',this)">All</button>
-          <button class="ftab" onclick="filterMenu('Coffee',this)">Coffee</button>
-          <button class="ftab" onclick="filterMenu('Food',this)">Food</button>
-          <button class="ftab" onclick="filterMenu('Desserts',this)">Desserts</button>
-          <button class="ftab" onclick="filterMenu('Beverages',this)">Beverages</button>
+          <!-- Dynamically populated category buttons -->
         </div>
-        <button class="btn btn-primary btn-sm">+ Add Item</button>
       </div>
-      <div class="menu-grid" id="menu-grid"></div>
+      <div id="menu-content-area"></div>
     </div>
 
-    <!-- ████ CUSTOMERS ████ -->
+    <!-- CUSTOMERS -->
     <div data-page="customers">
       <div class="stats-row">
-        <div class="stat-card"><div class="stat-value">1,247</div><div class="stat-label">Total Customers</div><div class="stat-delta up">+43 this month</div></div>
-        <div class="stat-card"><div class="stat-value">389</div><div class="stat-label">Active (30 days)</div><div class="stat-delta up">31% of base</div></div>
-        <div class="stat-card"><div class="stat-value">68%</div><div class="stat-label">Retention Rate</div><div class="stat-delta up">+3pp vs last quarter</div></div>
-        <div class="stat-card"><div class="stat-value">4.1</div><div class="stat-label">Avg Visits / Month</div><div class="stat-delta dn">-0.3 vs prev</div></div>
+        <div class="stat-card"><div class="stat-value">1,420</div><div class="stat-label">Total Customers</div><div class="stat-delta up">+65 this month</div></div>
+        <div class="stat-card"><div class="stat-value">492</div><div class="stat-label">Active (30 days)</div><div class="stat-delta up">35% of base</div></div>
+        <div class="stat-card"><div class="stat-value">72%</div><div class="stat-label">Retention Rate</div><div class="stat-delta up">+4pp vs last quarter</div></div>
+        <div class="stat-card"><div class="stat-value">4.6</div><div class="stat-label">Avg Visits / Month</div><div class="stat-delta up">+0.2 vs prev</div></div>
       </div>
       <div class="table-card">
         <table>
@@ -393,7 +389,7 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
       </div>
     </div>
 
-    <!-- ████ CAMPAIGNS / RETENTION ████ -->
+    <!-- CAMPAIGNS -->
     <div data-page="campaigns">
       <div class="camp-grid">
         <div class="camp-card">
@@ -421,7 +417,7 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
       </div>
     </div>
 
-    <!-- ████ AI CONVERSATIONS ████ -->
+    <!-- AI LOGS -->
     <div data-page="ailogs">
       <div class="stats-row" style="grid-template-columns:repeat(3,1fr)">
         <div class="stat-card"><div class="stat-value">63</div><div class="stat-label">Conversations Today</div><div class="stat-delta up">94% auto-resolved</div></div>
@@ -432,11 +428,11 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
       <div id="ai-logs-container"></div>
     </div>
 
-  </div><!-- /content -->
-</div><!-- /main -->
-</div><!-- /shell -->
+  </div>
+</div>
+</div>
 
-<!-- ── CUSTOMER AI CHAT WIDGET ── -->
+<!-- CHAT WIDGET -->
 <div id="ai-chat-btn" onclick="toggleChat()" style="position:fixed;bottom:24px;right:24px;width:54px;height:54px;border-radius:50%;background:#B87333;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.22);z-index:9999;transition:transform .15s ease;">
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
 </div>
@@ -444,15 +440,15 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
 <div id="ai-chat-box" style="display:none;position:fixed;bottom:90px;right:24px;width:350px;height:460px;background:#FFFFFF;border:1px solid #E4E2DE;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.14);flex-direction:column;overflow:hidden;z-index:9999;">
   <div style="background:#0B2018;color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;">
     <div>
-      <div style="font-weight:600;font-size:13.5px;">Brew &amp; Co Assistant</div>
-      <div style="font-size:11px;color:rgba(255,255,255,0.6);">Online | Instant Answers</div>
+      <div style="font-weight:600;font-size:13.5px;">Raidan Assistant</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.6);">Online | Mandi &amp; Table Inquiry</div>
     </div>
     <span onclick="toggleChat()" style="cursor:pointer;font-size:20px;color:#fff;line-height:1;">&times;</span>
   </div>
   
   <div id="ai-chat-messages" style="flex:1;padding:14px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;background:#F9F8F6;">
     <div style="background:#F0EFED;color:#1A1A1A;padding:8px 12px;border-radius:8px;font-size:12.5px;max-width:85%;line-height:1.45;">
-      Hi there! ☕ Need help with our menu, placing an order, or booking a table? Ask me anything!
+      Marhaban! Need help with our authentic Mandi platters, Majlis availability, or booking a table? Ask me anything!
     </div>
   </div>
 
@@ -466,108 +462,79 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
 const API_BASE = 'https://sipsync-api-k9tz.onrender.com/api';
 const MANAGER_KEY = 'sipsync-admin-2026';
 
-// ══════════════════════════════════════════════════════
-//  STATIC / FALLBACK DATA
-// ══════════════════════════════════════════════════════
+// Exact ordered sections matching the Raidan Menu Document
+const SECTION_ORDER = [
+  "Mandi", "Rice", "Mandi Family Pack", "Arabian Style Chicken",
+  "Mutton Gravy", "Chicken Gravy", "Veg", "Egg", "Veg Dry and Gravy",
+  "Sides", "Dal", "Tandoor", "Breads", "Fried Rice and Noddles",
+  "Chinese chi Boneless", "Fish", "soups", "Combo", "Rolls",
+  "Shawarma", "SAlad", "Fried chi an dBurgers", "Arabian Desserts",
+  "Fresh fruit Creams", "Falooda", "Crushes", "DEsert",
+  "FResh juices and Milk Shakes"
+];
+
+// Fallback operational data
 const ORDERS = [
-  {id:'ORD-5521',customer:'Priya Sharma',items:'Cappuccino x2, Paneer Sandwich',total:580,type:'Dine-in',status:'delivered',time:'12:45'},
-  {id:'ORD-5520',customer:'Arjun Mehta',items:'Cold Coffee, Margherita Pizza',total:510,type:'Dine-in',status:'delivered',time:'13:10'},
-  {id:'ORD-5519',customer:'Rohan Das',items:'Masala Chai x3, Samosa x4',total:340,type:'Takeaway',status:'paid',time:'11:30'},
-  {id:'ORD-5518',customer:'Anjali Kapoor',items:'Espresso, Chocolate Cake',total:420,type:'Dine-in',status:'delivered',time:'10:55'},
-  {id:'ORD-5517',customer:'Vikram Iyer',items:'Latte, Blueberry Muffin x2',total:460,type:'Dine-in',status:'paid',time:'10:15'},
-  {id:'ORD-5516',customer:'Sneha Jain',items:'Green Tea, Veg Wrap x2',total:390,type:'Takeaway',status:'pending',time:'14:05'},
-  {id:'ORD-5515',customer:'Manish Tiwari',items:'Cold Brew, Brownie',total:320,type:'Delivery',status:'pending',time:'14:20'},
-  {id:'ORD-5514',customer:'Pooja Agarwal',items:'Frappuccino x2, Pizza Slice x3',total:890,type:'Dine-in',status:'delivered',time:'13:40'},
-  {id:'ORD-5513',customer:'Krishn Reddy',items:'Americano, Grilled Sandwich',total:350,type:'Takeaway',status:'paid',time:'09:30'},
-  {id:'ORD-5512',customer:'Tanya Malhotra',items:'Mocha, Cheesecake',total:480,type:'Dine-in',status:'pending',time:'15:00'},
+  {id:'ORD-6101',customer:'Zaid Khan',items:'Mutton Mandi x2, Kunafa Cheese',total:1180,type:'Dine-in (Majlis M-02)',status:'delivered',time:'13:10'},
+  {id:'ORD-6100',customer:'Mohammed Tariq',items:'Mix Mandi (4 Person)',total:2200,type:'Dine-in (VIP-01)',status:'delivered',time:'13:25'},
+  {id:'ORD-6099',customer:'Salman F.',items:'Chicken Mandi, Al Faham (Half)',total:570,type:'Takeaway',status:'paid',time:'12:40'},
+  {id:'ORD-6098',customer:'Amina Bi',items:'Mutton Raan Mandi (3 Person)',total:1420,type:'Dine-in (Majlis M-05)',status:'delivered',time:'12:15'},
+  {id:'ORD-6097',customer:'Farhan Ahmed',items:'Plate Shawarma Special x2, Pepsi',total:620,type:'Takeaway',status:'paid',time:'11:50'},
+  {id:'ORD-6096',customer:'Dr. Shakeel',items:'Chicken Madghuth x2',total:580,type:'Delivery',status:'pending',time:'14:05'},
 ];
 
 const PAYMENTS = [
-  {id:'PAY-8801',orderId:'ORD-5521',customer:'Priya Sharma',amount:580,method:'UPI',status:'success',dt:'31 Aug, 12:58'},
-  {id:'PAY-8800',orderId:'ORD-5520',customer:'Arjun Mehta',amount:510,method:'Card',status:'success',dt:'31 Aug, 13:22'},
-  {id:'PAY-8799',orderId:'ORD-5519',customer:'Rohan Das',amount:340,method:'UPI',status:'success',dt:'31 Aug, 11:35'},
-  {id:'PAY-8798',orderId:'ORD-5518',customer:'Anjali Kapoor',amount:420,method:'Cash',status:'success',dt:'31 Aug, 11:05'},
-  {id:'PAY-8797',orderId:'ORD-5517',customer:'Vikram Iyer',amount:460,method:'Card',status:'success',dt:'31 Aug, 10:22'},
-  {id:'PAY-8796',orderId:'ORD-5516',customer:'Sneha Jain',amount:390,method:'UPI',status:'pending',dt:'31 Aug, 14:05'},
-  {id:'PAY-8795',orderId:'ORD-5515',customer:'Manish Tiwari',amount:320,method:'UPI',status:'pending',dt:'31 Aug, 14:20'},
-  {id:'PAY-8794',orderId:'ORD-5514',customer:'Pooja Agarwal',amount:890,method:'Card',status:'success',dt:'31 Aug, 13:52'},
-  {id:'PAY-8793',orderId:'ORD-5513',customer:'Krishn Reddy',amount:350,method:'UPI',status:'success',dt:'31 Aug, 09:38'},
-  {id:'PAY-8792',orderId:'ORD-5512',customer:'Tanya Malhotra',amount:480,method:'UPI',status:'failed',dt:'31 Aug, 15:02'},
+  {id:'PAY-9101',orderId:'ORD-6101',customer:'Zaid Khan',amount:1180,method:'UPI',status:'success',dt:'08 Sep, 13:22'},
+  {id:'PAY-9100',orderId:'ORD-6100',customer:'Mohammed Tariq',amount:2200,method:'Card',status:'success',dt:'08 Sep, 13:40'},
+  {id:'PAY-9099',orderId:'ORD-6099',customer:'Salman F.',amount:570,method:'UPI',status:'success',dt:'08 Sep, 12:45'},
+  {id:'PAY-9098',orderId:'ORD-6098',customer:'Amina Bi',amount:1420,method:'Cash',status:'success',dt:'08 Sep, 12:30'},
+  {id:'PAY-9097',orderId:'ORD-6097',customer:'Farhan Ahmed',amount:620,method:'UPI',status:'pending',dt:'08 Sep, 11:55'},
 ];
 
 const CUSTOMERS = [
-  {name:'Priya Sharma',phone:'9876543210',orders:28,spend:14200,lastVisit:'31 Aug 2026',status:'regular'},
-  {name:'Arjun Mehta',phone:'9812345678',orders:15,spend:7800,lastVisit:'31 Aug 2026',status:'regular'},
-  {name:'Rohan Das',phone:'9765432109',orders:6,spend:2100,lastVisit:'31 Aug 2026',status:'new'},
-  {name:'Anjali Kapoor',phone:'9654321098',orders:42,spend:22400,lastVisit:'31 Aug 2026',status:'vip'},
-  {name:'Vikram Iyer',phone:'9543210987',orders:19,spend:9800,lastVisit:'31 Aug 2026',status:'regular'},
-  {name:'Sneha Jain',phone:'9432109876',orders:3,spend:890,lastVisit:'15 Aug 2026',status:'new'},
-  {name:'Kavya Rao',phone:'9210987654',orders:11,spend:5400,lastVisit:'29 Aug 2026',status:'regular'},
-  {name:'Manish Tiwari',phone:'9321098765',orders:2,spend:640,lastVisit:'25 Jul 2026',status:'at-risk'},
-  {name:'Suresh Kumar',phone:'9109876543',orders:34,spend:18900,lastVisit:'10 Jul 2026',status:'at-risk'},
-  {name:'Pooja Agarwal',phone:'9098765432',orders:8,spend:4200,lastVisit:'31 Aug 2026',status:'regular'},
+  {name:'Mohammed Tariq',phone:'9845012345',orders:19,spend:38200,lastVisit:'08 Sep 2026',status:'vip'},
+  {name:'Zaid Khan',phone:'9740123456',orders:12,spend:14800,lastVisit:'08 Sep 2026',status:'regular'},
+  {name:'Dr. Shakeel',phone:'9900123456',orders:8,spend:9200,lastVisit:'08 Sep 2026',status:'regular'},
+  {name:'Amina Bi',phone:'9611234567',orders:5,spend:7400,lastVisit:'08 Sep 2026',status:'regular'},
+  {name:'Farhan Ahmed',phone:'9886234567',orders:2,spend:1240,lastVisit:'08 Sep 2026',status:'new'},
 ];
 
 const INACTIVE_CUSTS = [
-  {name:'Manish Tiwari',phone:'9321098765',lastVisit:'25 Jul 2026',days:37,orders:2,camp:'Not sent'},
-  {name:'Suresh Kumar',phone:'9109876543',lastVisit:'10 Jul 2026',days:52,orders:34,camp:'Not sent'},
-  {name:'Kirti Bhatt',phone:'9908765432',lastVisit:'18 Jun 2026',days:74,orders:7,camp:'Sent — no reply'},
-  {name:'Ravi Nair',phone:'9807654321',lastVisit:'22 Jun 2026',days:70,orders:5,camp:'Not sent'},
-  {name:'Lalita Doshi',phone:'9706543210',lastVisit:'14 Jul 2026',days:48,orders:12,camp:'Sent — replied YES'},
-  {name:'Dhruv Shah',phone:'9605432109',lastVisit:'30 Jun 2026',days:62,orders:3,camp:'Not sent'},
+  {name:'Syed Irfan',phone:'9844098765',lastVisit:'20 Jul 2026',days:49,orders:14,camp:'Not sent'},
+  {name:'Asif Hussain',phone:'9731098765',lastVisit:'02 Aug 2026',days:36,orders:8,camp:'Sent — replied YES'},
+  {name:'Tanveer Ullah',phone:'9980098765',lastVisit:'12 Jun 2026',days:87,orders:4,camp:'Not sent'},
 ];
 
 const AI_LOGS = [
   {
-    phone:'+91 9876543210', time:'2:38 PM', intent:'BOOKING',
+    phone:'+91 9845012345', time:'1:12 PM', intent:'MAJLIS BOOKING',
     msgs:[
-      {dir:'in',text:'Hi, I want to book a table for 4 people today evening'},
-      {dir:'out',text:'Sure! What time would you prefer — 7 PM or 8 PM?'},
-      {dir:'in',text:'7 baje chalega'},
-      {dir:'out',text:'Table for 4 confirmed at 7:00 PM. Booking ID: RES-2407. Ek confirmation WhatsApp aa raha hai. ☕'},
+      {dir:'in',text:'Do you have a Majlis available for 6 people tonight around 8:30 PM?'},
+      {dir:'out',text:'Yes, Majlis cabin M-06 on our First Floor is open for 8:30 PM. Shall I reserve it under your name?'},
+      {dir:'in',text:'Yes please, book under Tariq.'},
+      {dir:'out',text:'Confirmed! Majlis M-06 booked for 6 guests at 8:30 PM. Booking ID: RES-5021. See you soon at Raidan!'},
     ]
   },
   {
-    phone:'+91 9812345678', time:'1:15 PM', intent:'ORDER',
+    phone:'+91 9740123456', time:'12:30 PM', intent:'MENU INQUIRY',
     msgs:[
-      {dir:'in',text:'Menu bhejna'},
-      {dir:'out',text:'Here\'s our menu:\n☕ Coffee: Cappuccino ₹180, Cold Coffee ₹160, Latte ₹190\n🍕 Food: Paneer Sandwich ₹220, Margherita Pizza ₹350\n🍰 Desserts: Chocolate Cake ₹240, Cheesecake ₹260\nKya order karna chahte hain?'},
-      {dir:'in',text:'2 cappuccino and 1 paneer sandwich for takeaway'},
-      {dir:'out',text:'Order confirmed! Total: ₹580. Payment link bheja ja raha hai.'},
+      {dir:'in',text:'Is Mutton Madfoona available today?'},
+      {dir:'out',text:'Yes, fresh Mutton Madfoona (₹440) and Mutton Madfoona with Rice (₹610) are fully in stock right now.'},
     ]
-  },
-  {
-    phone:'+91 9765432109', time:'11:50 AM', intent:'STATUS',
-    msgs:[
-      {dir:'in',text:'My order ORD-5513 ka status kya hai?'},
-      {dir:'out',text:'Order ORD-5513 (Americano, Grilled Sandwich) — Status: Ready for pickup. Please collect from the counter. ✅'},
-    ]
-  },
-  {
-    phone:'+91 9654321098', time:'10:22 AM', intent:'FEEDBACK',
-    msgs:[
-      {dir:'in',text:'Great experience today! Coffee was amazing 5/5'},
-      {dir:'out',text:'Bahut shukriya! Aapka feedback sunke achha laga 😊 Would you mind leaving us a Google review? It really helps us grow!'},
-      {dir:'in',text:'Sure, link bhejo'},
-      {dir:'out',text:'Here\'s our Google review link: g.page/brewandco — Thank you so much! ☕'},
-    ]
-  },
+  }
 ];
 
 const ACTIVITY = [
-  {color:'#2E7D55',text:'New booking RES-2407 — Rahul Verma, 2 guests, 8 PM',time:'2 min ago'},
-  {color:'#B87333',text:'Order ORD-5521 delivered — Priya Sharma, ₹580',time:'8 min ago'},
-  {color:'#2563EB',text:'AI resolved 3 WhatsApp queries automatically',time:'15 min ago'},
-  {color:'#2E7D55',text:'Payment received ORD-5519 — ₹340 via UPI',time:'22 min ago'},
-  {color:'#C0392B',text:'Booking RES-2406 cancelled — Vivek Joshi',time:'45 min ago'},
+  {color:'#2E7D55',text:'Majlis M-02 occupied — Zaid Khan, Order ORD-6101 placed',time:'4 min ago'},
+  {color:'#B87333',text:'Order ORD-6100 delivered to VIP Cabin — ₹2,200',time:'12 min ago'},
+  {color:'#2E7D55',text:'UPI Payment settled PAY-9101 — ₹1,180',time:'19 min ago'},
+  {color:'#2563EB',text:'AI booked Majlis M-06 for 8:30 PM tonight',time:'28 min ago'},
 ];
 
-// ══════════════════════════════════════════════════════
-//  ROUTER
-// ══════════════════════════════════════════════════════
+// Router
 const PAGE_TITLES = {
   dashboard:'Dashboard',reservations:'Reservations',orders:'Orders',
-  payments:'Payments',menu:'Menu',customers:'Customers',
+  payments:'Payments',menu:'Menu & Live Stock',customers:'Customers',
   campaigns:'Retention Campaigns',ailogs:'AI Conversations'
 };
 
@@ -579,9 +546,6 @@ function navigateTo(page, el) {
   document.getElementById('page-title').textContent = PAGE_TITLES[page];
 }
 
-// ══════════════════════════════════════════════════════
-//  CLOCK
-// ══════════════════════════════════════════════════════
 function tick() {
   const d = new Date();
   document.getElementById('clock').textContent =
@@ -590,9 +554,7 @@ function tick() {
 }
 tick(); setInterval(tick, 30000);
 
-// ══════════════════════════════════════════════════════
-//  CHARTS
-// ══════════════════════════════════════════════════════
+// Charts
 const ACCENT = '#B87333';
 Chart.defaults.font.family = "'Inter', sans-serif";
 Chart.defaults.font.size = 11;
@@ -604,7 +566,7 @@ new Chart(document.getElementById('chartRevenue'), {
   data:{
     labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
     datasets:[{
-      data:[11200,13400,12800,15600,14200,19800,18340],
+      data:[21000,24500,22800,29600,34200,41800,38420],
       borderColor:ACCENT, borderWidth:2,
       backgroundColor:'rgba(184,115,51,0.08)',
       fill:true, tension:.4, pointRadius:3, pointBackgroundColor:ACCENT
@@ -623,10 +585,10 @@ new Chart(document.getElementById('chartRevenue'), {
 new Chart(document.getElementById('chartCategory'), {
   type:'doughnut',
   data:{
-    labels:['Coffee','Food','Desserts','Beverages'],
+    labels:['Mandi','Grills','Family Packs','Gravies & Breads','Beverages'],
     datasets:[{
-      data:[38,32,18,12],
-      backgroundColor:['#B87333','#2E7D55','#2563EB','#B8860B'],
+      data:[44,22,18,10,6],
+      backgroundColor:['#B87333','#2E7D55','#2563EB','#B8860B','#8E44AD'],
       borderWidth:0, hoverOffset:4
     }]
   },
@@ -644,8 +606,8 @@ new Chart(document.getElementById('chartBookings'), {
   data:{
     labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
     datasets:[
-      {label:'Confirmed', data:[8,12,10,14,16,22,24], backgroundColor:'rgba(184,115,51,0.7)', borderRadius:3},
-      {label:'Cancelled', data:[1,0,2,1,0,2,0], backgroundColor:'rgba(192,57,43,0.4)', borderRadius:3}
+      {label:'Confirmed', data:[12,14,16,18,24,32,30], backgroundColor:'rgba(184,115,51,0.7)', borderRadius:3},
+      {label:'Cancelled', data:[1,0,1,2,1,2,0], backgroundColor:'rgba(192,57,43,0.4)', borderRadius:3}
     ]
   },
   options:{
@@ -655,9 +617,6 @@ new Chart(document.getElementById('chartBookings'), {
   }
 });
 
-// ══════════════════════════════════════════════════════
-//  ACTIVITY FEED
-// ══════════════════════════════════════════════════════
 (function(){
   const el = document.getElementById('activity-feed');
   ACTIVITY.forEach(a => {
@@ -671,10 +630,13 @@ new Chart(document.getElementById('chartBookings'), {
   });
 })();
 
-// ══════════════════════════════════════════════════════
-//  DYNAMIC RESERVATIONS (API CONNECTED)
-// ══════════════════════════════════════════════════════
-let reservationsCache = [];
+// Reservations
+let reservationsCache = [
+  {id:'RES-5021',name:'Mohammed Tariq',phone:'9845012345',date:'2026-09-08',time:'20:30',guests:6,status:'confirmed',channel:'WhatsApp AI'},
+  {id:'RES-5020',name:'Zaid Khan',phone:'9740123456',date:'2026-09-08',time:'13:00',guests:4,status:'confirmed',channel:'Walk-in'},
+  {id:'RES-5019',name:'Amina Bi',phone:'9611234567',date:'2026-09-08',time:'12:15',guests:5,status:'confirmed',channel:'Web'},
+  {id:'RES-5018',name:'Rohan Kumar',phone:'9876543210',date:'2026-09-07',time:'19:45',guests:2,status:'cancelled',channel:'Phone'},
+];
 
 function statusBadge(s){
   const m={confirmed:'badge-green',pending:'badge-yellow',cancelled:'badge-red'};
@@ -684,15 +646,17 @@ function statusBadge(s){
 async function loadReservations(filter = 'all') {
   try {
     const res = await fetch(`${API_BASE}/reservations/`);
-    if (!res.ok) throw new Error("API error");
-    reservationsCache = await res.json();
+    if (res.ok) {
+      reservationsCache = await res.json();
+    }
   } catch (err) {
-    console.warn("Using offline reservations fallback");
+    console.warn("Using local reservations cache");
   }
 
+  const todayStr = new Date().toISOString().split('T')[0];
   const data = filter==='all' ? reservationsCache
-    : filter==='today' ? reservationsCache.filter(b=>b.date==='2026-08-31')
-    : filter==='upcoming' ? reservationsCache.filter(b=>b.date>'2026-08-31')
+    : filter==='today' ? reservationsCache.filter(b=>b.date===todayStr)
+    : filter==='upcoming' ? reservationsCache.filter(b=>b.date>=todayStr && b.status!=='cancelled')
     : reservationsCache.filter(b=>b.status==='cancelled');
 
   const tb = document.getElementById('res-tbody');
@@ -701,7 +665,7 @@ async function loadReservations(filter = 'all') {
       <td class="td-mono td-muted">${b.id}</td>
       <td class="td-bold">${b.name}</td>
       <td class="td-muted">${b.phone}</td>
-      <td>${b.date.split('-').reverse().join(' ')}</td>
+      <td>${b.date}</td>
       <td>${b.time}</td>
       <td>${b.guests}</td>
       <td>${statusBadge(b.status)}</td>
@@ -715,9 +679,7 @@ function filterRes(f, el) {
   loadReservations(f);
 }
 
-// ══════════════════════════════════════════════════════
-//  ORDERS & PAYMENTS
-// ══════════════════════════════════════════════════════
+// Orders & Payments
 function orderBadge(s){
   const m={delivered:'badge-green',paid:'badge-blue',pending:'badge-yellow'};
   return `<span class="badge ${m[s]||'badge-grey'}">${s.charAt(0).toUpperCase()+s.slice(1)}</span>`;
@@ -762,8 +724,9 @@ renderOrders('all');
 })();
 
 // ══════════════════════════════════════════════════════
-//  DYNAMIC MENU (API CONNECTED WITH PERSISTENT TOGGLE)
+//  MENU (SECTION HEADINGS & DYNAMIC TABS)
 // ══════════════════════════════════════════════════════
+let allMenuItems = [];
 let currentCategory = 'all';
 
 async function toggleMenuItem(id) {
@@ -777,7 +740,10 @@ async function toggleMenuItem(id) {
     });
 
     if (res.ok) {
-      loadMenu(currentCategory);
+      // Refresh memory & UI
+      const target = allMenuItems.find(i => i.id === id);
+      if (target) target.avail = !target.avail;
+      renderMenuSections();
     } else {
       console.error("Authorization error or failed toggle:", res.status);
     }
@@ -786,42 +752,117 @@ async function toggleMenuItem(id) {
   }
 }
 
-async function loadMenu(cat = 'all') {
-  currentCategory = cat;
+async function loadMenu() {
   try {
     const res = await fetch(`${API_BASE}/menu/`);
-    if (!res.ok) throw new Error("API error");
-    let data = await res.json();
-    if (cat !== 'all') {
-      data = data.filter(m => m.cat === cat);
-    }
-    document.getElementById('menu-grid').innerHTML = data.map(m => `
-      <div class="menu-item-card">
-        <div class="mi-cat">${m.cat}</div>
-        <div class="mi-name">${m.name}</div>
-        <div class="mi-price">₹${m.price}</div>
-        <div class="mi-footer">
-          <span style="font-size:12px;color:var(--muted)">${m.avail ? 'Available' : 'Unavailable'}</span>
-          <label class="toggle">
-            <input type="checkbox" ${m.avail ? 'checked' : ''} onchange="toggleMenuItem(${m.id})">
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-      </div>`).join('');
+    if (!res.ok) throw new Error("API error fetching menu");
+    allMenuItems = await res.json();
+    renderCategoryTabs();
+    renderMenuSections();
   } catch (err) {
-    console.error("Failed to load menu items from backend:", err);
+    console.error("Failed to load menu items:", err);
   }
 }
 
-function filterMenu(cat, el) {
-  document.querySelectorAll('#menu-tabs .ftab').forEach(t=>t.classList.remove('active'));
-  el.classList.add('active');
-  loadMenu(cat);
+function renderCategoryTabs() {
+  const tabsContainer = document.getElementById('menu-tabs');
+  if (!tabsContainer) return;
+
+  // Extract unique categories present in the database, ordered by SECTION_ORDER
+  const uniqueInDb = [...new Set(allMenuItems.map(m => m.cat))];
+  const orderedCats = SECTION_ORDER.filter(s => uniqueInDb.some(u => u.toLowerCase() === s.toLowerCase()));
+  
+  // Include any extra database categories not in the official list
+  uniqueInDb.forEach(u => {
+    if (!orderedCats.some(o => o.toLowerCase() === u.toLowerCase())) {
+      orderedCats.push(u);
+    }
+  });
+
+  const buttons = ['all', ...orderedCats];
+  tabsContainer.innerHTML = buttons.map(cat => `
+    <button class="ftab ${cat.toLowerCase() === currentCategory.toLowerCase() ? 'active' : ''}" 
+            onclick="filterMenu('${cat}', this)">
+      ${cat === 'all' ? 'All Items' : cat}
+    </button>
+  `).join('');
 }
 
-// ══════════════════════════════════════════════════════
-//  CUSTOMERS & CAMPAIGNS
-// ══════════════════════════════════════════════════════
+function filterMenu(cat, el) {
+  currentCategory = cat;
+  if (el) {
+    document.querySelectorAll('#menu-tabs .ftab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+  }
+  renderMenuSections();
+}
+
+function renderMenuSections() {
+  const container = document.getElementById('menu-content-area');
+  if (!container) return;
+
+  let sectionsToRender = [];
+  if (currentCategory === 'all') {
+    // Show all available sections that have items
+    const presentCats = [...new Set(allMenuItems.map(m => m.cat))];
+    sectionsToRender = SECTION_ORDER.filter(s => presentCats.some(p => p.toLowerCase() === s.toLowerCase()));
+    
+    // Add any remaining unmapped categories
+    presentCats.forEach(p => {
+      if (!sectionsToRender.some(s => s.toLowerCase() === p.toLowerCase())) {
+        sectionsToRender.push(p);
+      }
+    });
+  } else {
+    sectionsToRender = [currentCategory];
+  }
+
+  let html = '';
+
+  sectionsToRender.forEach(secName => {
+    const items = allMenuItems.filter(m => m.cat.toLowerCase() === secName.toLowerCase());
+    if (items.length > 0) {
+      html += `
+        <div class="menu-section-block">
+          <div class="menu-group-title">
+            <h3>${secName}</h3>
+            <span class="menu-group-count">${items.length} items</span>
+          </div>
+          <div class="menu-grid">
+            ${items.map(m => `
+              <div class="menu-item-card" style="${!m.avail ? 'opacity:0.55;background:#FAF9F7;' : ''}">
+                <div>
+                  <div class="mi-cat">${m.cat}</div>
+                  <div class="mi-name">${m.name}</div>
+                </div>
+                <div>
+                  <div class="mi-price">${m.price === 0 ? 'Seasonal' : '₹' + m.price.toFixed(0)}</div>
+                  <div class="mi-footer">
+                    <span style="font-size:11.5px;font-weight:600;color:${m.avail ? 'var(--green)' : 'var(--red)'}">
+                      ${m.avail ? '● Available' : '○ Out of Stock'}
+                    </span>
+                    <label class="toggle">
+                      <input type="checkbox" ${m.avail ? 'checked' : ''} onchange="toggleMenuItem(${m.id})">
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+  });
+
+  if (html === '') {
+    html = `<div style="text-align:center;color:var(--muted);padding:40px;">No items found in this section.</div>`;
+  }
+
+  container.innerHTML = html;
+}
+
+// Customers & Campaigns
 (function(){
   const tb = document.getElementById('cust-tbody');
   tb.innerHTML = CUSTOMERS.map(c=>{
@@ -859,9 +900,7 @@ function filterMenu(cat, el) {
   }).join('');
 })();
 
-// ══════════════════════════════════════════════════════
-//  AI LOGS (CRM AUDITOR)
-// ══════════════════════════════════════════════════════
+// AI Logs
 (function(){
   const el = document.getElementById('ai-logs-container');
   el.innerHTML = AI_LOGS.map(log=>`
@@ -883,9 +922,7 @@ function filterMenu(cat, el) {
     </div>`).join('');
 })();
 
-// ══════════════════════════════════════════════════════
-//  CUSTOMER AI CHAT ASSISTANT
-// ══════════════════════════════════════════════════════
+// Chat Widget
 function toggleChat() {
   const box = document.getElementById('ai-chat-box');
   box.style.display = box.style.display === 'none' ? 'flex' : 'none';
@@ -905,7 +942,6 @@ async function sendChatMessage() {
 
   const container = document.getElementById('ai-chat-messages');
 
-  // Append user bubble
   container.innerHTML += `
     <div style="background:rgba(184,115,51,0.14);color:#1A1A1A;padding:8px 12px;border-radius:8px;font-size:12.5px;max-width:85%;align-self:flex-end;line-height:1.45;">
       ${text}
@@ -920,7 +956,7 @@ async function sendChatMessage() {
       body: JSON.stringify({ message: text })
     });
     
-    let reply = "Thanks for asking! We are currently baking fresh goodies. Ask me about coffee or table bookings! ☕";
+    let reply = "Marhaban! Need help with our authentic Mandi platters or Majlis bookings?";
     if (res.ok) {
       const data = await res.json();
       reply = data.reply;
@@ -931,15 +967,14 @@ async function sendChatMessage() {
         ${reply}
       </div>`;
   } catch (err) {
-    // Intelligent local fallback if backend endpoint is still being configured
     const lower = text.toLowerCase();
-    let fallback = "I'm having trouble reaching the main desk, but I'm here! What would you like to know about our cafe?";
-    if (lower.includes('menu') || lower.includes('coffee')) {
-      fallback = "Our bestsellers include Cappuccino (₹180), Cold Brew (₹200), and Margherita Pizza (₹350)! ☕";
-    } else if (lower.includes('book') || lower.includes('table')) {
-      fallback = "Tables can be booked directly through our dashboard or via WhatsApp! What time would you prefer?";
+    let fallback = "I'm having trouble reaching the main desk, but I'm here! What would you like to know about our Mandi?";
+    if (lower.includes('menu') || lower.includes('mandi')) {
+      fallback = "Our bestsellers include Mutton Mandi (₹430), Chicken Madghuth (₹290), and Mix Mandi for 4 (₹2200)!";
+    } else if (lower.includes('book') || lower.includes('table') || lower.includes('majlis')) {
+      fallback = "Majlis rooms and tables can be reserved right here or via WhatsApp! What time will you arrive?";
     } else if (lower.includes('status') || lower.includes('order')) {
-      fallback = "Please provide your Order ID (like ORD-5513) to check live status.";
+      fallback = "Please share your Order ID (e.g. ORD-6101) to verify live status.";
     }
 
     container.innerHTML += `
@@ -950,11 +985,9 @@ async function sendChatMessage() {
   container.scrollTop = container.scrollHeight;
 }
 
-// ══════════════════════════════════════════════════════
-//  INITIALIZATION
-// ══════════════════════════════════════════════════════
+// Initialization
 loadReservations('all');
-loadMenu('all');
+loadMenu();
 </script>
 </body>
 </html>
