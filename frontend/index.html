@@ -35,6 +35,18 @@
 html,body{height:100%;font-family:'Inter',sans-serif;font-size:14px;background:var(--bg);color:var(--text);line-height:1.5}
 input,select,button{font-family:inherit;font-size:inherit}
 
+/* ── Pulse Alert Animation ── */
+@keyframes pulseBadge {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(184,115,51,0.6); }
+  70% { transform: scale(1.05); box-shadow: 0 0 0 8px rgba(184,115,51,0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(184,115,51,0); }
+}
+.order-alert-pulse {
+  animation: pulseBadge 1.5s infinite ease-in-out;
+  background: #B87333 !important;
+  color: #fff !important;
+}
+
 /* ── Layout ── */
 .shell{display:flex;height:100vh;overflow:hidden}
 .sidebar{width:var(--sidebar-w);background:var(--sidebar);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
@@ -139,32 +151,6 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
 .toggle input:checked+.toggle-slider{background:var(--green)}
 .toggle input:checked+.toggle-slider::before{transform:translateX(18px)}
 
-/* ── AI Logs ── */
-.log-item{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:10px}
-.log-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.log-phone{font-size:13px;font-weight:600}
-.log-time{font-size:11.5px;color:var(--muted)}
-.log-msgs{display:flex;flex-direction:column;gap:6px}
-.msg-row{display:flex;gap:8px;align-items:flex-start}
-.msg-row.in{flex-direction:row}
-.msg-row.out{flex-direction:row-reverse}
-.msg-bubble{padding:7px 11px;border-radius:8px;font-size:13px;max-width:72%;line-height:1.5}
-.msg-row.in .msg-bubble{background:#F0EFED;color:var(--text)}
-.msg-row.out .msg-bubble{background:var(--accent-dim);color:var(--text)}
-.msg-label{font-size:10.5px;color:var(--muted);margin-top:2px;align-self:flex-end;white-space:nowrap}
-.log-intent{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:500;padding:2px 8px;border-radius:4px;background:var(--blue-bg);color:var(--blue);margin-top:8px}
-
-/* ── Customers ── */
-.cust-row-info{display:flex;align-items:center;gap:10px}
-.cust-av{width:32px;height:32px;border-radius:50%;background:var(--accent-dim);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
-
-/* ── Campaigns ── */
-.camp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
-.camp-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px}
-.camp-number{font-size:32px;font-weight:700;color:var(--accent);margin-bottom:4px}
-.camp-label{font-size:12px;color:var(--muted)}
-.camp-action{margin-top:14px}
-
 /* ── Activity / Misc ── */
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px}
 .activity-item{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
@@ -217,16 +203,6 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
     Customers
   </div>
-  <div class="sb-item" onclick="navigateTo('campaigns',this)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013 12.58a19.79 19.79 0 01-3.07-8.67A2 2 0 011.92 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
-    Retention
-  </div>
-
-  <div class="sb-section-label">Intelligence</div>
-  <div class="sb-item" onclick="navigateTo('ailogs',this)">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-    AI Conversations
-  </div>
 
   <div class="sb-footer">
     <div class="sb-avatar">
@@ -246,6 +222,10 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
       <div class="page-title" id="page-title">Dashboard</div>
     </div>
     <div class="topbar-right">
+      <!-- Unified Audio Controller Toggle -->
+      <button id="audio-toggle-btn" class="btn btn-ghost btn-sm" onclick="toggleKitchenAudio()" style="gap:5px;">
+        <span id="audio-icon">🔔</span> <span id="audio-label">Alerts On</span>
+      </button>
       <span class="topbar-badge" id="live-poll-badge">● Live Sync Active</span>
       <span class="topbar-time" id="clock"></span>
     </div>
@@ -391,9 +371,7 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
     <!-- MENU (SECTION-GROUPED) -->
     <div data-page="menu">
       <div class="section-header">
-        <div class="filter-tabs" id="menu-tabs">
-          <!-- Dynamically populated category buttons -->
-        </div>
+        <div class="filter-tabs" id="menu-tabs"></div>
       </div>
       <div id="menu-content-area"></div>
     </div>
@@ -412,45 +390,6 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
           <tbody id="cust-tbody"></tbody>
         </table>
       </div>
-    </div>
-
-    <!-- CAMPAIGNS -->
-    <div data-page="campaigns">
-      <div class="camp-grid">
-        <div class="camp-card">
-          <div class="camp-number">142</div>
-          <div class="camp-label">Inactive 30+ Days</div>
-          <div class="camp-action"><button class="btn btn-primary btn-sm">Send Re-engagement</button></div>
-        </div>
-        <div class="camp-card">
-          <div class="camp-number">67</div>
-          <div class="camp-label">Birthday This Month</div>
-          <div class="camp-action"><button class="btn btn-primary btn-sm">Send Birthday Offer</button></div>
-        </div>
-        <div class="camp-card">
-          <div class="camp-number">23</div>
-          <div class="camp-label">Campaign Responses Today</div>
-          <div class="camp-action"><button class="btn btn-ghost btn-sm">View Responses</button></div>
-        </div>
-      </div>
-      <div class="section-header"><div class="section-title">Inactive Customers — Pending Outreach</div></div>
-      <div class="table-card">
-        <table>
-          <thead><tr><th>Customer</th><th>Phone</th><th>Last Visit</th><th>Days Inactive</th><th>Total Orders</th><th>Campaign Status</th></tr></thead>
-          <tbody id="camp-tbody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- AI LOGS -->
-    <div data-page="ailogs">
-      <div class="stats-row" style="grid-template-columns:repeat(3,1fr)">
-        <div class="stat-card"><div class="stat-value">63</div><div class="stat-label">Conversations Today</div><div class="stat-delta up">94% auto-resolved</div></div>
-        <div class="stat-card"><div class="stat-value">4</div><div class="stat-label">Escalated to Staff</div><div class="stat-delta">6% of total</div></div>
-        <div class="stat-card"><div class="stat-value">18s</div><div class="stat-label">Avg Response Time</div><div class="stat-delta up">AI handles end-to-end</div></div>
-      </div>
-      <div class="section-header"><div class="section-title">Recent Conversations</div></div>
-      <div id="ai-logs-container"></div>
     </div>
 
   </div>
@@ -506,201 +445,112 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
   </div>
 </div>
 
-<!-- CHAT WIDGET -->
-<div id="ai-chat-btn" onclick="toggleChat()" style="position:fixed;bottom:24px;right:24px;width:54px;height:54px;border-radius:50%;background:#B87333;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.22);z-index:9999;transition:transform .15s ease;">
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-</div>
-
-<div id="ai-chat-box" style="display:none;position:fixed;bottom:90px;right:24px;width:350px;height:460px;background:#FFFFFF;border:1px solid #E4E2DE;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.14);flex-direction:column;overflow:hidden;z-index:9999;">
-  <div style="background:#0B2018;color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;">
-    <div>
-      <div style="font-weight:600;font-size:13.5px;">Raidan Assistant</div>
-      <div style="font-size:11px;color:rgba(255,255,255,0.6);">Online | Mandi &amp; Table Inquiry</div>
-    </div>
-    <span onclick="toggleChat()" style="cursor:pointer;font-size:20px;color:#fff;line-height:1;">&times;</span>
-  </div>
-  
-  <div id="ai-chat-messages" style="flex:1;padding:14px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;background:#F9F8F6;">
-    <div style="background:#F0EFED;color:#1A1A1A;padding:8px 12px;border-radius:8px;font-size:12.5px;max-width:85%;line-height:1.45;">
-      Marhaban! Need help with our authentic Mandi platters, Majlis availability, or booking a table? Ask me anything!
-    </div>
-  </div>
-
-  <div style="padding:10px 12px;border-top:1px solid #E4E2DE;background:#fff;display:flex;gap:8px;">
-    <input type="text" id="ai-chat-input" placeholder="Type a message..." style="flex:1;border:1px solid #E4E2DE;border-radius:6px;padding:8px 10px;font-size:13px;outline:none;" onkeypress="handleChatKey(event)">
-    <button onclick="sendChatMessage()" style="background:#B87333;color:#fff;border:none;border-radius:6px;padding:8px 12px;font-size:12.5px;cursor:pointer;font-weight:600;">Send</button>
-  </div>
-</div>
-
 <script>
 const API_BASE = 'https://sipsync-api-k9tz.onrender.com/api';
 const MANAGER_KEY = 'sipsync-admin-2026';
 
-const SECTION_ORDER = [
-  "Mandi", "Rice", "Mandi Family Pack", "Arabian Style Chicken",
-  "Mutton Gravy", "Chicken Gravy", "Veg", "Egg", "Veg Dry and Gravy",
-  "Sides", "Dal", "Tandoor", "Breads", "Fried Rice and Noddles",
-  "Chinese chi Boneless", "Fish", "soups", "Combo", "Rolls",
-  "Shawarma", "SAlad", "Fried chi an dBurgers", "Arabian Desserts",
-  "Fresh fruit Creams", "Falooda", "Crushes", "DEsert",
-  "FResh juices and Milk Shakes"
-];
+// ══════════════════════════════════════════════════════
+//  UNIFIED AUDIO ENGINE (KITCHEN & MANAGER SOUNDS)
+// ══════════════════════════════════════════════════════
+let audioCtx = null;
+let audioEnabled = true;
 
-const PAYMENTS = [
-  {id:'PAY-9101',orderId:'ORD-6101',customer:'Zaid Khan',amount:1180,method:'UPI',status:'success',dt:'08 Sep, 13:22'},
-  {id:'PAY-9100',orderId:'ORD-6100',customer:'Mohammed Tariq',amount:2200,method:'Card',status:'success',dt:'08 Sep, 13:40'},
-  {id:'PAY-9099',orderId:'ORD-6099',customer:'Salman F.',amount:570,method:'UPI',status:'success',dt:'08 Sep, 12:45'},
-  {id:'PAY-9098',orderId:'ORD-6098',customer:'Amina Bi',amount:1420,method:'Cash',status:'success',dt:'08 Sep, 12:30'},
-  {id:'PAY-9097',orderId:'ORD-6097',customer:'Farhan Ahmed',amount:620,method:'UPI',status:'pending',dt:'08 Sep, 11:55'},
-];
-
-const CUSTOMERS = [
-  {name:'Mohammed Tariq',phone:'9845012345',orders:19,spend:38200,lastVisit:'08 Sep 2026',status:'vip'},
-  {name:'Zaid Khan',phone:'9740123456',orders:12,spend:14800,lastVisit:'08 Sep 2026',status:'regular'},
-  {name:'Dr. Shakeel',phone:'9900123456',orders:8,spend:9200,lastVisit:'08 Sep 2026',status:'regular'},
-  {name:'Amina Bi',phone:'9611234567',orders:5,spend:7400,lastVisit:'08 Sep 2026',status:'regular'},
-  {name:'Farhan Ahmed',phone:'9886234567',orders:2,spend:1240,lastVisit:'08 Sep 2026',status:'new'},
-];
-
-const INACTIVE_CUSTS = [
-  {name:'Syed Irfan',phone:'9844098765',lastVisit:'20 Jul 2026',days:49,orders:14,camp:'Not sent'},
-  {name:'Asif Hussain',phone:'9731098765',lastVisit:'02 Aug 2026',days:36,orders:8,camp:'Sent — replied YES'},
-  {name:'Tanveer Ullah',phone:'9980098765',lastVisit:'12 Jun 2026',days:87,orders:4,camp:'Not sent'},
-];
-
-const AI_LOGS = [
-  {
-    phone:'+91 9845012345', time:'1:12 PM', intent:'MAJLIS BOOKING',
-    msgs:[
-      {dir:'in',text:'Do you have a Majlis available for 6 people tonight around 8:30 PM?'},
-      {dir:'out',text:'Yes, Majlis cabin M-06 on our First Floor is open for 8:30 PM. Shall I reserve it under your name?'},
-      {dir:'in',text:'Yes please, book under Tariq.'},
-      {dir:'out',text:'Confirmed! Majlis M-06 booked for 6 guests at 8:30 PM. Booking ID: RES-5021. See you soon at Raidan!'},
-    ]
-  },
-  {
-    phone:'+91 9740123456', time:'12:30 PM', intent:'MENU INQUIRY',
-    msgs:[
-      {dir:'in',text:'Is Mutton Madfoona available today?'},
-      {dir:'out',text:'Yes, fresh Mutton Madfoona (₹440) and Mutton Madfoona with Rice (₹610) are fully in stock right now.'},
-    ]
-  }
-];
-
-const ACTIVITY = [
-  {color:'#2E7D55',text:'Majlis M-02 occupied — Zaid Khan, Order placed',time:'4 min ago'},
-  {color:'#B87333',text:'Order delivered to VIP Cabin — ₹2,200',time:'12 min ago'},
-  {color:'#2E7D55',text:'UPI Payment settled PAY-9101 — ₹1,180',time:'19 min ago'},
-  {color:'#2563EB',text:'AI booked Majlis M-06 for 8:30 PM tonight',time:'28 min ago'},
-];
-
-// Router
-const PAGE_TITLES = {
-  dashboard:'Dashboard',reservations:'Reservations',orders:'Orders',
-  payments:'Payments',menu:'Menu & Live Stock',customers:'Customers',
-  campaigns:'Retention Campaigns',ailogs:'AI Conversations'
-};
-
-function navigateTo(page, el) {
-  document.querySelectorAll('[data-page]').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
-  document.querySelector('[data-page="'+page+'"]').classList.add('active');
-  el.classList.add('active');
-  document.getElementById('page-title').textContent = PAGE_TITLES[page];
-
-  if (page === 'orders') loadLiveOrders();
-  if (page === 'reservations') loadLiveReservations();
-}
-
-function tick() {
-  const d = new Date();
-  document.getElementById('clock').textContent =
-    d.toLocaleDateString('en-IN',{day:'numeric',month:'short'}) + ', ' +
-    d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
-}
-tick(); setInterval(tick, 30000);
-
-// Charts
-const ACCENT = '#B87333';
-Chart.defaults.font.family = "'Inter', sans-serif";
-Chart.defaults.font.size = 11;
-Chart.defaults.color = '#6B6966';
-Chart.defaults.plugins.legend.display = false;
-
-new Chart(document.getElementById('chartRevenue'), {
-  type:'line',
-  data:{
-    labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
-    datasets:[{
-      data:[21000,24500,22800,29600,34200,41800,38420],
-      borderColor:ACCENT, borderWidth:2,
-      backgroundColor:'rgba(184,115,51,0.08)',
-      fill:true, tension:.4, pointRadius:3, pointBackgroundColor:ACCENT
-    }]
-  },
-  options:{
-    responsive:true, maintainAspectRatio:false,
-    scales:{
-      x:{grid:{display:false},ticks:{font:{size:10}}},
-      y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{callback:v=>'₹'+v/1000+'k',font:{size:10}}}
-    },
-    plugins:{tooltip:{callbacks:{label:ctx=>'₹'+ctx.raw.toLocaleString('en-IN')}}}
-  }
-});
-
-new Chart(document.getElementById('chartCategory'), {
-  type:'doughnut',
-  data:{
-    labels:['Mandi','Grills','Family Packs','Gravies & Breads','Beverages'],
-    datasets:[{
-      data:[44,22,18,10,6],
-      backgroundColor:['#B87333','#2E7D55','#2563EB','#B8860B','#8E44AD'],
-      borderWidth:0, hoverOffset:4
-    }]
-  },
-  options:{
-    responsive:true, maintainAspectRatio:false, cutout:'68%',
-    plugins:{
-      legend:{display:true, position:'bottom', labels:{boxWidth:10, padding:10, font:{size:11}}},
-      tooltip:{callbacks:{label:ctx=>ctx.label+': '+ctx.raw+'%'}}
+function initAudioContext() {
+  if (!audioCtx) {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (AudioContextClass) {
+      audioCtx = new AudioContextClass();
     }
   }
-});
-
-new Chart(document.getElementById('chartBookings'), {
-  type:'bar',
-  data:{
-    labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
-    datasets:[
-      {label:'Confirmed', data:[12,14,16,18,24,32,30], backgroundColor:'rgba(184,115,51,0.7)', borderRadius:3},
-      {label:'Cancelled', data:[1,0,1,2,1,2,0], backgroundColor:'rgba(192,57,43,0.4)', borderRadius:3}
-    ]
-  },
-  options:{
-    responsive:true, maintainAspectRatio:false,
-    plugins:{legend:{display:true, position:'bottom', labels:{boxWidth:10, padding:10, font:{size:11}}}},
-    scales:{x:{grid:{display:false},stacked:false},y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}}}
+  if (audioCtx && audioCtx.state === 'suspended') {
+    audioCtx.resume();
   }
-});
+}
 
-(function(){
-  const el = document.getElementById('activity-feed');
-  ACTIVITY.forEach(a => {
-    el.innerHTML += `<div class="activity-item">
-      <div class="activity-dot" style="background:${a.color}"></div>
-      <div>
-        <div class="activity-text">${a.text}</div>
-        <div class="activity-time">${a.time}</div>
-      </div>
-    </div>`;
+// Kitchen Order Sound: Dual-tone sharp bell (880Hz -> 1320Hz)
+function playKitchenChime() {
+  if (!audioEnabled) return;
+  initAudioContext();
+  if (!audioCtx) return;
+
+  const now = audioCtx.currentTime;
+
+  const osc1 = audioCtx.createOscillator();
+  const gain1 = audioCtx.createGain();
+  osc1.type = 'sine';
+  osc1.frequency.setValueAtTime(880, now);
+  gain1.gain.setValueAtTime(0.35, now);
+  gain1.gain.exponentialRampToValueAtTime(0.0001, now + 0.55);
+  osc1.connect(gain1);
+  gain1.connect(audioCtx.destination);
+  osc1.start(now);
+  osc1.stop(now + 0.55);
+
+  const osc2 = audioCtx.createOscillator();
+  const gain2 = audioCtx.createGain();
+  osc2.type = 'sine';
+  osc2.frequency.setValueAtTime(1320, now + 0.14);
+  gain2.gain.setValueAtTime(0.35, now + 0.14);
+  gain2.gain.exponentialRampToValueAtTime(0.0001, now + 0.75);
+  osc2.connect(gain2);
+  gain2.connect(audioCtx.destination);
+  osc2.start(now + 0.14);
+  osc2.stop(now + 0.75);
+}
+
+// Front Desk / Reservation Sound: Warm 3-tone arpeggio (C5 -> E5 -> G5)
+function playReservationChime() {
+  if (!audioEnabled) return;
+  initAudioContext();
+  if (!audioCtx) return;
+
+  const now = audioCtx.currentTime;
+  const notes = [523.25, 659.25, 783.99]; // C5, E5, G5
+
+  notes.forEach((freq, idx) => {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    const startTime = now + (idx * 0.12);
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, startTime);
+    gain.gain.setValueAtTime(0.3, startTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.7);
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.start(startTime);
+    osc.stop(startTime + 0.7);
   });
-})();
+}
+
+function toggleKitchenAudio() {
+  initAudioContext();
+  audioEnabled = !audioEnabled;
+  const btnIcon = document.getElementById('audio-icon');
+  const btnLabel = document.getElementById('audio-label');
+  if (audioEnabled) {
+    btnIcon.textContent = '🔔';
+    btnLabel.textContent = 'Alerts On';
+    playKitchenChime(); // Audio test confirmation
+  } else {
+    btnIcon.textContent = '🔕';
+    btnLabel.textContent = 'Muted';
+  }
+}
+
+document.addEventListener('click', () => {
+  if (!audioCtx) initAudioContext();
+}, { once: true });
 
 // ══════════════════════════════════════════════════════
-//  LIVE RESERVATIONS PIPELINE (5-SEC POLLING)
+//  LIVE RESERVATIONS PIPELINE (WITH AUDIO ALERT)
 // ══════════════════════════════════════════════════════
 let reservationsCache = [];
 let currentResFilter = 'all';
+let knownReservationIds = new Set();
+let isFirstResLoad = true;
 
 function resStatusBadge(s){
   const statusStr = (s || 'confirmed').toLowerCase();
@@ -718,8 +568,31 @@ async function loadLiveReservations(filter = currentResFilter) {
   try {
     const res = await fetch(`${API_BASE}/reservations/`);
     if (res.ok) {
-      reservationsCache = await res.json();
-      reservationsCache.sort((a, b) => (b.date + ' ' + b.time).localeCompare(a.date + ' ' + a.time));
+      const freshReservations = await res.json();
+      freshReservations.sort((a, b) => (b.date + ' ' + b.time).localeCompare(a.date + ' ' + a.time));
+
+      if (!isFirstResLoad) {
+        const newBookings = freshReservations.filter(r => 
+          !knownReservationIds.has(r.id) && (r.status || '').toLowerCase() === 'confirmed'
+        );
+
+        if (newBookings.length > 0) {
+          playReservationChime();
+          const pollBadge = document.getElementById('live-poll-badge');
+          if (pollBadge) {
+            pollBadge.classList.add('order-alert-pulse');
+            pollBadge.textContent = `📅 ${newBookings.length} New Booking!`;
+            setTimeout(() => {
+              pollBadge.classList.remove('order-alert-pulse');
+              pollBadge.textContent = '● Live Sync Active';
+            }, 5000);
+          }
+        }
+      }
+
+      freshReservations.forEach(r => knownReservationIds.add(r.id));
+      isFirstResLoad = false;
+      reservationsCache = freshReservations;
     }
   } catch (err) {
     console.warn("Could not query /reservations/ API:", err);
@@ -865,10 +738,12 @@ setInterval(() => {
 }, 5000);
 
 // ══════════════════════════════════════════════════════
-//  LIVE ORDERS & KITCHEN PIPELINE (AUTO-SYNCING 4S)
+//  LIVE ORDERS & KITCHEN PIPELINE (WITH AUDIO ALERT)
 // ══════════════════════════════════════════════════════
 let liveOrdersCache = [];
 let currentOrderFilter = 'all';
+let knownOrderIds = new Set();
+let isFirstOrderLoad = true;
 
 function orderStatusBadge(s){
   const statusStr = (s || 'pending').toLowerCase();
@@ -887,8 +762,31 @@ async function loadLiveOrders(filter = currentOrderFilter) {
   try {
     const res = await fetch(`${API_BASE}/orders/`);
     if (res.ok) {
-      liveOrdersCache = await res.json();
-      liveOrdersCache.sort((a, b) => (b.id || 0) - (a.id || 0));
+      const freshOrders = await res.json();
+      freshOrders.sort((a, b) => (b.id || 0) - (a.id || 0));
+
+      if (!isFirstOrderLoad) {
+        const newPending = freshOrders.filter(o => 
+          !knownOrderIds.has(o.id) && (o.status || '').toLowerCase() === 'pending'
+        );
+
+        if (newPending.length > 0) {
+          playKitchenChime();
+          const pollBadge = document.getElementById('live-poll-badge');
+          if (pollBadge) {
+            pollBadge.classList.add('order-alert-pulse');
+            pollBadge.textContent = `🔔 ${newPending.length} New Order!`;
+            setTimeout(() => {
+              pollBadge.classList.remove('order-alert-pulse');
+              pollBadge.textContent = '● Live Sync Active';
+            }, 5000);
+          }
+        }
+      }
+
+      freshOrders.forEach(o => knownOrderIds.add(o.id));
+      isFirstOrderLoad = false;
+      liveOrdersCache = freshOrders;
     }
   } catch (err) {
     console.warn("Could not reach /orders/ API endpoint:", err);
@@ -969,25 +867,19 @@ setInterval(() => {
   loadLiveOrders(currentOrderFilter);
 }, 4000);
 
-(function(){
-  const tb = document.getElementById('pay-tbody');
-  tb.innerHTML = PAYMENTS.map(p=>{
-    const badge = p.status==='success'?'badge-green':p.status==='pending'?'badge-yellow':'badge-red';
-    return `<tr>
-      <td class="td-mono td-muted">${p.id}</td>
-      <td class="td-mono td-muted">${p.orderId}</td>
-      <td class="td-bold">${p.customer}</td>
-      <td class="td-bold">₹${p.amount}</td>
-      <td class="td-muted">${p.method}</td>
-      <td><span class="badge ${badge}">${p.status.charAt(0).toUpperCase()+p.status.slice(1)}</span></td>
-      <td class="td-muted">${p.dt}</td>
-    </tr>`;
-  }).join('');
-})();
+// ══════════════════════════════════════════════════════
+//  MENU & OTHER VIEWS
+// ══════════════════════════════════════════════════════
+const SECTION_ORDER = [
+  "Mandi", "Rice", "Mandi Family Pack", "Arabian Style Chicken",
+  "Mutton Gravy", "Chicken Gravy", "Veg", "Egg", "Veg Dry and Gravy",
+  "Sides", "Dal", "Tandoor", "Breads", "Fried Rice and Noddles",
+  "Chinese chi Boneless", "Fish", "soups", "Combo", "Rolls",
+  "Shawarma", "SAlad", "Fried chi an dBurgers", "Arabian Desserts",
+  "Fresh fruit Creams", "Falooda", "Crushes", "DEsert",
+  "FResh juices and Milk Shakes"
+];
 
-// ══════════════════════════════════════════════════════
-//  MENU (SECTION HEADINGS & DYNAMIC TABS)
-// ══════════════════════════════════════════════════════
 let allMenuItems = [];
 let currentCategory = 'all';
 
@@ -1005,8 +897,6 @@ async function toggleMenuItem(id) {
       const target = allMenuItems.find(i => i.id === id);
       if (target) target.avail = !target.avail;
       renderMenuSections();
-    } else {
-      console.error("Authorization error or failed toggle:", res.status);
     }
   } catch (err) {
     console.error("Failed to toggle availability:", err);
@@ -1119,130 +1009,87 @@ function renderMenuSections() {
   container.innerHTML = html;
 }
 
-// Customers & Campaigns
-(function(){
-  const tb = document.getElementById('cust-tbody');
-  tb.innerHTML = CUSTOMERS.map(c=>{
-    const init = c.name.split(' ').map(w=>w[0]).join('').slice(0,2);
-    const sm = {regular:'badge-green',vip:'badge-blue',new:'badge-grey','at-risk':'badge-yellow'};
-    const sl = {regular:'Regular',vip:'VIP','new':'New','at-risk':'At Risk'};
-    return `<tr>
-      <td>
-        <div class="cust-row-info">
-          <div class="cust-av">${init}</div>
-          <span class="td-bold">${c.name}</span>
-        </div>
-      </td>
-      <td class="td-muted">${c.phone}</td>
-      <td>${c.orders}</td>
-      <td class="td-bold">₹${c.spend.toLocaleString('en-IN')}</td>
-      <td class="td-muted">${c.lastVisit}</td>
-      <td><span class="badge ${sm[c.status]}">${sl[c.status]}</span></td>
-    </tr>`;
-  }).join('');
-})();
+// Router & Static Data
+const PAGE_TITLES = {
+  dashboard:'Dashboard',reservations:'Reservations',orders:'Orders',
+  payments:'Payments',menu:'Menu & Live Stock',customers:'Customers'
+};
 
-(function(){
-  const tb = document.getElementById('camp-tbody');
-  tb.innerHTML = INACTIVE_CUSTS.map(c=>{
-    const cs = c.camp==='Not sent'?'badge-grey':c.camp.includes('replied')?'badge-green':'badge-yellow';
-    return `<tr>
-      <td class="td-bold">${c.name}</td>
-      <td class="td-muted">${c.phone}</td>
-      <td class="td-muted">${c.lastVisit}</td>
-      <td class="td-bold" style="color:var(--red)">${c.days} days</td>
-      <td>${c.orders}</td>
-      <td><span class="badge ${cs}">${c.camp}</span></td>
-    </tr>`;
-  }).join('');
-})();
+function navigateTo(page, el) {
+  document.querySelectorAll('[data-page]').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+  document.querySelector('[data-page="'+page+'"]').classList.add('active');
+  el.classList.add('active');
+  document.getElementById('page-title').textContent = PAGE_TITLES[page];
 
-// AI Logs
-(function(){
-  const el = document.getElementById('ai-logs-container');
-  el.innerHTML = AI_LOGS.map(log=>`
-    <div class="log-item">
-      <div class="log-header">
-        <div>
-          <div class="log-phone">${log.phone}</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:1px">${log.time} &middot; Today</div>
-        </div>
-        <span class="badge badge-blue">${log.intent}</span>
-      </div>
-      <div class="log-msgs">
-        ${log.msgs.map(m=>`
-          <div class="msg-row ${m.dir==='in'?'in':'out'}">
-            <div class="msg-bubble">${m.text.replace(/\n/g,'<br>')}</div>
-            <div class="msg-label">${m.dir==='in'?'Customer':'AI'}</div>
-          </div>`).join('')}
-      </div>
-    </div>`).join('');
-})();
-
-// Chat Widget
-function toggleChat() {
-  const box = document.getElementById('ai-chat-box');
-  box.style.display = box.style.display === 'none' ? 'flex' : 'none';
-  if (box.style.display === 'flex') {
-    document.getElementById('ai-chat-input').focus();
-  }
+  if (page === 'orders') loadLiveOrders();
+  if (page === 'reservations') loadLiveReservations();
 }
 
-function handleChatKey(e) {
-  if (e.key === 'Enter') sendChatMessage();
+function tick() {
+  const d = new Date();
+  document.getElementById('clock').textContent =
+    d.toLocaleDateString('en-IN',{day:'numeric',month:'short'}) + ', ' +
+    d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
 }
+tick(); setInterval(tick, 30000);
 
-async function sendChatMessage() {
-  const input = document.getElementById('ai-chat-input');
-  const text = input.value.trim();
-  if (!text) return;
+// Demo Charts Setup
+const ACCENT = '#B87333';
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.font.size = 11;
+Chart.defaults.color = '#6B6966';
+Chart.defaults.plugins.legend.display = false;
 
-  const container = document.getElementById('ai-chat-messages');
-
-  container.innerHTML += `
-    <div style="background:rgba(184,115,51,0.14);color:#1A1A1A;padding:8px 12px;border-radius:8px;font-size:12.5px;max-width:85%;align-self:flex-end;line-height:1.45;">
-      ${text}
-    </div>`;
-  input.value = '';
-  container.scrollTop = container.scrollHeight;
-
-  try {
-    const res = await fetch(`${API_BASE}/chat/`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: text })
-    });
-    
-    let reply = "Marhaban! Need help with our authentic Mandi platters or Majlis bookings?";
-    if (res.ok) {
-      const data = await res.json();
-      reply = data.reply;
+new Chart(document.getElementById('chartRevenue'), {
+  type:'line',
+  data:{
+    labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+    datasets:[{
+      data:[21000,24500,22800,29600,34200,41800,38420],
+      borderColor:ACCENT, borderWidth:2,
+      backgroundColor:'rgba(184,115,51,0.08)',
+      fill:true, tension:.4, pointRadius:3, pointBackgroundColor:ACCENT
+    }]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    scales:{
+      x:{grid:{display:false},ticks:{font:{size:10}}},
+      y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{callback:v=>'₹'+v/1000+'k',font:{size:10}}}
     }
-
-    container.innerHTML += `
-      <div style="background:#F0EFED;color:#1A1A1A;padding:8px 12px;border-radius:8px;font-size:12.5px;max-width:85%;align-self:flex-start;line-height:1.45;">
-        ${reply}
-      </div>`;
-  } catch (err) {
-    const lower = text.toLowerCase();
-    let fallback = "I'm having trouble reaching the main desk, but I'm here! What would you like to know about our Mandi?";
-    if (lower.includes('menu') || lower.includes('mandi')) {
-      fallback = "Our bestsellers include Mutton Mandi (₹430), Chicken Madghuth (₹290), and Mix Mandi for 4 (₹2200)!";
-    } else if (lower.includes('book') || lower.includes('table') || lower.includes('majlis')) {
-      fallback = "Majlis rooms and tables can be reserved right here or via WhatsApp! What time will you arrive?";
-    } else if (lower.includes('status') || lower.includes('order')) {
-      fallback = "Please share your Order ID (e.g. ORD-6101) to verify live status.";
-    }
-
-    container.innerHTML += `
-      <div style="background:#F0EFED;color:#1A1A1A;padding:8px 12px;border-radius:8px;font-size:12.5px;max-width:85%;align-self:flex-start;line-height:1.45;">
-        ${fallback}
-      </div>`;
   }
-  container.scrollTop = container.scrollHeight;
-}
+});
 
-// Initial Bootstrapping
+new Chart(document.getElementById('chartCategory'), {
+  type:'doughnut',
+  data:{
+    labels:['Mandi','Grills','Family Packs','Gravies & Breads','Beverages'],
+    datasets:[{
+      data:[44,22,18,10,6],
+      backgroundColor:['#B87333','#2E7D55','#2563EB','#B8860B','#8E44AD'],
+      borderWidth:0
+    }]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false, cutout:'68%',
+    plugins:{legend:{display:true, position:'bottom'}}
+  }
+});
+
+new Chart(document.getElementById('chartBookings'), {
+  type:'bar',
+  data:{
+    labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+    datasets:[
+      {label:'Confirmed', data:[12,14,16,18,24,32,30], backgroundColor:'rgba(184,115,51,0.7)', borderRadius:3},
+      {label:'Cancelled', data:[1,0,1,2,1,2,0], backgroundColor:'rgba(192,57,43,0.4)', borderRadius:3}
+    ]
+  },
+  options:{responsive:true, maintainAspectRatio:false}
+});
+
+// Bootstrapping
 loadLiveReservations('all');
 loadLiveOrders('all');
 loadMenu();
