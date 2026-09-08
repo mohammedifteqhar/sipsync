@@ -246,7 +246,7 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
       <div class="page-title" id="page-title">Dashboard</div>
     </div>
     <div class="topbar-right">
-      <span class="topbar-badge" id="live-poll-badge">● Live Sync</span>
+      <span class="topbar-badge" id="live-poll-badge">● Live Sync Active</span>
       <span class="topbar-time" id="clock"></span>
     </div>
   </div>
@@ -257,9 +257,9 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
     <div data-page="dashboard" class="active">
       <div class="stats-row">
         <div class="stat-card">
-          <div class="stat-value" id="stat-bookings">24</div>
+          <div class="stat-value" id="stat-bookings">0</div>
           <div class="stat-label">Bookings Today</div>
-          <div class="stat-delta up">+4 from yesterday</div>
+          <div class="stat-delta up">Live auto-updating</div>
         </div>
         <div class="stat-card">
           <div class="stat-value" id="stat-revenue">₹38,420</div>
@@ -309,26 +309,39 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
     <div data-page="reservations">
       <div class="section-header">
         <div class="filter-tabs" id="res-tabs">
-          <button class="ftab active" onclick="filterRes('all',this)">All</button>
+          <button class="ftab active" onclick="filterRes('all',this)">All Bookings</button>
           <button class="ftab" onclick="filterRes('today',this)">Today</button>
           <button class="ftab" onclick="filterRes('upcoming',this)">Upcoming</button>
           <button class="ftab" onclick="filterRes('cancelled',this)">Cancelled</button>
         </div>
-        <button class="btn btn-primary btn-sm">+ New Booking</button>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-ghost btn-sm" onclick="loadLiveReservations()">&#x21bb; Refresh</button>
+          <button class="btn btn-primary btn-sm" onclick="openResModal()">+ New Booking</button>
+        </div>
       </div>
       <div class="table-card">
         <table id="res-table">
           <thead>
             <tr>
-              <th>Booking ID</th><th>Guest</th><th>Phone</th><th>Date</th><th>Time</th><th>Guests</th><th>Status</th><th>Channel</th>
+              <th>Booking ID</th>
+              <th>Guest Name</th>
+              <th>Phone</th>
+              <th>Date &amp; Time</th>
+              <th>Party Size</th>
+              <th>Seating Unit</th>
+              <th>Channel</th>
+              <th>Status</th>
+              <th>Action</th>
             </tr>
           </thead>
-          <tbody id="res-tbody"></tbody>
+          <tbody id="res-tbody">
+            <tr><td colspan="9" style="text-align:center;padding:24px;color:var(--muted)">Connecting to live reservations feed...</td></tr>
+          </tbody>
         </table>
       </div>
     </div>
 
-    <!-- ORDERS (LIVE SUPABASE PIPELINE) -->
+    <!-- ORDERS -->
     <div data-page="orders">
       <div class="section-header">
         <div class="filter-tabs" id="order-filter-tabs">
@@ -444,6 +457,55 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
 </div>
 </div>
 
+<!-- ── NEW RESERVATION MODAL (WALK-IN / FRONT-DESK) ── -->
+<div id="res-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:10000;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#fff;border-radius:12px;width:100%;max-width:440px;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,0.2);">
+    <div style="background:#0B2018;color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;">
+      <h3 style="font-size:15px;font-weight:600;">Manual Table / Majlis Reservation</h3>
+      <span onclick="closeResModal()" style="cursor:pointer;font-size:22px;color:rgba(255,255,255,0.7);">&times;</span>
+    </div>
+    <form id="res-form" onsubmit="submitReservation(event)" style="padding:20px;display:flex;flex-direction:column;gap:14px;">
+      <div>
+        <label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px;">GUEST NAME</label>
+        <input type="text" id="rf-name" required placeholder="e.g. Tariq Mansoor" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px;">PHONE</label>
+          <input type="tel" id="rf-phone" required placeholder="9845012345" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
+        </div>
+        <div>
+          <label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px;">GUESTS</label>
+          <input type="number" id="rf-guests" required min="1" max="25" value="4" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px;">DATE</label>
+          <input type="date" id="rf-date" required style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
+        </div>
+        <div>
+          <label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px;">TIME</label>
+          <input type="time" id="rf-time" required value="20:00" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
+        </div>
+      </div>
+      <div>
+        <label style="display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px;">PREFERRED SEATING AREA</label>
+        <select id="rf-area" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
+          <option value="Majlis Cabin (Floor Seating)">Majlis Cabin (Floor Seating · 6-8 Pax)</option>
+          <option value="VIP Family Room">VIP Family Room (Private · 10+ Pax)</option>
+          <option value="Ground Floor Dining">Ground Floor Dining (Standard Table)</option>
+          <option value="First Floor Dining">First Floor Dining (Open Seating)</option>
+        </select>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:10px;">
+        <button type="button" onclick="closeResModal()" class="btn btn-ghost btn-sm">Cancel</button>
+        <button type="submit" class="btn btn-primary btn-sm" id="rf-submit-btn">Confirm Booking</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- CHAT WIDGET -->
 <div id="ai-chat-btn" onclick="toggleChat()" style="position:fixed;bottom:24px;right:24px;width:54px;height:54px;border-radius:50%;background:#B87333;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.22);z-index:9999;transition:transform .15s ease;">
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
@@ -474,7 +536,6 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
 const API_BASE = 'https://sipsync-api-k9tz.onrender.com/api';
 const MANAGER_KEY = 'sipsync-admin-2026';
 
-// Exact ordered sections matching the Raidan Menu Document
 const SECTION_ORDER = [
   "Mandi", "Rice", "Mandi Family Pack", "Arabian Style Chicken",
   "Mutton Gravy", "Chicken Gravy", "Veg", "Egg", "Veg Dry and Gravy",
@@ -485,7 +546,6 @@ const SECTION_ORDER = [
   "FResh juices and Milk Shakes"
 ];
 
-// Fallback operational data
 const PAYMENTS = [
   {id:'PAY-9101',orderId:'ORD-6101',customer:'Zaid Khan',amount:1180,method:'UPI',status:'success',dt:'08 Sep, 13:22'},
   {id:'PAY-9100',orderId:'ORD-6100',customer:'Mohammed Tariq',amount:2200,method:'Card',status:'success',dt:'08 Sep, 13:40'},
@@ -548,9 +608,8 @@ function navigateTo(page, el) {
   el.classList.add('active');
   document.getElementById('page-title').textContent = PAGE_TITLES[page];
 
-  if (page === 'orders') {
-    loadLiveOrders();
-  }
+  if (page === 'orders') loadLiveOrders();
+  if (page === 'reservations') loadLiveReservations();
 }
 
 function tick() {
@@ -637,57 +696,176 @@ new Chart(document.getElementById('chartBookings'), {
   });
 })();
 
-// Reservations
-let reservationsCache = [
-  {id:'RES-5021',name:'Mohammed Tariq',phone:'9845012345',date:'2026-09-08',time:'20:30',guests:6,status:'confirmed',channel:'WhatsApp AI'},
-  {id:'RES-5020',name:'Zaid Khan',phone:'9740123456',date:'2026-09-08',time:'13:00',guests:4,status:'confirmed',channel:'Walk-in'},
-  {id:'RES-5019',name:'Amina Bi',phone:'9611234567',date:'2026-09-08',time:'12:15',guests:5,status:'confirmed',channel:'Web'},
-  {id:'RES-5018',name:'Rohan Kumar',phone:'9876543210',date:'2026-09-07',time:'19:45',guests:2,status:'cancelled',channel:'Phone'},
-];
+// ══════════════════════════════════════════════════════
+//  LIVE RESERVATIONS PIPELINE (5-SEC POLLING)
+// ══════════════════════════════════════════════════════
+let reservationsCache = [];
+let currentResFilter = 'all';
 
-function statusBadge(s){
-  const m={confirmed:'badge-green',pending:'badge-yellow',cancelled:'badge-red'};
-  return `<span class="badge ${m[s]||'badge-grey'}">${s.charAt(0).toUpperCase()+s.slice(1)}</span>`;
+function resStatusBadge(s){
+  const statusStr = (s || 'confirmed').toLowerCase();
+  const m = {
+    confirmed: 'badge-green',
+    seated: 'badge-blue',
+    pending: 'badge-yellow',
+    cancelled: 'badge-red'
+  };
+  return `<span class="badge ${m[statusStr] || 'badge-grey'}">${statusStr.charAt(0).toUpperCase() + statusStr.slice(1)}</span>`;
 }
 
-async function loadReservations(filter = 'all') {
+async function loadLiveReservations(filter = currentResFilter) {
+  currentResFilter = filter;
   try {
     const res = await fetch(`${API_BASE}/reservations/`);
     if (res.ok) {
       reservationsCache = await res.json();
+      reservationsCache.sort((a, b) => (b.date + ' ' + b.time).localeCompare(a.date + ' ' + a.time));
     }
   } catch (err) {
-    console.warn("Using local reservations cache");
+    console.warn("Could not query /reservations/ API:", err);
   }
 
   const todayStr = new Date().toISOString().split('T')[0];
-  const data = filter==='all' ? reservationsCache
-    : filter==='today' ? reservationsCache.filter(b=>b.date===todayStr)
-    : filter==='upcoming' ? reservationsCache.filter(b=>b.date>=todayStr && b.status!=='cancelled')
-    : reservationsCache.filter(b=>b.status==='cancelled');
+  let data = reservationsCache;
+
+  if (currentResFilter === 'today') {
+    data = reservationsCache.filter(b => b.date === todayStr);
+  } else if (currentResFilter === 'upcoming') {
+    data = reservationsCache.filter(b => b.date >= todayStr && b.status !== 'cancelled');
+  } else if (currentResFilter === 'cancelled') {
+    data = reservationsCache.filter(b => b.status === 'cancelled');
+  }
+
+  const todayBookingsCount = reservationsCache.filter(b => b.date === todayStr && b.status !== 'cancelled').length;
+  const statEl = document.getElementById('stat-bookings');
+  if (statEl) statEl.textContent = todayBookingsCount;
 
   const tb = document.getElementById('res-tbody');
-  tb.innerHTML = data.map(b=>`
-    <tr>
-      <td class="td-mono td-muted">${b.id}</td>
-      <td class="td-bold">${b.name}</td>
-      <td class="td-muted">${b.phone}</td>
-      <td>${b.date}</td>
-      <td>${b.time}</td>
-      <td>${b.guests}</td>
-      <td>${statusBadge(b.status)}</td>
-      <td class="td-muted">${b.channel}</td>
-    </tr>`).join('');
+  if (!tb) return;
+
+  if (data.length === 0) {
+    tb.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--muted)">No reservations currently listed under "${currentResFilter}".</td></tr>`;
+    return;
+  }
+
+  tb.innerHTML = data.map(b => {
+    const status = (b.status || 'confirmed').toLowerCase();
+    let action = '';
+
+    if (status === 'confirmed') {
+      action = `
+        <button class="btn btn-primary btn-sm" style="padding:2px 8px;font-size:11px;" onclick="updateResStatus(${b.id}, 'seated')">Seat</button>
+        <button class="btn btn-ghost btn-sm" style="padding:2px 8px;font-size:11px;color:var(--red);" onclick="updateResStatus(${b.id}, 'cancelled')">Cancel</button>
+      `;
+    } else if (status === 'seated') {
+      action = `<span style="font-size:11.5px;color:var(--green);font-weight:600;">Seated</span>`;
+    } else {
+      action = `<span style="font-size:11.5px;color:var(--muted);">Cancelled</span>`;
+    }
+
+    return `
+      <tr>
+        <td class="td-mono td-bold">#RES-${b.id}</td>
+        <td class="td-bold">${b.name}</td>
+        <td class="td-muted">${b.phone}</td>
+        <td>${b.date} &middot; ${b.time}</td>
+        <td>${b.guests} Pax</td>
+        <td class="td-muted">${b.seating_area || 'Standard Dining'}</td>
+        <td><span class="badge badge-grey">${b.channel || 'Online Guest'}</span></td>
+        <td>${resStatusBadge(b.status)}</td>
+        <td>${action}</td>
+      </tr>
+    `;
+  }).join('');
 }
 
 function filterRes(f, el) {
-  document.querySelectorAll('#res-tabs .ftab').forEach(t=>t.classList.remove('active'));
-  el.classList.add('active');
-  loadReservations(f);
+  if (el) {
+    document.querySelectorAll('#res-tabs .ftab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+  }
+  loadLiveReservations(f);
 }
 
+function openResModal() {
+  const modal = document.getElementById('res-modal');
+  if (modal) {
+    document.getElementById('rf-date').value = new Date().toISOString().split('T')[0];
+    modal.style.display = 'flex';
+  }
+}
+
+function closeResModal() {
+  const modal = document.getElementById('res-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+async function submitReservation(e) {
+  e.preventDefault();
+  const submitBtn = document.getElementById('rf-submit-btn');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Saving...';
+
+  const payload = {
+    name: document.getElementById('rf-name').value.trim(),
+    phone: document.getElementById('rf-phone').value.trim(),
+    guests: parseInt(document.getElementById('rf-guests').value, 10),
+    date: document.getElementById('rf-date').value,
+    time: document.getElementById('rf-time').value,
+    seating_area: document.getElementById('rf-area').value,
+    channel: 'Walk-in Desk',
+    status: 'confirmed'
+  };
+
+  try {
+    const res = await fetch(`${API_BASE}/reservations/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (res.ok) {
+      closeResModal();
+      document.getElementById('res-form').reset();
+      loadLiveReservations(currentResFilter);
+    } else {
+      alert('Failed to register reservation.');
+    }
+  } catch (err) {
+    console.error('Error booking reservation:', err);
+    alert('Server connection error.');
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Confirm Booking';
+  }
+}
+
+async function updateResStatus(id, newStatus) {
+  try {
+    const res = await fetch(`${API_BASE}/reservations/${id}/status`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Manager-Key': MANAGER_KEY
+      },
+      body: JSON.stringify({ status: newStatus })
+    });
+
+    const target = reservationsCache.find(r => r.id === id);
+    if (target) target.status = newStatus;
+    loadLiveReservations(currentResFilter);
+  } catch (err) {
+    console.error('Error updating reservation:', err);
+  }
+}
+
+// 5-second polling loop for live reservations
+setInterval(() => {
+  loadLiveReservations(currentResFilter);
+}, 5000);
+
 // ══════════════════════════════════════════════════════
-//  LIVE ORDERS & KITCHEN PIPELINE (AUTO-SYNCING)
+//  LIVE ORDERS & KITCHEN PIPELINE (AUTO-SYNCING 4S)
 // ══════════════════════════════════════════════════════
 let liveOrdersCache = [];
 let currentOrderFilter = 'all';
@@ -710,7 +888,6 @@ async function loadLiveOrders(filter = currentOrderFilter) {
     const res = await fetch(`${API_BASE}/orders/`);
     if (res.ok) {
       liveOrdersCache = await res.json();
-      // Keep newest orders at the top
       liveOrdersCache.sort((a, b) => (b.id || 0) - (a.id || 0));
     }
   } catch (err) {
@@ -720,13 +897,11 @@ async function loadLiveOrders(filter = currentOrderFilter) {
   const tb = document.getElementById('orders-tbody');
   if (!tb) return;
 
-  // Filter dataset
   let displayData = liveOrdersCache;
   if (currentOrderFilter !== 'all') {
     displayData = liveOrdersCache.filter(o => (o.status || '').toLowerCase() === currentOrderFilter.toLowerCase());
   }
 
-  // Update Active Orders in Top Stat
   const pendingCount = liveOrdersCache.filter(o => (o.status || '').toLowerCase() === 'pending').length;
   const statCard = document.getElementById('stat-active-orders');
   if (statCard) statCard.textContent = pendingCount;
@@ -773,7 +948,6 @@ async function advanceOrderStatus(orderId, nextStatus) {
       body: JSON.stringify({ status: nextStatus })
     });
 
-    // Optimistic fallback update in local memory
     const target = liveOrdersCache.find(o => o.id === orderId);
     if (target) target.status = nextStatus;
     loadLiveOrders();
@@ -790,7 +964,7 @@ function filterOrders(f, el) {
   loadLiveOrders(f);
 }
 
-// Auto-poll orders endpoint every 4 seconds
+// 4-second polling loop for orders
 setInterval(() => {
   loadLiveOrders(currentOrderFilter);
 }, 4000);
@@ -1068,10 +1242,10 @@ async function sendChatMessage() {
   container.scrollTop = container.scrollHeight;
 }
 
-// Initialization
-loadReservations('all');
-loadMenu();
+// Initial Bootstrapping
+loadLiveReservations('all');
 loadLiveOrders('all');
+loadMenu();
 </script>
 </body>
 </html>
