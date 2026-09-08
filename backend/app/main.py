@@ -1,10 +1,11 @@
 import logging
+import traceback
 from typing import List, Optional
 from fastapi import FastAPI, Request, Depends, HTTPException, Header, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from sqlalchemy import Column, Integer, String, Float
+from sqlalchemy import Column, BigInteger, String, Float
 from sqlalchemy.orm import Session
 
 from app.database import engine, Base, get_db
@@ -22,16 +23,16 @@ logger = logging.getLogger("sipsync")
 # ----------------------------------------------------
 class Order(Base):
     __tablename__ = "orders"
-    __table_args__ = {'extend_existing': True}
+    __table_args__ = {"schema": "public", "extend_existing": True}
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(BigInteger, primary_key=True, index=True, autoincrement=True)
     customer = Column(String, nullable=False)
     items = Column(String, nullable=False)
     total = Column(Float, nullable=False)
     type = Column(String, default="Dine-in")
     status = Column(String, default="pending")
 
-# Create tables in PostgreSQL/Supabase if not already existing
+# Initialize schema metadata
 Base.metadata.create_all(bind=engine)
 
 class OrderCreate(BaseModel):
@@ -88,10 +89,15 @@ async def log_requests(request: Request, call_next):
         logger.info(f"Completed {request.method} {request.url.path} with status {response.status_code}")
         return response
     except Exception as e:
-        logger.error(f"Unhandled error processing {request.url.path}: {str(e)}")
+        err_tb = traceback.format_exc()
+        logger.error(f"Unhandled error processing {request.url.path}:\n{err_tb}")
         return JSONResponse(
             status_code=500,
-            content={"detail": "Internal server error occurred. Please contact support."}
+            content={
+                "error": str(e),
+                "detail": "Internal server error occurred.",
+                "traceback": err_tb
+            }
         )
 
 # ----------------------------------------------------
@@ -116,16 +122,32 @@ def place_order(order_data: OrderCreate, db: Session = Depends(get_db)):
         type=order_data.type or "Dine-in",
         status=order_data.status or "pending"
     )
-    db.add(new_order)
-    db.commit()
-    db.refresh(new_order)
-    logger.info(f"New QR order created: #{new_order.id} for {new_order.customer} (Total: ₹{new_order.total})")
-    return new_order
+    try:
+        db.add(new_order)
+        db.commit()
+        db.refresh(new_order)
+        logger.info(f"New QR order created: #{new_order.id} for {new_order.customer} (Total: ₹{new_order.total})")
+        return new_order
+    except Exception as err:
+        db.rollback()
+        logger.error(f"Failed to commit order to database: {str(err)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Database insertion failed: {str(err)}"
+        )
 
 @app.get("/api/orders/", response_model=List[OrderResponse], tags=["Orders"])
 def get_live_orders(db: Session = Depends(get_db)):
     """Called by manager dashboard to poll incoming kitchen orders."""
-    return db.query(Order).order_by(Order.id.desc()).all()
+    try:
+        return db.query(Order).order_by(Order.id.desc()).all()
+    except Exception as err:
+        db.rollback()
+        logger.error(f"Failed to query orders: {str(err)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Database query failed: {str(err)}"
+        )
 
 @app.patch("/api/orders/{order_id}/status", response_model=OrderResponse, tags=["Orders"])
 def update_order_status(
@@ -145,11 +167,18 @@ def update_order_status(
     if not order:
         raise HTTPException(status_code=404, detail="Order not found.")
 
-    order.status = update_data.status
-    db.commit()
-    db.refresh(order)
-    logger.info(f"Order #{order.id} transitioned to {order.status}")
-    return order
+    try:
+        order.status = update_data.status
+        db.commit()
+        db.refresh(order)
+        logger.info(f"Order #{order.id} transitioned to {order.status}")
+        return order
+    except Exception as err:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update order status: {str(err)}"
+        )
 
 @app.get("/", tags=["Health"])
 def health_check():
