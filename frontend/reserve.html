@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reserve a Table & Majlis — Raidan Restaurant</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',sans-serif;background:#0B2018;color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:24px 16px}
+  .card{background:#132E23;border:1px solid rgba(255,255,255,0.12);border-radius:16px;width:100%;max-width:460px;padding:28px 24px;box-shadow:0 20px 40px rgba(0,0,0,0.4)}
+  .logo{font-size:22px;font-weight:700;color:#D4944A;letter-spacing:-0.5px;margin-bottom:2px}
+  .sub{font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:24px}
+  .form-group{margin-bottom:16px}
+  label{display:block;font-size:12px;font-weight:600;letter-spacing:0.5px;color:rgba(255,255,255,0.7);text-transform:uppercase;margin-bottom:6px}
+  input,select,textarea{width:100%;padding:11px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:#fff;font-size:14px;outline:none;font-family:inherit}
+  input:focus,select:focus,textarea:focus{border-color:#D4944A}
+  select option{background:#132E23;color:#fff}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .btn{width:100%;background:#B87333;color:#fff;border:none;border-radius:8px;padding:14px;font-size:14px;font-weight:600;cursor:pointer;margin-top:10px;transition:background .2s}
+  .btn:hover{background:#D4944A}
+  .success-box{display:none;text-align:center;padding:30px 10px}
+  .success-title{font-size:20px;font-weight:700;color:#2ECC71;margin-bottom:8px}
+  .success-desc{font-size:13.5px;color:rgba(255,255,255,0.75);line-height:1.6}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div id="form-container">
+    <div class="logo">Raidan Restaurant</div>
+    <div class="sub">Authentic Mandi & Dining · Reserve Your Spot</div>
+
+    <form id="cust-res-form" onsubmit="handleReserve(event)">
+      <div class="form-group">
+        <label>Your Full Name</label>
+        <input type="text" id="cr-name" required placeholder="e.g. Tariq Mansoor">
+      </div>
+
+      <div class="grid2">
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" id="cr-phone" required placeholder="9845012345">
+        </div>
+        <div class="form-group">
+          <label>Guests</label>
+          <input type="number" id="cr-guests" min="1" max="25" value="4" required>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="cr-date" required>
+        </div>
+        <div class="form-group">
+          <label>Time</label>
+          <input type="time" id="cr-time" value="20:30" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Seating Preference</label>
+        <select id="cr-area">
+          <option value="Majlis Cabin (M-01 to M-07)">Majlis Floor Cabin (Private · 4-8 Pax)</option>
+          <option value="VIP Family Room (VIP-01)">VIP Family Room (10+ Pax)</option>
+          <option value="Ground Floor Table">Ground Floor Standard Table</option>
+          <option value="First Floor Table">First Floor Open Dining</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Special Requests (Optional)</label>
+        <input type="text" id="cr-notes" placeholder="Birthday setup, high chair, etc.">
+      </div>
+
+      <button type="submit" class="btn" id="cr-submit">Book Table Now</button>
+    </form>
+  </div>
+
+  <div class="success-box" id="success-view">
+    <div style="font-size:44px;margin-bottom:12px;">✅</div>
+    <div class="success-title">Booking Confirmed!</div>
+    <div class="success-desc" id="success-details"></div>
+    <button class="btn" style="margin-top:24px;" onclick="window.location.reload()">Book Another</button>
+  </div>
+</div>
+
+<script>
+const API_BASE = 'https://sipsync-api-k9tz.onrender.com/api';
+
+// Set minimum date to today
+document.getElementById('cr-date').value = new Date().toISOString().split('T')[0];
+document.getElementById('cr-date').min = new Date().toISOString().split('T')[0];
+
+async function handleReserve(e) {
+  e.preventDefault();
+  const btn = document.getElementById('cr-submit');
+  btn.disabled = true;
+  btn.textContent = 'Securing Booking...';
+
+  const payload = {
+    name: document.getElementById('cr-name').value.trim(),
+    phone: document.getElementById('cr-phone').value.trim(),
+    guests: parseInt(document.getElementById('cr-guests').value, 10),
+    date: document.getElementById('cr-date').value,
+    time: document.getElementById('cr-time').value,
+    seating_area: document.getElementById('cr-area').value,
+    channel: 'Online Customer',
+    notes: document.getElementById('cr-notes').value.trim()
+  };
+
+  try {
+    const res = await fetch(`${API_BASE}/reservations/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      document.getElementById('form-container').style.display = 'none';
+      const sv = document.getElementById('success-view');
+      sv.style.display = 'block';
+      document.getElementById('success-details').innerHTML = `
+        Thank you, <strong>${data.name}</strong>!<br>
+        Your reservation <strong>#RES-${data.id}</strong> for <strong>${data.guests} guests</strong> in <strong>${data.seating_area}</strong> is set for <strong>${data.date} at ${data.time}</strong>.
+      `;
+    } else {
+      alert('Could not complete reservation. Please contact the front desk.');
+      btn.disabled = false;
+      btn.textContent = 'Book Table Now';
+    }
+  } catch (err) {
+    alert('Server connection error. Please try again.');
+    btn.disabled = false;
+    btn.textContent = 'Book Table Now';
+  }
+}
+</script>
+</body>
+</html>
