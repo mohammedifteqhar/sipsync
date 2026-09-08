@@ -246,7 +246,7 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
       <div class="page-title" id="page-title">Dashboard</div>
     </div>
     <div class="topbar-right">
-      <span class="topbar-badge">Live System</span>
+      <span class="topbar-badge" id="live-poll-badge">● Live Sync</span>
       <span class="topbar-time" id="clock"></span>
     </div>
   </div>
@@ -257,19 +257,19 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
     <div data-page="dashboard" class="active">
       <div class="stats-row">
         <div class="stat-card">
-          <div class="stat-value">24</div>
+          <div class="stat-value" id="stat-bookings">24</div>
           <div class="stat-label">Bookings Today</div>
           <div class="stat-delta up">+4 from yesterday</div>
         </div>
         <div class="stat-card">
-          <div class="stat-value">₹38,420</div>
+          <div class="stat-value" id="stat-revenue">₹38,420</div>
           <div class="stat-label">Revenue Today</div>
           <div class="stat-delta up">+18% from yesterday</div>
         </div>
         <div class="stat-card">
-          <div class="stat-value">9</div>
-          <div class="stat-label">Active Tables / Majlis</div>
-          <div class="stat-delta up">Floor 82% occupied</div>
+          <div class="stat-value" id="stat-active-orders">0</div>
+          <div class="stat-label">Active Kitchen Orders</div>
+          <div class="stat-delta up">Live auto-refreshing</div>
         </div>
         <div class="stat-card">
           <div class="stat-value">63</div>
@@ -328,21 +328,33 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
       </div>
     </div>
 
-    <!-- ORDERS -->
+    <!-- ORDERS (LIVE SUPABASE PIPELINE) -->
     <div data-page="orders">
       <div class="section-header">
-        <div class="filter-tabs">
-          <button class="ftab active" onclick="filterOrders('all',this)">All</button>
+        <div class="filter-tabs" id="order-filter-tabs">
+          <button class="ftab active" onclick="filterOrders('all',this)">All Orders</button>
           <button class="ftab" onclick="filterOrders('pending',this)">Pending</button>
+          <button class="ftab" onclick="filterOrders('served',this)">Served</button>
           <button class="ftab" onclick="filterOrders('paid',this)">Paid</button>
-          <button class="ftab" onclick="filterOrders('delivered',this)">Delivered</button>
         </div>
-        <button class="btn btn-ghost btn-sm">Export</button>
+        <button class="btn btn-ghost btn-sm" onclick="loadLiveOrders()">&#x21bb; Refresh Now</button>
       </div>
       <div class="table-card">
         <table>
-          <thead><tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Type</th><th>Status</th><th>Time</th></tr></thead>
-          <tbody id="orders-tbody"></tbody>
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer / Spot</th>
+              <th>Items Ordered</th>
+              <th>Total Amount</th>
+              <th>Dining Type</th>
+              <th>Fulfillment Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="orders-tbody">
+            <tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted)">Connecting to live kitchen feed...</td></tr>
+          </tbody>
         </table>
       </div>
     </div>
@@ -474,15 +486,6 @@ const SECTION_ORDER = [
 ];
 
 // Fallback operational data
-const ORDERS = [
-  {id:'ORD-6101',customer:'Zaid Khan',items:'Mutton Mandi x2, Kunafa Cheese',total:1180,type:'Dine-in (Majlis M-02)',status:'delivered',time:'13:10'},
-  {id:'ORD-6100',customer:'Mohammed Tariq',items:'Mix Mandi (4 Person)',total:2200,type:'Dine-in (VIP-01)',status:'delivered',time:'13:25'},
-  {id:'ORD-6099',customer:'Salman F.',items:'Chicken Mandi, Al Faham (Half)',total:570,type:'Takeaway',status:'paid',time:'12:40'},
-  {id:'ORD-6098',customer:'Amina Bi',items:'Mutton Raan Mandi (3 Person)',total:1420,type:'Dine-in (Majlis M-05)',status:'delivered',time:'12:15'},
-  {id:'ORD-6097',customer:'Farhan Ahmed',items:'Plate Shawarma Special x2, Pepsi',total:620,type:'Takeaway',status:'paid',time:'11:50'},
-  {id:'ORD-6096',customer:'Dr. Shakeel',items:'Chicken Madghuth x2',total:580,type:'Delivery',status:'pending',time:'14:05'},
-];
-
 const PAYMENTS = [
   {id:'PAY-9101',orderId:'ORD-6101',customer:'Zaid Khan',amount:1180,method:'UPI',status:'success',dt:'08 Sep, 13:22'},
   {id:'PAY-9100',orderId:'ORD-6100',customer:'Mohammed Tariq',amount:2200,method:'Card',status:'success',dt:'08 Sep, 13:40'},
@@ -525,8 +528,8 @@ const AI_LOGS = [
 ];
 
 const ACTIVITY = [
-  {color:'#2E7D55',text:'Majlis M-02 occupied — Zaid Khan, Order ORD-6101 placed',time:'4 min ago'},
-  {color:'#B87333',text:'Order ORD-6100 delivered to VIP Cabin — ₹2,200',time:'12 min ago'},
+  {color:'#2E7D55',text:'Majlis M-02 occupied — Zaid Khan, Order placed',time:'4 min ago'},
+  {color:'#B87333',text:'Order delivered to VIP Cabin — ₹2,200',time:'12 min ago'},
   {color:'#2E7D55',text:'UPI Payment settled PAY-9101 — ₹1,180',time:'19 min ago'},
   {color:'#2563EB',text:'AI booked Majlis M-06 for 8:30 PM tonight',time:'28 min ago'},
 ];
@@ -544,6 +547,10 @@ function navigateTo(page, el) {
   document.querySelector('[data-page="'+page+'"]').classList.add('active');
   el.classList.add('active');
   document.getElementById('page-title').textContent = PAGE_TITLES[page];
+
+  if (page === 'orders') {
+    loadLiveOrders();
+  }
 }
 
 function tick() {
@@ -679,33 +686,114 @@ function filterRes(f, el) {
   loadReservations(f);
 }
 
-// Orders & Payments
-function orderBadge(s){
-  const m={delivered:'badge-green',paid:'badge-blue',pending:'badge-yellow'};
-  return `<span class="badge ${m[s]||'badge-grey'}">${s.charAt(0).toUpperCase()+s.slice(1)}</span>`;
+// ══════════════════════════════════════════════════════
+//  LIVE ORDERS & KITCHEN PIPELINE (AUTO-SYNCING)
+// ══════════════════════════════════════════════════════
+let liveOrdersCache = [];
+let currentOrderFilter = 'all';
+
+function orderStatusBadge(s){
+  const statusStr = (s || 'pending').toLowerCase();
+  const m = {
+    pending: 'badge-yellow',
+    preparing: 'badge-blue',
+    served: 'badge-green',
+    delivered: 'badge-green',
+    paid: 'badge-grey'
+  };
+  return `<span class="badge ${m[statusStr] || 'badge-grey'}">${statusStr.charAt(0).toUpperCase() + statusStr.slice(1)}</span>`;
 }
 
-function renderOrders(filter){
-  const data = filter==='all' ? ORDERS : ORDERS.filter(o=>o.status===filter);
+async function loadLiveOrders(filter = currentOrderFilter) {
+  currentOrderFilter = filter;
+  try {
+    const res = await fetch(`${API_BASE}/orders/`);
+    if (res.ok) {
+      liveOrdersCache = await res.json();
+      // Keep newest orders at the top
+      liveOrdersCache.sort((a, b) => (b.id || 0) - (a.id || 0));
+    }
+  } catch (err) {
+    console.warn("Could not reach /orders/ API endpoint:", err);
+  }
+
   const tb = document.getElementById('orders-tbody');
-  tb.innerHTML = data.map(o=>`
-    <tr>
-      <td class="td-mono td-muted">${o.id}</td>
-      <td class="td-bold">${o.customer}</td>
-      <td class="td-muted" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${o.items}</td>
-      <td class="td-bold">₹${o.total}</td>
-      <td class="td-muted">${o.type}</td>
-      <td>${orderBadge(o.status)}</td>
-      <td class="td-muted">${o.time}</td>
-    </tr>`).join('');
+  if (!tb) return;
+
+  // Filter dataset
+  let displayData = liveOrdersCache;
+  if (currentOrderFilter !== 'all') {
+    displayData = liveOrdersCache.filter(o => (o.status || '').toLowerCase() === currentOrderFilter.toLowerCase());
+  }
+
+  // Update Active Orders in Top Stat
+  const pendingCount = liveOrdersCache.filter(o => (o.status || '').toLowerCase() === 'pending').length;
+  const statCard = document.getElementById('stat-active-orders');
+  if (statCard) statCard.textContent = pendingCount;
+
+  if (displayData.length === 0) {
+    tb.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:28px;color:var(--muted)">No orders found under "${currentOrderFilter}". Scan a table QR to place one!</td></tr>`;
+    return;
+  }
+
+  tb.innerHTML = displayData.map(o => {
+    const status = (o.status || 'pending').toLowerCase();
+    let actionBtn = '';
+    
+    if (status === 'pending') {
+      actionBtn = `<button class="btn btn-primary btn-sm" onclick="advanceOrderStatus(${o.id}, 'served')">Mark Served</button>`;
+    } else if (status === 'served') {
+      actionBtn = `<button class="btn btn-ghost btn-sm" onclick="advanceOrderStatus(${o.id}, 'paid')">Settle Bill</button>`;
+    } else {
+      actionBtn = `<span style="font-size:12px;color:var(--muted)">Completed</span>`;
+    }
+
+    return `
+      <tr>
+        <td class="td-mono td-bold">#${o.id}</td>
+        <td class="td-bold">${o.customer || 'Guest Diner'}</td>
+        <td class="td-muted" style="max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${o.items}">${o.items}</td>
+        <td class="td-bold" style="color:var(--accent)">₹${o.total}</td>
+        <td class="td-muted">${o.type || 'Dine-in'}</td>
+        <td>${orderStatusBadge(o.status)}</td>
+        <td>${actionBtn}</td>
+      </tr>
+    `;
+  }).join('');
 }
 
-function filterOrders(f,el){
-  el.closest('.filter-tabs').querySelectorAll('.ftab').forEach(t=>t.classList.remove('active'));
-  el.classList.add('active');
-  renderOrders(f);
+async function advanceOrderStatus(orderId, nextStatus) {
+  try {
+    const res = await fetch(`${API_BASE}/orders/${orderId}/status`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Manager-Key': MANAGER_KEY
+      },
+      body: JSON.stringify({ status: nextStatus })
+    });
+
+    // Optimistic fallback update in local memory
+    const target = liveOrdersCache.find(o => o.id === orderId);
+    if (target) target.status = nextStatus;
+    loadLiveOrders();
+  } catch (err) {
+    console.error("Failed to update status:", err);
+  }
 }
-renderOrders('all');
+
+function filterOrders(f, el) {
+  if (el) {
+    el.closest('.filter-tabs').querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+  }
+  loadLiveOrders(f);
+}
+
+// Auto-poll orders endpoint every 4 seconds
+setInterval(() => {
+  loadLiveOrders(currentOrderFilter);
+}, 4000);
 
 (function(){
   const tb = document.getElementById('pay-tbody');
@@ -740,7 +828,6 @@ async function toggleMenuItem(id) {
     });
 
     if (res.ok) {
-      // Refresh memory & UI
       const target = allMenuItems.find(i => i.id === id);
       if (target) target.avail = !target.avail;
       renderMenuSections();
@@ -768,11 +855,9 @@ function renderCategoryTabs() {
   const tabsContainer = document.getElementById('menu-tabs');
   if (!tabsContainer) return;
 
-  // Extract unique categories present in the database, ordered by SECTION_ORDER
   const uniqueInDb = [...new Set(allMenuItems.map(m => m.cat))];
   const orderedCats = SECTION_ORDER.filter(s => uniqueInDb.some(u => u.toLowerCase() === s.toLowerCase()));
   
-  // Include any extra database categories not in the official list
   uniqueInDb.forEach(u => {
     if (!orderedCats.some(o => o.toLowerCase() === u.toLowerCase())) {
       orderedCats.push(u);
@@ -803,11 +888,9 @@ function renderMenuSections() {
 
   let sectionsToRender = [];
   if (currentCategory === 'all') {
-    // Show all available sections that have items
     const presentCats = [...new Set(allMenuItems.map(m => m.cat))];
     sectionsToRender = SECTION_ORDER.filter(s => presentCats.some(p => p.toLowerCase() === s.toLowerCase()));
     
-    // Add any remaining unmapped categories
     presentCats.forEach(p => {
       if (!sectionsToRender.some(s => s.toLowerCase() === p.toLowerCase())) {
         sectionsToRender.push(p);
@@ -988,6 +1071,7 @@ async function sendChatMessage() {
 // Initialization
 loadReservations('all');
 loadMenu();
+loadLiveOrders('all');
 </script>
 </body>
 </html>
