@@ -24,7 +24,7 @@
   --muted:#6B6966;
   --label:#959290;
   --green:#2E7D55;
-  --green-bg:rgba(46,125,85,.1);
+  --green-bg:rgba(46,125,85,.12);
   --red:#C0392B;
   --red-bg:rgba(192,57,43,.1);
   --yellow:#B8860B;
@@ -112,7 +112,7 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
 .td-mono{font-family:'Inter',monospace;font-size:12px}
 
 /* ── Badges ── */
-.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:11.5px;font-weight:500;white-space:nowrap}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:11.5px;font-weight:600;white-space:nowrap}
 .badge::before{content:'';width:6px;height:6px;border-radius:50%;flex-shrink:0}
 .badge-green{background:var(--green-bg);color:var(--green)}.badge-green::before{background:var(--green)}
 .badge-red{background:var(--red-bg);color:var(--red)}.badge-red::before{background:var(--red)}
@@ -460,15 +460,7 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
       <div style="font-size:12px;font-weight:600;color:var(--muted);letter-spacing:0.5px;text-transform:uppercase;">Amount Due</div>
       <div style="font-size:28px;font-weight:700;color:var(--accent);margin:2px 0 14px;" id="pay-modal-amount">₹0</div>
       
-      <!-- Dynamic UPI QR Container -->
-      <div style="background:#fff;padding:12px;border:2px dashed var(--border);border-radius:12px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;min-height:180px;min-width:180px;">
-        <div id="upi-qrcode"></div>
-      </div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;text-align:center;">
-        Scan with Google Pay, PhonePe, Paytm, or BHIM
-      </div>
-
-      <!-- Payment Method Selector -->
+      <!-- Payment Method Selector (Tabs) -->
       <div style="width:100%;margin-bottom:16px;">
         <label style="display:block;font-size:11.5px;font-weight:600;color:var(--muted);margin-bottom:6px;">PAYMENT METHOD</label>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
@@ -476,6 +468,23 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
           <button type="button" class="btn btn-ghost btn-sm pay-method-btn" onclick="selectPayMethod('Cash', this)" style="justify-content:center;">Cash</button>
           <button type="button" class="btn btn-ghost btn-sm pay-method-btn" onclick="selectPayMethod('Card', this)" style="justify-content:center;">Card</button>
         </div>
+      </div>
+
+      <!-- Dynamic UPI QR Container (Visible ONLY on UPI) -->
+      <div id="upi-section" style="display:flex;flex-direction:column;align-items:center;width:100%;">
+        <div style="background:#fff;padding:12px;border:2px dashed var(--border);border-radius:12px;margin-bottom:10px;display:flex;align-items:center;justify-content:center;min-height:180px;min-width:180px;">
+          <div id="upi-qrcode"></div>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:16px;text-align:center;">
+          Scan with Google Pay, PhonePe, Paytm, or BHIM
+        </div>
+      </div>
+
+      <!-- Offline Cash / Card Confirmation Box (Visible ONLY on Cash/Card) -->
+      <div id="offline-pay-section" style="display:none;width:100%;background:#FAF9F7;border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:16px;text-align:center;">
+        <div id="offline-pay-icon" style="font-size:28px;margin-bottom:6px;">💵</div>
+        <div id="offline-pay-title" style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;">Collect Cash at Counter</div>
+        <div id="offline-pay-desc" style="font-size:12px;color:var(--muted);">Collect the bill amount from the diner and confirm below to close this ticket.</div>
       </div>
 
       <!-- Action Buttons -->
@@ -494,6 +503,9 @@ const MANAGER_KEY = 'sipsync-admin-2026';
 // ── UPI Merchant Config ──
 const RESTAURANT_UPI_VPA = 'raidan@upi';
 const RESTAURANT_NAME = 'Raidan Restaurant';
+
+// Local storage mapping for payment methods per order: { [orderId]: 'UPI' | 'Cash' | 'Card' }
+const settledOrderMethods = {};
 
 // ══════════════════════════════════════════════════════
 //  UNIFIED AUDIO ENGINE (KITCHEN & MANAGER SOUNDS)
@@ -783,21 +795,27 @@ setInterval(() => {
 }, 5000);
 
 // ══════════════════════════════════════════════════════
-//  LIVE ORDERS & KITCHEN PIPELINE (WITH AUDIO & PAYMENT)
+//  LIVE ORDERS & KITCHEN PIPELINE (WITH GREEN PAID BADGE)
 // ══════════════════════════════════════════════════════
 let liveOrdersCache = [];
 let currentOrderFilter = 'all';
 let knownOrderIds = new Set();
 let isFirstOrderLoad = true;
 
-function orderStatusBadge(s){
+// Dynamic badge renderer: paid orders (Cash/UPI/Card) render with badge-green
+function orderStatusBadge(s, orderId){
   const statusStr = (s || 'pending').toLowerCase();
+  
+  if (statusStr === 'paid') {
+    const method = settledOrderMethods[orderId] || 'Paid';
+    return `<span class="badge badge-green">Paid (${method})</span>`;
+  }
+
   const m = {
     pending: 'badge-yellow',
     preparing: 'badge-blue',
     served: 'badge-green',
-    delivered: 'badge-green',
-    paid: 'badge-grey'
+    delivered: 'badge-green'
   };
   return `<span class="badge ${m[statusStr] || 'badge-grey'}">${statusStr.charAt(0).toUpperCase() + statusStr.slice(1)}</span>`;
 }
@@ -871,7 +889,8 @@ async function loadLiveOrders(filter = currentOrderFilter) {
     } else if (status === 'served') {
       actionBtn = `<button class="btn btn-primary btn-sm" style="background:var(--green);" onclick="openPaymentModal(${o.id})">Settle Bill</button>`;
     } else {
-      actionBtn = `<span style="font-size:12px;color:var(--muted)">Paid</span>`;
+      const method = settledOrderMethods[o.id] || 'Settled';
+      actionBtn = `<span style="font-size:12px;color:var(--green);font-weight:600;">✓ ${method}</span>`;
     }
 
     return `
@@ -881,7 +900,7 @@ async function loadLiveOrders(filter = currentOrderFilter) {
         <td class="td-muted" style="max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${o.items}">${o.items}</td>
         <td class="td-bold" style="color:var(--accent)">₹${o.total}</td>
         <td class="td-muted">${o.type || 'Dine-in'}</td>
-        <td>${orderStatusBadge(o.status)}</td>
+        <td>${orderStatusBadge(o.status, o.id)}</td>
         <td>${actionBtn}</td>
       </tr>
     `;
@@ -936,14 +955,15 @@ function renderPaymentsTable() {
   const tb = document.getElementById('pay-tbody');
   if (!tb) return;
   tb.innerHTML = PAYMENTS.map(p => {
+    // Both success and custom payment channels display in green badge
     const badge = p.status === 'success' ? 'badge-green' : p.status === 'pending' ? 'badge-yellow' : 'badge-red';
     return `<tr>
       <td class="td-mono td-muted">${p.id}</td>
       <td class="td-mono td-muted">${p.orderId}</td>
       <td class="td-bold">${p.customer}</td>
       <td class="td-bold">₹${p.amount}</td>
-      <td class="td-muted">${p.method}</td>
-      <td><span class="badge ${badge}">${p.status.charAt(0).toUpperCase() + p.status.slice(1)}</span></td>
+      <td class="td-bold" style="color:var(--green)">${p.method}</td>
+      <td><span class="badge ${badge}">Paid (${p.method})</span></td>
       <td class="td-muted">${p.dt}</td>
     </tr>`;
   }).join('');
@@ -962,6 +982,10 @@ function openPaymentModal(orderId) {
   document.getElementById('pay-modal-title').textContent = `Settle Order #${order.id}`;
   document.getElementById('pay-modal-subtitle').textContent = `${order.customer || 'Diner'} · ${order.type || 'Table'}`;
   document.getElementById('pay-modal-amount').textContent = `₹${order.total}`;
+
+  // Default to UPI view
+  document.getElementById('upi-section').style.display = 'flex';
+  document.getElementById('offline-pay-section').style.display = 'none';
 
   document.querySelectorAll('.pay-method-btn').forEach(btn => {
     btn.classList.remove('btn-primary');
@@ -998,12 +1022,36 @@ function closePaymentModal() {
 
 function selectPayMethod(method, btn) {
   selectedPaymentMethod = method;
+
   document.querySelectorAll('.pay-method-btn').forEach(b => {
     b.classList.remove('btn-primary');
     b.classList.add('btn-ghost');
   });
   btn.classList.add('btn-primary');
   btn.classList.remove('btn-ghost');
+
+  const upiSection = document.getElementById('upi-section');
+  const offlineSection = document.getElementById('offline-pay-section');
+  const iconEl = document.getElementById('offline-pay-icon');
+  const titleEl = document.getElementById('offline-pay-title');
+  const descEl = document.getElementById('offline-pay-desc');
+
+  if (method === 'UPI') {
+    upiSection.style.display = 'flex';
+    offlineSection.style.display = 'none';
+  } else if (method === 'Cash') {
+    upiSection.style.display = 'none';
+    offlineSection.style.display = 'block';
+    iconEl.textContent = '💵';
+    titleEl.textContent = 'Collect Cash at Counter';
+    descEl.textContent = `Collect ₹${activePaymentOrder ? activePaymentOrder.total : 0} in cash from the guest and confirm below.`;
+  } else if (method === 'Card') {
+    upiSection.style.display = 'none';
+    offlineSection.style.display = 'block';
+    iconEl.textContent = '💳';
+    titleEl.textContent = 'Swipe / Tap Card on POS';
+    descEl.textContent = `Process ₹${activePaymentOrder ? activePaymentOrder.total : 0} on your card terminal and confirm below.`;
+  }
 }
 
 async function confirmPaymentSettlement() {
@@ -1013,16 +1061,22 @@ async function confirmPaymentSettlement() {
   btn.textContent = 'Settling...';
 
   const orderId = activePaymentOrder.id;
+  const methodUsed = selectedPaymentMethod;
 
   try {
+    // 1. Record method locally so badge renders green as Paid (Cash), Paid (UPI), or Paid (Card)
+    settledOrderMethods[orderId] = methodUsed;
+
+    // 2. Advance status to 'paid'
     await advanceOrderStatus(orderId, 'paid');
 
+    // 3. Append to payments ledger
     PAYMENTS.unshift({
       id: `PAY-${Math.floor(1000 + Math.random() * 9000)}`,
       orderId: `#${orderId}`,
       customer: activePaymentOrder.customer || 'Guest',
       amount: activePaymentOrder.total,
-      method: selectedPaymentMethod,
+      method: methodUsed,
       status: 'success',
       dt: new Date().toLocaleDateString('en-IN', {day:'2-digit', month:'short'}) + ', ' + new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'})
     });
