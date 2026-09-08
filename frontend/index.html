@@ -6,6 +6,8 @@
 <title>Raidan Restaurant — Manager Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<!-- Dynamic QR Code Generator for NPCI UPI Payments -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -222,7 +224,6 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
       <div class="page-title" id="page-title">Dashboard</div>
     </div>
     <div class="topbar-right">
-      <!-- Unified Audio Controller Toggle -->
       <button id="audio-toggle-btn" class="btn btn-ghost btn-sm" onclick="toggleKitchenAudio()" style="gap:5px;">
         <span id="audio-icon">🔔</span> <span id="audio-label">Alerts On</span>
       </button>
@@ -356,8 +357,8 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
     <div data-page="payments">
       <div class="stats-row" style="grid-template-columns:repeat(4,1fr)">
         <div class="stat-card"><div class="stat-value">₹6.8L</div><div class="stat-label">This Month Revenue</div><div class="stat-delta up">+21% vs last month</div></div>
-        <div class="stat-card"><div class="stat-value">₹8,400</div><div class="stat-label">Pending Collection</div><div class="stat-delta dn">3 unpaid orders</div></div>
-        <div class="stat-card"><div class="stat-value">312</div><div class="stat-label">Transactions</div><div class="stat-delta up">+45 this week</div></div>
+        <div class="stat-card"><div class="stat-value" id="stat-pending-collect">₹0</div><div class="stat-label">Pending Collection</div><div class="stat-delta dn" id="stat-pending-orders-count">0 unpaid</div></div>
+        <div class="stat-card"><div class="stat-value" id="stat-trans-count">0</div><div class="stat-label">Transactions</div><div class="stat-delta up">Live tracked</div></div>
         <div class="stat-card"><div class="stat-value">₹1,140</div><div class="stat-label">Average Ticket Size</div><div class="stat-delta up">+12% vs last month</div></div>
       </div>
       <div class="table-card">
@@ -445,9 +446,54 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
   </div>
 </div>
 
+<!-- ── DYNAMIC UPI PAYMENT & BILL SETTLEMENT MODAL ── -->
+<div id="payment-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10001;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#fff;border-radius:14px;width:100%;max-width:400px;overflow:hidden;box-shadow:0 24px 48px rgba(0,0,0,0.25);display:flex;flex-direction:column;">
+    <div style="background:#0B2018;color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <h3 style="font-size:15px;font-weight:600;" id="pay-modal-title">Settle Bill</h3>
+        <span style="font-size:11.5px;color:rgba(255,255,255,0.65);" id="pay-modal-subtitle">Table T-01</span>
+      </div>
+      <span onclick="closePaymentModal()" style="cursor:pointer;font-size:22px;color:rgba(255,255,255,0.7);">&times;</span>
+    </div>
+    <div style="padding:20px;display:flex;flex-direction:column;align-items:center;">
+      <div style="font-size:12px;font-weight:600;color:var(--muted);letter-spacing:0.5px;text-transform:uppercase;">Amount Due</div>
+      <div style="font-size:28px;font-weight:700;color:var(--accent);margin:2px 0 14px;" id="pay-modal-amount">₹0</div>
+      
+      <!-- Dynamic UPI QR Container -->
+      <div style="background:#fff;padding:12px;border:2px dashed var(--border);border-radius:12px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;min-height:180px;min-width:180px;">
+        <div id="upi-qrcode"></div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:16px;text-align:center;">
+        Scan with Google Pay, PhonePe, Paytm, or BHIM
+      </div>
+
+      <!-- Payment Method Selector -->
+      <div style="width:100%;margin-bottom:16px;">
+        <label style="display:block;font-size:11.5px;font-weight:600;color:var(--muted);margin-bottom:6px;">PAYMENT METHOD</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+          <button type="button" class="btn btn-primary btn-sm pay-method-btn" onclick="selectPayMethod('UPI', this)" style="justify-content:center;">UPI</button>
+          <button type="button" class="btn btn-ghost btn-sm pay-method-btn" onclick="selectPayMethod('Cash', this)" style="justify-content:center;">Cash</button>
+          <button type="button" class="btn btn-ghost btn-sm pay-method-btn" onclick="selectPayMethod('Card', this)" style="justify-content:center;">Card</button>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="width:100%;display:flex;gap:10px;">
+        <button type="button" onclick="closePaymentModal()" class="btn btn-ghost" style="flex:1;justify-content:center;">Cancel</button>
+        <button type="button" id="btn-confirm-payment" onclick="confirmPaymentSettlement()" class="btn btn-primary" style="flex:2;justify-content:center;">Confirm &amp; Settle</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 const API_BASE = 'https://sipsync-api-k9tz.onrender.com/api';
 const MANAGER_KEY = 'sipsync-admin-2026';
+
+// ── UPI Merchant Config ──
+const RESTAURANT_UPI_VPA = 'raidan@upi';
+const RESTAURANT_NAME = 'Raidan Restaurant';
 
 // ══════════════════════════════════════════════════════
 //  UNIFIED AUDIO ENGINE (KITCHEN & MANAGER SOUNDS)
@@ -505,7 +551,7 @@ function playReservationChime() {
   if (!audioCtx) return;
 
   const now = audioCtx.currentTime;
-  const notes = [523.25, 659.25, 783.99]; // C5, E5, G5
+  const notes = [523.25, 659.25, 783.99];
 
   notes.forEach((freq, idx) => {
     const osc = audioCtx.createOscillator();
@@ -533,7 +579,7 @@ function toggleKitchenAudio() {
   if (audioEnabled) {
     btnIcon.textContent = '🔔';
     btnLabel.textContent = 'Alerts On';
-    playKitchenChime(); // Audio test confirmation
+    playKitchenChime();
   } else {
     btnIcon.textContent = '🔕';
     btnLabel.textContent = 'Muted';
@@ -732,13 +778,12 @@ async function updateResStatus(id, newStatus) {
   }
 }
 
-// 5-second polling loop for live reservations
 setInterval(() => {
   loadLiveReservations(currentResFilter);
 }, 5000);
 
 // ══════════════════════════════════════════════════════
-//  LIVE ORDERS & KITCHEN PIPELINE (WITH AUDIO ALERT)
+//  LIVE ORDERS & KITCHEN PIPELINE (WITH AUDIO & PAYMENT)
 // ══════════════════════════════════════════════════════
 let liveOrdersCache = [];
 let currentOrderFilter = 'all';
@@ -804,8 +849,16 @@ async function loadLiveOrders(filter = currentOrderFilter) {
   const statCard = document.getElementById('stat-active-orders');
   if (statCard) statCard.textContent = pendingCount;
 
+  // Calculate pending collection for served unpaid orders
+  const servedOrders = liveOrdersCache.filter(o => (o.status || '').toLowerCase() === 'served');
+  const pendingCollection = servedOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+  const statPending = document.getElementById('stat-pending-collect');
+  const statPendingCount = document.getElementById('stat-pending-orders-count');
+  if (statPending) statPending.textContent = `₹${pendingCollection.toLocaleString('en-IN')}`;
+  if (statPendingCount) statPendingCount.textContent = `${servedOrders.length} unpaid`;
+
   if (displayData.length === 0) {
-    tb.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:28px;color:var(--muted)">No orders found under "${currentOrderFilter}". Scan a table QR to place one!</td></tr>`;
+    tb.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:28px;color:var(--muted)">No orders found under "${currentOrderFilter}".</td></tr>`;
     return;
   }
 
@@ -816,9 +869,9 @@ async function loadLiveOrders(filter = currentOrderFilter) {
     if (status === 'pending') {
       actionBtn = `<button class="btn btn-primary btn-sm" onclick="advanceOrderStatus(${o.id}, 'served')">Mark Served</button>`;
     } else if (status === 'served') {
-      actionBtn = `<button class="btn btn-ghost btn-sm" onclick="advanceOrderStatus(${o.id}, 'paid')">Settle Bill</button>`;
+      actionBtn = `<button class="btn btn-primary btn-sm" style="background:var(--green);" onclick="openPaymentModal(${o.id})">Settle Bill</button>`;
     } else {
-      actionBtn = `<span style="font-size:12px;color:var(--muted)">Completed</span>`;
+      actionBtn = `<span style="font-size:12px;color:var(--muted)">Paid</span>`;
     }
 
     return `
@@ -862,10 +915,128 @@ function filterOrders(f, el) {
   loadLiveOrders(f);
 }
 
-// 4-second polling loop for orders
 setInterval(() => {
   loadLiveOrders(currentOrderFilter);
 }, 4000);
+
+// ══════════════════════════════════════════════════════
+//  DYNAMIC NPCI UPI PAYMENT & BILL SETTLEMENT
+// ══════════════════════════════════════════════════════
+let activePaymentOrder = null;
+let selectedPaymentMethod = 'UPI';
+
+const PAYMENTS = [
+  {id:'PAY-9101',orderId:'#6101',customer:'Zaid Khan',amount:1180,method:'UPI',status:'success',dt:'08 Sep, 13:22'},
+  {id:'PAY-9100',orderId:'#6100',customer:'Mohammed Tariq',amount:2200,method:'Card',status:'success',dt:'08 Sep, 13:40'},
+  {id:'PAY-9099',orderId:'#6099',customer:'Salman F.',amount:570,method:'UPI',status:'success',dt:'08 Sep, 12:45'},
+  {id:'PAY-9098',orderId:'#6098',customer:'Amina Bi',amount:1420,method:'Cash',status:'success',dt:'08 Sep, 12:30'},
+];
+
+function renderPaymentsTable() {
+  const tb = document.getElementById('pay-tbody');
+  if (!tb) return;
+  tb.innerHTML = PAYMENTS.map(p => {
+    const badge = p.status === 'success' ? 'badge-green' : p.status === 'pending' ? 'badge-yellow' : 'badge-red';
+    return `<tr>
+      <td class="td-mono td-muted">${p.id}</td>
+      <td class="td-mono td-muted">${p.orderId}</td>
+      <td class="td-bold">${p.customer}</td>
+      <td class="td-bold">₹${p.amount}</td>
+      <td class="td-muted">${p.method}</td>
+      <td><span class="badge ${badge}">${p.status.charAt(0).toUpperCase() + p.status.slice(1)}</span></td>
+      <td class="td-muted">${p.dt}</td>
+    </tr>`;
+  }).join('');
+
+  const countEl = document.getElementById('stat-trans-count');
+  if (countEl) countEl.textContent = PAYMENTS.length;
+}
+
+function openPaymentModal(orderId) {
+  const order = liveOrdersCache.find(o => o.id === orderId);
+  if (!order) return;
+
+  activePaymentOrder = order;
+  selectedPaymentMethod = 'UPI';
+
+  document.getElementById('pay-modal-title').textContent = `Settle Order #${order.id}`;
+  document.getElementById('pay-modal-subtitle').textContent = `${order.customer || 'Diner'} · ${order.type || 'Table'}`;
+  document.getElementById('pay-modal-amount').textContent = `₹${order.total}`;
+
+  document.querySelectorAll('.pay-method-btn').forEach(btn => {
+    btn.classList.remove('btn-primary');
+    btn.classList.add('btn-ghost');
+    if (btn.textContent.trim() === 'UPI') {
+      btn.classList.add('btn-primary');
+      btn.classList.remove('btn-ghost');
+    }
+  });
+
+  const upiUrl = `upi://pay?pa=${encodeURIComponent(RESTAURANT_UPI_VPA)}&pn=${encodeURIComponent(RESTAURANT_NAME)}&am=${encodeURIComponent(order.total)}&cu=INR&tn=${encodeURIComponent('Bill ORD-' + order.id)}`;
+
+  const qrContainer = document.getElementById('upi-qrcode');
+  qrContainer.innerHTML = '';
+
+  new QRCode(qrContainer, {
+    text: upiUrl,
+    width: 160,
+    height: 160,
+    colorDark: '#0B2018',
+    colorLight: '#FFFFFF',
+    correctLevel: QRCode.CorrectLevel.M
+  });
+
+  const modal = document.getElementById('payment-modal');
+  if (modal) modal.style.display = 'flex';
+}
+
+function closePaymentModal() {
+  const modal = document.getElementById('payment-modal');
+  if (modal) modal.style.display = 'none';
+  activePaymentOrder = null;
+}
+
+function selectPayMethod(method, btn) {
+  selectedPaymentMethod = method;
+  document.querySelectorAll('.pay-method-btn').forEach(b => {
+    b.classList.remove('btn-primary');
+    b.classList.add('btn-ghost');
+  });
+  btn.classList.add('btn-primary');
+  btn.classList.remove('btn-ghost');
+}
+
+async function confirmPaymentSettlement() {
+  if (!activePaymentOrder) return;
+  const btn = document.getElementById('btn-confirm-payment');
+  btn.disabled = true;
+  btn.textContent = 'Settling...';
+
+  const orderId = activePaymentOrder.id;
+
+  try {
+    await advanceOrderStatus(orderId, 'paid');
+
+    PAYMENTS.unshift({
+      id: `PAY-${Math.floor(1000 + Math.random() * 9000)}`,
+      orderId: `#${orderId}`,
+      customer: activePaymentOrder.customer || 'Guest',
+      amount: activePaymentOrder.total,
+      method: selectedPaymentMethod,
+      status: 'success',
+      dt: new Date().toLocaleDateString('en-IN', {day:'2-digit', month:'short'}) + ', ' + new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'})
+    });
+
+    renderPaymentsTable();
+    closePaymentModal();
+  } catch (err) {
+    console.error('Failed to settle payment:', err);
+    alert('Failed to settle bill.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Confirm & Settle';
+  }
+}
 
 // ══════════════════════════════════════════════════════
 //  MENU & OTHER VIEWS
@@ -1024,6 +1195,7 @@ function navigateTo(page, el) {
 
   if (page === 'orders') loadLiveOrders();
   if (page === 'reservations') loadLiveReservations();
+  if (page === 'payments') renderPaymentsTable();
 }
 
 function tick() {
@@ -1093,6 +1265,7 @@ new Chart(document.getElementById('chartBookings'), {
 loadLiveReservations('all');
 loadLiveOrders('all');
 loadMenu();
+renderPaymentsTable();
 </script>
 </body>
 </html>
