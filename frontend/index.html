@@ -1419,30 +1419,119 @@ async function confirmPaymentSettlement() {
   const orderId = activePaymentOrder.id;
   const methodUsed = selectedPaymentMethod;
 
+  // 1. OPTIMISTIC INSTANT UPDATE (0ms lag for Floor & Orders view)
+  const cachedOrder = liveOrdersCache.find(o => o.id === orderId);
+  if (cachedOrder) {
+    cachedOrder.status = 'paid';
+  }
+  activePaymentOrder.status = 'paid';
+
+  // 2. Instantly update floor matrix and tables before network call finishes
+  renderFloorMatrix();
+  renderLiveOrdersTableOnly();
+
+  // 3. Append to local payment ledger immediately
+  PAYMENTS.unshift({
+    id: `PAY-${Math.floor(1000 + Math.random() * 9000)}`,
+    orderId: `#${orderId}`,
+    customer: activePaymentOrder.customer || 'Guest',
+    amount: activePaymentOrder.total,
+    method: methodUsed,
+    status: 'paid',
+    dt: new Date().toLocaleDateString('en-IN', {day:'2-digit', month:'short'}) + ', ' + new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'})
+  });
+  renderPaymentsTable();
+
+  // 4. Close modal instantly so the cashier experiences zero UI freezing
+  closePaymentModal();
+
+  // 5. Sync state to backend database in the background
   try {
-    await advanceOrderStatus(orderId, 'paid');
-
-    PAYMENTS.unshift({
-      id: `PAY-${Math.floor(1000 + Math.random() * 9000)}`,
-      orderId: `#${orderId}`,
-      customer: activePaymentOrder.customer || 'Guest',
-      amount: activePaymentOrder.total,
-      method: methodUsed,
-      status: 'paid',
-      dt: new Date().toLocaleDateString('en-IN', {day:'2-digit', month:'short'}) + ', ' + new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'})
+    await fetch(`${API_BASE}/orders/${orderId}/status`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Manager-Key': MANAGER_KEY
+      },
+      body: JSON.stringify({ status: 'paid' })
     });
-
-    renderPaymentsTable();
-    closePaymentModal();
   } catch (err) {
-    console.error('Failed to settle payment:', err);
-    alert('Failed to settle bill.');
+    console.error('Failed to sync payment status with server:', err);
   } finally {
     btn.disabled = false;
     btn.textContent = 'Confirm & Settle';
   }
 }
 
+function renderLiveOrdersTableOnly() {
+  const tb = document.getElementById('orders-tbody');
+  if (!tb) return;
+
+  let displayData = liveOrdersCache;
+  if (currentOrderFilter !== 'all') {
+    displayData = liveOrdersCache.filter(o => (o.status || '').toLowerCase() === currentOrderFilter.toLowerCase());
+  }
+
+  const pendingCount = liveOrdersCache.filter(o => (o.status || '').toLowerCase() === 'pending').length;
+  const statCard = document.getElementById('stat-active-orders');
+  if (statCard) statCard.textContent = pendingCount;
+
+  const servedOrders = liveOrdersCache.filter(o => (o.status || '').toLowerCase() === 'served');
+  const pendingCollection = servedOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+  const statPending = document.getElementById('stat-pending-collect');
+  const statPendingCount = document.getElementById('stat-pending-orders-count');
+  if (statPending) statPending.textContent = `₹${pendingCollection.toLocaleString('en-IN')}`;
+  if (statPendingCount) statPendingCount.textContent = `${servedOrders.length} unpaid`;
+
+  if (displayData.length === 0) {
+    tb.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:28px;color:var(--muted)">No orders found under "${currentOrderFilter}".</td></tr>`;
+    return;
+  }
+
+  tb.innerHTML = displayData.map(o => {
+    const status = (o.status || 'pending').toLowerCase();
+    const printButtons = `
+      <button class="btn btn-ghost btn-sm" title="Print Kitchen Ticket" onclick="printKOT(${o.id})" style="padding:3px 7px;font-size:11px;">🖨️ KOT</button>
+      <button class="btn btn-ghost btn-sm" title="Print Customer Receipt" onclick="printCustomerBill(${o.id})" style="padding:3px 7px;font-size:11px;">🧾 Bill</button>
+    `;
+
+    let actionBtn = '';
+    if (status === 'pending') {
+      actionBtn = `
+        <div style="display:flex;gap:4px;align-items:center;">
+          ${printButtons}
+          <button class="btn btn-primary btn-sm" onclick="advanceOrderStatus(${o.id}, 'served')">Mark Served</button>
+        </div>
+      `;
+    } else if (status === 'served') {
+      actionBtn = `
+        <div style="display:flex;gap:4px;align-items:center;">
+          ${printButtons}
+          <button class="btn btn-primary btn-sm" style="background:var(--green);" onclick="openPaymentModal(${o.id})">Settle Bill</button>
+        </div>
+      `;
+    } else {
+      actionBtn = `
+        <div style="display:flex;gap:4px;align-items:center;">
+          ${printButtons}
+          <span style="font-size:12px;color:var(--green);font-weight:600;margin-left:4px;">✓ Settled</span>
+        </div>
+      `;
+    }
+
+    return `
+      <tr>
+        <td class="td-mono td-bold">#${o.id}</td>
+        <td class="td-bold">${o.customer || 'Guest Diner'}</td>
+        <td class="td-muted" style="max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${o.items}">${o.items}</td>
+        <td class="td-bold" style="color:var(--accent)">₹${o.total}</td>
+        <td class="td-muted">${o.type || 'Dine-in'}</td>
+        <td>${orderStatusBadge(o.status)}</td>
+        <td>${actionBtn}</td>
+      </tr>
+    `;
+  }).join('');
+}
 // ══════════════════════════════════════════════════════
 //  MENU & OTHER VIEWS
 // ══════════════════════════════════════════════════════
