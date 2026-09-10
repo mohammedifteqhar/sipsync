@@ -165,3 +165,54 @@ def update_reservation_status(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to update reservation: {str(err)}"
         )
+class CustomerCancelRequest(BaseModel):
+    phone: str
+
+@router.post("/{res_id}/cancel", response_model=ReservationOut)
+def customer_cancel_reservation(
+    res_id: int,
+    payload: CustomerCancelRequest,
+    db: Session = Depends(get_db)
+):
+    """Allows a guest to self-cancel by providing their booking ID and matching phone number."""
+    res = db.query(Reservation).filter(Reservation.id == res_id).first()
+    if not res:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail="Reservation not found."
+        )
+
+    # Security check: verify phone matches
+    cleaned_input_phone = "".join(filter(str.isdigit, payload.phone))
+    cleaned_db_phone = "".join(filter(str.isdigit, res.phone))
+
+    if not cleaned_input_phone or cleaned_input_phone != cleaned_db_phone:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="The phone number provided does not match this booking."
+        )
+
+    if res.status == "cancelled":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, 
+            detail="This reservation has already been cancelled."
+        )
+
+    if res.status == "seated":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, 
+            detail="Cannot cancel a reservation after being seated."
+        )
+
+    try:
+        res.status = "cancelled"
+        db.commit()
+        db.refresh(res)
+        logger.info(f"Customer self-cancelled reservation #RES-{res.id} ({res.name})")
+        return res
+    except Exception as err:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to cancel booking: {str(err)}"
+        )
