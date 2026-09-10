@@ -33,8 +33,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-
 .table-pill-dot{width:6px;height:6px;border-radius:50%;background:#10B981}
 
 /* Horizontal Category Navigation */
-.cat-nav{position:sticky;top:57px;background:#fff;border-bottom:1px solid var(--border);z-index:90;display:flex;gap:8px;overflow-x:auto;padding:10px 16px;white-space:nowrap}
-.cat-btn{background:var(--bg);border:1px solid var(--border);padding:6px 14px;border-radius:20px;font-size:12.5px;font-weight:500;color:var(--muted);cursor:pointer;flex-shrink:0}
+.cat-nav{position:sticky;top:57px;background:#fff;border-bottom:1px solid var(--border);z-index:90;display:flex;gap:8px;overflow-x:auto;padding:10px 16px;white-space:nowrap;scroll-behavior:smooth}
+.cat-nav::-webkit-scrollbar{display:none}
+.cat-btn{background:var(--bg);border:1px solid var(--border);padding:6px 14px;border-radius:20px;font-size:12.5px;font-weight:500;color:var(--muted);cursor:pointer;flex-shrink:0;-webkit-tap-highlight-color:transparent}
 .cat-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
 
 /* Menu Feed */
@@ -49,7 +50,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-
 .dish-thumb{width:76px;height:76px;border-radius:8px;object-fit:cover;flex-shrink:0;background:#EFECE6}
 .dish-thumb-placeholder{width:76px;height:76px;border-radius:8px;background:#EFECE6;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
 .item-info{flex:1;min-width:0}
-.item-name{font-size:14.5px;font-weight:600;color:var(--text);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item-name{font-size:14.5px;font-weight:600;color:var(--text);margin-bottom:3px;white-space:normal;line-height:1.3}
 .item-price{font-size:14px;font-weight:700;color:var(--accent)}
 .item-stock{font-size:11px;color:var(--red);font-weight:600;margin-top:2px}
 
@@ -91,7 +92,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-
 .tag-pill{background:#F4F3F0;border:1px solid #D6D4CE;border-radius:14px;padding:5px 10px;font-size:11.5px;cursor:pointer}
 .tag-pill.active{background:#1B2A4A;color:#fff;border-color:#1B2A4A}
 
-/* Success Confirmation Banner */
+/* Success Confirmation Screen */
 .success-screen{position:fixed;inset:0;background:#fff;z-index:400;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
 .success-icon{width:56px;height:56px;border-radius:50%;background:var(--green-bg);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:16px}
 </style>
@@ -193,7 +194,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-
       <button class="modal-close" onclick="closeFeedbackModal()">&times;</button>
     </div>
 
-    <!-- Rating Screen -->
     <div id="review-form-screen">
       <div class="rating-row">
         <span>Food &amp; Taste</span>
@@ -238,7 +238,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-
       </button>
     </div>
 
-    <!-- Google Review Screen (for 5-Star diners) -->
     <div id="review-google-screen" style="display:none;text-align:center;padding:12px 0;">
       <div style="font-size:32px;margin-bottom:8px">⭐</div>
       <h3 style="font-size:16px;font-weight:700;margin-bottom:6px">Glad you loved the experience!</h3>
@@ -278,11 +277,57 @@ document.getElementById('display-table').textContent = TABLE_ID.startsWith('M') 
 let catalog = [];
 let cart = {};
 
+// Clean common spelling mistakes and normalize category strings
+function cleanCategoryName(rawCat) {
+  if (!rawCat) return "Main Menu";
+  let c = rawCat.trim();
+  
+  const corrections = {
+    "mandi": "Mandi Specials",
+    "chicken": "Chicken Delicacies",
+    "chiken": "Chicken Delicacies",
+    "mutton": "Mutton Delicacies",
+    "veg": "Vegetarian",
+    "starters": "Starters & Appetizers",
+    "starter": "Starters & Appetizers",
+    "dessert": "Desserts",
+    "desserts": "Desserts",
+    "beverage": "Beverages",
+    "beverages": "Beverages",
+    "drinks": "Beverages",
+    "rotis": "Breads & Rotis",
+    "roti": "Breads & Rotis",
+    "bread": "Breads & Rotis",
+    "breads": "Breads & Rotis"
+  };
+
+  const lower = c.toLowerCase();
+  for (const [key, clean] of Object.entries(corrections)) {
+    if (lower === key) return clean;
+  }
+  
+  // Format words nicely if not matched above
+  return c.split(' ')
+          .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+          .join(' ');
+}
+
+// Generate web-safe alphanumeric DOM ID for scrolling
+function catToId(cat) {
+  return 'group-' + cat.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
 async function init() {
   try {
     const res = await fetch(`${API_BASE}/menu/`);
     if (!res.ok) throw new Error("Could not fetch menu catalog");
-    catalog = await res.json();
+    const rawData = await res.json();
+
+    // Clean category typos on load
+    catalog = rawData.map(item => ({
+      ...item,
+      cat: cleanCategoryName(item.cat)
+    }));
 
     renderCategories();
     renderCatalog();
@@ -299,18 +344,31 @@ function renderCategories() {
   const cats = [...new Set(catalog.map(i => i.cat))];
   
   nav.innerHTML = cats.map((cat, idx) => `
-    <button class="cat-btn ${idx === 0 ? 'active' : ''}" onclick="scrollToCategory('${cat}', this)">
+    <button class="cat-btn ${idx === 0 ? 'active' : ''}" 
+            data-target="${catToId(cat)}"
+            onclick="scrollToCategory('${catToId(cat)}', this)">
       ${cat}
     </button>
   `).join('');
 }
 
-function scrollToCategory(cat, btn) {
+function scrollToCategory(targetId, btn) {
   document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  const target = document.getElementById(`sec-${CSS.escape(cat)}`);
-  if (target) {
-    window.scrollTo({ top: target.offsetTop - 110, behavior: 'smooth' });
+  if (btn) {
+    btn.classList.add('active');
+    btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  }
+
+  const targetEl = document.getElementById(targetId);
+  if (targetEl) {
+    const headerOffset = 118; // Sticky header + category nav height
+    const elementPosition = targetEl.getBoundingClientRect().top;
+    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+    window.scrollTo({
+      top: offsetPosition,
+      behavior: 'smooth'
+    });
   }
 }
 
@@ -320,8 +378,10 @@ function renderCatalog() {
 
   feed.innerHTML = cats.map(cat => {
     const items = catalog.filter(i => i.cat === cat);
+    const groupId = catToId(cat);
+
     return `
-      <div class="menu-group" id="sec-${cat}">
+      <div class="menu-group" id="${groupId}">
         <div class="group-header">
           <span class="group-title">${cat}</span>
           <span class="group-badge">${items.length}</span>
@@ -336,7 +396,7 @@ function renderCatalog() {
             ${imgMarkup}
             <div class="item-info">
               <div class="item-name">${item.name}</div>
-              <div class="item-price">${item.price === 0 ? 'Seasonal' : '₹' + item.price.toFixed(0)}</div>
+              <div class="item-price">${item.price === 0 ? 'Seasonal' : '₹' + Number(item.price).toFixed(0)}</div>
               ${!item.avail ? '<div class="item-stock">Out of Stock</div>' : ''}
             </div>
             <div>
@@ -470,7 +530,7 @@ async function callStaff(requestType) {
       })
     });
     if (res.ok) {
-      alert(`Floor team paged: "${requestType}" for ${TABLE_ID}.`);
+      alert(`Floor team notified: "${requestType}" for ${TABLE_ID}.`);
     } else {
       alert("Staff notified.");
     }
