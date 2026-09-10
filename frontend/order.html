@@ -20,7 +20,7 @@
   --green-bg:rgba(46,125,85,.1);
   --red:#C0392B;
 }
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-height:1.4;padding-bottom:100px}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-height:1.4;padding-bottom:110px}
 
 /* Top Banner */
 .header{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--border);z-index:100;padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
@@ -44,18 +44,24 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-
 .group-title{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--primary)}
 .group-badge{font-size:11px;background:var(--border);color:var(--muted);padding:2px 7px;border-radius:10px;font-weight:600}
 
-.item-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
-.item-info{flex:1;padding-right:12px}
-.item-name{font-size:14px;font-weight:600;color:var(--text);margin-bottom:2px}
+/* Dish Card Layout */
+.item-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:12px;display:flex;align-items:center;gap:12px}
+.dish-thumb{width:76px;height:76px;border-radius:8px;object-fit:cover;flex-shrink:0;background:#EFECE6}
+.dish-thumb-placeholder{width:76px;height:76px;border-radius:8px;background:#EFECE6;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
+.item-info{flex:1;min-width:0}
+.item-name{font-size:14.5px;font-weight:600;color:var(--text);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .item-price{font-size:14px;font-weight:700;color:var(--accent)}
-.item-stock{font-size:11px;color:var(--red);font-weight:600;margin-top:4px}
+.item-stock{font-size:11px;color:var(--red);font-weight:600;margin-top:2px}
 
-.qty-control{display:flex;align-items:center;gap:8px}
+.qty-control{display:flex;align-items:center;gap:6px}
 .btn-qty{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--text);cursor:pointer}
 .btn-qty:active{background:var(--bg)}
 .qty-display{font-size:13px;font-weight:600;min-width:16px;text-align:center}
-.btn-add{background:var(--primary);color:#fff;border:none;padding:7px 16px;border-radius:6px;font-size:12.5px;font-weight:600;cursor:pointer}
+.btn-add{background:var(--primary);color:#fff;border:none;padding:7px 14px;border-radius:6px;font-size:12.5px;font-weight:600;cursor:pointer}
 .btn-add:disabled{background:#D1D0CD;cursor:not-allowed}
+
+/* Floating Silent Waiter Button */
+.btn-floating-assist{position:fixed;bottom:80px;right:16px;background:var(--primary);color:#fff;border:1px solid rgba(255,255,255,.15);border-radius:30px;padding:10px 16px;font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:6px;box-shadow:0 4px 16px rgba(0,0,0,.18);cursor:pointer;z-index:150}
 
 /* Bottom Bar */
 .bottom-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 -4px 12px rgba(0,0,0,.04);z-index:200}
@@ -64,7 +70,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-
 .cart-total{font-size:16px;font-weight:700;color:var(--text)}
 .btn-checkout{background:var(--accent);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:13.5px;font-weight:600;cursor:pointer}
 
-/* Fullscreen Order Modal */
+/* Modals */
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:none;align-items:flex-end}
 .modal-box{background:#fff;width:100%;border-radius:16px 16px 0 0;padding:20px;max-height:85vh;overflow-y:auto}
 .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:12px}
@@ -73,59 +79,21 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-
 .cart-line{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #F0EFED}
 .form-input{width:100%;padding:10px;border:1px solid var(--border);border-radius:6px;font-size:13px;margin:10px 0}
 
+/* Service Actions */
+.service-action-btn{width:100%;background:#FAF9F7;border:1px solid #E2E0DB;border-radius:10px;padding:14px;font-size:14px;font-weight:600;color:#1B2A4A;text-align:left;cursor:pointer;margin-bottom:10px;display:flex;align-items:center;gap:10px}
+.service-action-btn:active{background:#ECEAE4}
+
+/* Feedback & Ratings */
+.rating-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:13.5px;font-weight:600;color:#333}
+.star-group span{font-size:24px;color:#D1CFC9;cursor:pointer;padding:0 2px}
+.star-group span.active{color:#F1C40F}
+.tag-container{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 16px}
+.tag-pill{background:#F4F3F0;border:1px solid #D6D4CE;border-radius:14px;padding:5px 10px;font-size:11.5px;cursor:pointer}
+.tag-pill.active{background:#1B2A4A;color:#fff;border-color:#1B2A4A}
+
 /* Success Confirmation Banner */
 .success-screen{position:fixed;inset:0;background:#fff;z-index:400;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
 .success-icon{width:56px;height:56px;border-radius:50%;background:var(--green-bg);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:16px}
-/* Styling for Service Buttons */
-.service-action-btn {
-  width: 100%;
-  background: #FAF9F7;
-  border: 1px solid #E2E0DB;
-  border-radius: 10px;
-  padding: 14px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #1B2A4A;
-  text-align: left;
-  cursor: pointer;
-}
-
-/* Star Rating Layout */
-.rating-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-  font-size: 13.5px;
-  font-weight: 600;
-  color: #333;
-}
-
-/* Stars: Grey by default, Gold when selected */
-.star-group span {
-  font-size: 22px;
-  color: #D1CFC9;
-  cursor: pointer;
-  padding: 0 2px;
-}
-.star-group span.active {
-  color: #F1C40F;
-}
-
-/* Quick Highlight Badges */
-.tag-pill {
-  background: #F4F3F0;
-  border: 1px solid #D6D4CE;
-  border-radius: 14px;
-  padding: 5px 10px;
-  font-size: 11.5px;
-  cursor: pointer;
-}
-.tag-pill.active {
-  background: #1B2A4A;
-  color: #fff;
-  border-color: #1B2A4A;
-}
 </style>
 </head>
 <body>
@@ -137,7 +105,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-
     <div class="brand-sub">The Authentic Taste of Arabia</div>
   </div>
   <div class="header-right">
-    <a href="reserve.html" class="reserve-link">Reserve Spot →</a>
+    <a href="reserve.html" class="reserve-link">Reserve Spot &rarr;</a>
     <div class="table-pill">
       <div class="table-pill-dot"></div>
       <span id="display-table">Table T-01</span>
@@ -150,6 +118,12 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-
 
 <!-- Menu Container -->
 <div class="content" id="menu-feed"></div>
+
+<!-- Silent Assistance Bell Button -->
+<button class="btn-floating-assist" onclick="openServiceDrawer()">
+  <span>🛎️</span>
+  <span>Assistance</span>
+</button>
 
 <!-- Bottom Floating Cart -->
 <div class="bottom-bar" id="bottom-bar" style="display:none;">
@@ -189,6 +163,95 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-
   </div>
 </div>
 
+<!-- Silent Waiter / Service Drawer Modal -->
+<div class="modal" id="service-drawer">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">Table Assistance</div>
+      <button class="modal-close" onclick="closeServiceDrawer()">&times;</button>
+    </div>
+    <button class="service-action-btn" onclick="callStaff('Water / Cutlery Request')">
+      <span>💧</span> Request Drinking Water / Cutlery
+    </button>
+    <button class="service-action-btn" onclick="callStaff('Table Cleanup')">
+      <span>🧹</span> Request Table Cleaning / Napkins
+    </button>
+    <button class="service-action-btn" onclick="callStaff('Call Server to Table')">
+      <span>🛎️</span> Call Server to Table
+    </button>
+    <button class="service-action-btn" onclick="callStaff('Bill Request')">
+      <span>💳</span> Request Final Bill
+    </button>
+  </div>
+</div>
+
+<!-- 15-Second Post-Meal Feedback Modal -->
+<div class="modal" id="feedback-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">Rate Your Experience</div>
+      <button class="modal-close" onclick="closeFeedbackModal()">&times;</button>
+    </div>
+
+    <!-- Rating Screen -->
+    <div id="review-form-screen">
+      <div class="rating-row">
+        <span>Food &amp; Taste</span>
+        <div class="star-group" data-cat="food">
+          <span class="active" onclick="setStars('food', 1)">★</span>
+          <span class="active" onclick="setStars('food', 2)">★</span>
+          <span class="active" onclick="setStars('food', 3)">★</span>
+          <span class="active" onclick="setStars('food', 4)">★</span>
+          <span class="active" onclick="setStars('food', 5)">★</span>
+        </div>
+      </div>
+      <div class="rating-row">
+        <span>Service &amp; Hospitality</span>
+        <div class="star-group" data-cat="service">
+          <span class="active" onclick="setStars('service', 1)">★</span>
+          <span class="active" onclick="setStars('service', 2)">★</span>
+          <span class="active" onclick="setStars('service', 3)">★</span>
+          <span class="active" onclick="setStars('service', 4)">★</span>
+          <span class="active" onclick="setStars('service', 5)">★</span>
+        </div>
+      </div>
+      <div class="rating-row">
+        <span>Ambiance &amp; Seating</span>
+        <div class="star-group" data-cat="ambiance">
+          <span class="active" onclick="setStars('ambiance', 1)">★</span>
+          <span class="active" onclick="setStars('ambiance', 2)">★</span>
+          <span class="active" onclick="setStars('ambiance', 3)">★</span>
+          <span class="active" onclick="setStars('ambiance', 4)">★</span>
+          <span class="active" onclick="setStars('ambiance', 5)">★</span>
+        </div>
+      </div>
+
+      <div class="tag-container">
+        <div class="tag-pill" onclick="toggleTag(this)">Authentic Taste</div>
+        <div class="tag-pill" onclick="toggleTag(this)">Fast Service</div>
+        <div class="tag-pill" onclick="toggleTag(this)">Comfortable Majlis</div>
+        <div class="tag-pill" onclick="toggleTag(this)">Generous Portions</div>
+      </div>
+
+      <button class="btn-checkout" style="width:100%;padding:12px;font-size:14px;" onclick="submitReview()">
+        Submit Feedback &rarr;
+      </button>
+    </div>
+
+    <!-- Google Review Screen (for 5-Star diners) -->
+    <div id="review-google-screen" style="display:none;text-align:center;padding:12px 0;">
+      <div style="font-size:32px;margin-bottom:8px">⭐</div>
+      <h3 style="font-size:16px;font-weight:700;margin-bottom:6px">Glad you loved the experience!</h3>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px">
+        Would you mind sharing your 5-star review on Google? It helps our kitchen team tremendously.
+      </p>
+      <a href="https://maps.google.com" target="_blank" class="btn-checkout" style="display:block;text-decoration:none;padding:12px;font-size:14px;">
+        Post on Google Reviews &rarr;
+      </a>
+    </div>
+  </div>
+</div>
+
 <!-- Success Confirmation Screen -->
 <div class="success-screen" id="success-screen">
   <div class="success-icon">&#10003;</div>
@@ -199,19 +262,21 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-
   <div style="font-size:12px;font-weight:600;padding:8px 16px;background:var(--bg);border-radius:6px;margin-bottom:24px;" id="success-order-id">
     Order ID: ORD-PENDING
   </div>
-  <button class="btn-checkout" style="width:auto;" onclick="location.reload()">Order More Items</button>
+  <div style="display:flex;gap:10px;">
+    <button class="btn-checkout" style="width:auto;background:var(--primary);" onclick="location.reload()">Order More</button>
+    <button class="btn-checkout" style="width:auto;" onclick="openFeedbackModal()">Rate Experience</button>
+  </div>
 </div>
 
 <script>
 const API_BASE = 'https://sipsync-api-k9tz.onrender.com/api';
 
-// Retrieve Table/Majlis code from query string: ?table=M-02
 const urlParams = new URLSearchParams(window.location.search);
 const TABLE_ID = urlParams.get('table') || 'T-01';
 document.getElementById('display-table').textContent = TABLE_ID.startsWith('M') ? `Majlis ${TABLE_ID}` : `Table ${TABLE_ID}`;
 
 let catalog = [];
-let cart = {}; // { itemId: { item, qty } }
+let cart = {};
 
 async function init() {
   try {
@@ -261,8 +326,14 @@ function renderCatalog() {
           <span class="group-title">${cat}</span>
           <span class="group-badge">${items.length}</span>
         </div>
-        ${items.map(item => `
+        ${items.map(item => {
+          const imgMarkup = item.image_url 
+            ? `<img src="${item.image_url}" class="dish-thumb" alt="${item.name}" loading="lazy" onerror="this.outerHTML='<div class=\\'dish-thumb-placeholder\\'>🍽️</div>'">`
+            : `<div class="dish-thumb-placeholder">🍽️</div>`;
+
+          return `
           <div class="item-card" style="${!item.avail ? 'opacity:0.5' : ''}">
+            ${imgMarkup}
             <div class="item-info">
               <div class="item-name">${item.name}</div>
               <div class="item-price">${item.price === 0 ? 'Seasonal' : '₹' + item.price.toFixed(0)}</div>
@@ -282,7 +353,7 @@ function renderCatalog() {
               `}
             </div>
           </div>
-        `).join('')}
+        `}).join('')}
       </div>
     `;
   }).join('');
@@ -379,16 +450,54 @@ async function submitOrderToKitchen() {
   }
 }
 
-init();
+// Service Drawer functions
+function openServiceDrawer() {
+  document.getElementById('service-drawer').style.display = 'flex';
+}
+function closeServiceDrawer() {
+  document.getElementById('service-drawer').style.display = 'none';
+}
 
-// 1. Keep track of ratings and tags selected
+async function callStaff(requestType) {
+  closeServiceDrawer();
+  try {
+    const res = await fetch(`${API_BASE}/service-requests/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        table_number: TABLE_ID,
+        request_type: requestType
+      })
+    });
+    if (res.ok) {
+      alert(`Floor team paged: "${requestType}" for ${TABLE_ID}.`);
+    } else {
+      alert("Staff notified.");
+    }
+  } catch (err) {
+    alert("Captain paged.");
+  }
+}
+
+// Feedback & Rating Functions
 let reviewRatings = { food: 5, service: 5, ambiance: 5 };
 let selectedTags = [];
 
-// 2. Turn stars gold when clicked
+function openFeedbackModal() {
+  document.getElementById('success-screen').style.display = 'none';
+  document.getElementById('review-form-screen').style.display = 'block';
+  document.getElementById('review-google-screen').style.display = 'none';
+  document.getElementById('feedback-modal').style.display = 'flex';
+}
+
+function closeFeedbackModal() {
+  document.getElementById('feedback-modal').style.display = 'none';
+}
+
 function setStars(category, count) {
   reviewRatings[category] = count;
   const starContainer = document.querySelector(`.star-group[data-cat="${category}"]`);
+  if (!starContainer) return;
   const stars = starContainer.querySelectorAll('span');
   stars.forEach((star, index) => {
     if (index < count) {
@@ -399,7 +508,6 @@ function setStars(category, count) {
   });
 }
 
-// 3. Highlight badges (like 'Fast Service') when tapped
 function toggleTag(element) {
   element.classList.toggle('active');
   const tagText = element.innerText.trim();
@@ -411,52 +519,13 @@ function toggleTag(element) {
   }
 }
 
-// 4. Open and close popups
-function openServiceDrawer() {
-  document.getElementById('service-drawer').style.display = 'flex';
-}
-function closeServiceDrawer() {
-  document.getElementById('service-drawer').style.display = 'none';
-}
-function closeReviewModal() {
-  document.getElementById('review-modal').style.display = 'none';
-}
-
-// 5. Silent waiter call: sends the request without making noise
-async function callStaff(requestType) {
-  const table = new URLSearchParams(window.location.search).get('table') || 'Table';
-  closeServiceDrawer();
-
-  try {
-    const res = await fetch(`${API_BASE}/service-requests/`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        table_number: table,
-        request_type: requestType
-      })
-    });
-    if (res.ok) {
-      alert(`Floor captain notified for ${requestType}.`);
-    } else {
-      alert("Staff notified.");
-    }
-  } catch (err) {
-    alert("Captain paged.");
-  }
-}
-
-// 6. Submit feedback & smart Google redirect
 async function submitReview() {
-  const table = new URLSearchParams(window.location.search).get('table') || 'Dine-in';
-
-  // Save to database
   try {
     await fetch(`${API_BASE}/reviews/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        table_number: table,
+        table_number: TABLE_ID,
         food_rating: reviewRatings.food,
         service_rating: reviewRatings.service,
         ambiance_rating: reviewRatings.ambiance,
@@ -464,18 +533,19 @@ async function submitReview() {
       })
     });
   } catch (err) {
-    console.log("Logged locally");
+    console.log("Logged review locally");
   }
 
-  // If 5 stars across the board, ask for Google Review
   if (reviewRatings.food === 5 && reviewRatings.service === 5 && reviewRatings.ambiance === 5) {
     document.getElementById('review-form-screen').style.display = 'none';
     document.getElementById('review-google-screen').style.display = 'block';
   } else {
-    alert("Thank you for your valuable feedback!");
-    closeReviewModal();
+    alert("Thank you for your feedback! We look forward to serving you again.");
+    closeFeedbackModal();
   }
 }
+
+init();
 </script>
 </body>
 </html>
