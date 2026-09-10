@@ -41,8 +41,8 @@ class Payment(Base):
     dt = Column(String, nullable=False)
 
 class MenuItem(Base):
-    __tablename__ = "menu"
-    __table_args__ = {"schema": "public", "extend_existing": True}
+    __tablename__ = "menu_items"
+    __table_args__ = {"extend_existing": True}
 
     id = Column(BigInteger, primary_key=True, index=True, autoincrement=True)
     name = Column(String, nullable=False)
@@ -50,7 +50,7 @@ class MenuItem(Base):
     price = Column(Float, nullable=False)
     avail = Column(Boolean, default=True)
     image_url = Column(String, nullable=True)
-
+    
 class Customer(Base):
     __tablename__ = "customers"
     __table_args__ = {"schema": "public", "extend_existing": True}
