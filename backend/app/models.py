@@ -62,3 +62,27 @@ class Customer(Base):
     spend = Column(Float, default=0.0)
     last_visit = Column(String, nullable=False)
     status = Column(String, default="new")
+    
+from sqlalchemy import ARRAY
+
+class CustomerReview(Base):
+    __tablename__ = "customer_reviews"
+    __table_args__ = {"schema": "public", "extend_existing": True}
+
+    id = Column(BigInteger, primary_key=True, index=True, autoincrement=True)
+    table_number = Column(String, nullable=False)
+    order_id = Column(BigInteger, nullable=True)
+    food_rating = Column(Integer, nullable=False)
+    service_rating = Column(Integer, nullable=False)
+    ambiance_rating = Column(Integer, nullable=False)
+    tags = Column(ARRAY(String), nullable=True)
+    created_at = Column(String, nullable=True)
+
+class ServiceRequest(Base):
+    __tablename__ = "service_requests"
+    __table_args__ = {"schema": "public", "extend_existing": True}
+
+    id = Column(BigInteger, primary_key=True, index=True, autoincrement=True)
+    table_number = Column(String, nullable=False)
+    request_type = Column(String, nullable=False)
+    status = Column(String, default="pending")
