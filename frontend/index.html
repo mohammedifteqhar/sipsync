@@ -46,7 +46,7 @@ input,select,button{font-family:inherit;font-size:inherit}
   body * {
     visibility: hidden;
   }
-  .shell, #payment-modal, #res-modal, #ai-chat-btn, #ai-chat-box {
+  .shell, #payment-modal, #res-modal, #call-waiter-btn, #service-drawer, #review-modal {
     display: none !important;
   }
   #thermal-receipt-area, #thermal-receipt-area * {
@@ -263,11 +263,14 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
 .menu-group-title{display:flex;align-items:center;gap:10px;margin:28px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
 .menu-group-title h3{font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.2px}
 .menu-group-count{font-size:11px;background:var(--accent-dim);color:var(--accent);font-weight:600;padding:2px 8px;border-radius:12px}
-.menu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
-.menu-item-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;flex-direction:column;justify-content:space-between;transition:opacity .2s}
-.mi-name{font-size:13.5px;font-weight:600;margin-bottom:2px}
+.menu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.menu-item-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;gap:12px;transition:opacity .2s;align-items:center}
+.mi-thumb{width:64px;height:64px;border-radius:8px;object-fit:cover;background:#FAF9F7;flex-shrink:0}
+.mi-thumb-placeholder{width:64px;height:64px;border-radius:8px;background:#FAF9F7;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;border:1px solid var(--border)}
+.mi-details{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:space-between}
+.mi-name{font-size:13.5px;font-weight:600;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mi-cat{font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:4px;letter-spacing:.3px}
-.mi-price{font-size:17px;font-weight:700;color:var(--accent);margin:6px 0 10px}
+.mi-price{font-size:15px;font-weight:700;color:var(--accent);margin:2px 0 6px}
 .mi-footer{display:flex;align-items:center;justify-content:space-between}
 .toggle{position:relative;width:38px;height:20px;display:inline-block}
 .toggle input{opacity:0;width:0;height:0;position:absolute}
@@ -275,6 +278,15 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
 .toggle-slider::before{content:'';position:absolute;width:14px;height:14px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
 .toggle input:checked+.toggle-slider{background:var(--green)}
 .toggle input:checked+.toggle-slider::before{transform:translateX(18px)}
+
+/* ── Service Actions & Modal ── */
+.service-action-btn{width:100%;background:#FAF9F7;border:1px solid #E2E0DB;border-radius:10px;padding:12px;font-size:13.5px;font-weight:600;color:#1B2A4A;text-align:left;cursor:pointer;display:flex;align-items:center;gap:8px}
+.service-action-btn:active{background:#ECEAE4}
+.rating-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:13.5px;font-weight:600;color:#333}
+.star-group span{font-size:22px;color:#D1CFC9;cursor:pointer;padding:0 2px}
+.star-group span.active{color:#F1C40F}
+.tag-pill{background:#F4F3F0;border:1px solid #D6D4CE;border-radius:14px;padding:5px 10px;font-size:11.5px;cursor:pointer}
+.tag-pill.active{background:#1B2A4A;color:#fff;border-color:#1B2A4A}
 
 /* ── Activity / Misc ── */
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px}
@@ -425,21 +437,18 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
         <button class="btn btn-ghost btn-sm" onclick="renderFloorMatrix()">&#x21bb; Refresh Grid</button>
       </div>
 
-      <!-- Ground Floor Tables -->
       <div class="floor-section-header">
         <span class="floor-section-title">Ground Floor Dining (Tables T-01 to T-14)</span>
         <span class="td-muted" style="font-size:12px;">Standard 4-6 Seater Tables</span>
       </div>
       <div class="spot-grid" id="grid-ground-floor"></div>
 
-      <!-- First Floor Majlis -->
       <div class="floor-section-header">
         <span class="floor-section-title">First Floor Majlis Cabins (M-01 to M-07)</span>
         <span class="td-muted" style="font-size:12px;">Carpet Floor Dining · 6-8 Pax</span>
       </div>
       <div class="spot-grid" id="grid-first-floor"></div>
 
-      <!-- VIP Hall -->
       <div class="floor-section-header">
         <span class="floor-section-title">Private Dining &amp; VIP Hall</span>
         <span class="td-muted" style="font-size:12px;">10-15 Pax Group Dining</span>
@@ -530,7 +539,7 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
       </div>
     </div>
 
-    <!-- MENU (SECTION-GROUPED) -->
+    <!-- MENU (SECTION-GROUPED WITH IMAGES) -->
     <div data-page="menu">
       <div class="section-header">
         <div class="filter-tabs" id="menu-tabs"></div>
@@ -558,7 +567,7 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
 </div>
 </div>
 
-<!-- ── NEW RESERVATION MODAL (WALK-IN / FRONT-DESK) ── -->
+<!-- ── RESERVATION MODAL ── -->
 <div id="res-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:10000;align-items:center;justify-content:center;padding:16px;">
   <div style="background:#fff;border-radius:12px;width:100%;max-width:440px;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,0.2);">
     <div style="background:#0B2018;color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;">
@@ -621,7 +630,6 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
       <div style="font-size:12px;font-weight:600;color:var(--muted);letter-spacing:0.5px;text-transform:uppercase;">Amount Due</div>
       <div style="font-size:28px;font-weight:700;color:var(--accent);margin:2px 0 14px;" id="pay-modal-amount">₹0</div>
       
-      <!-- Payment Method Selector (Tabs) -->
       <div style="width:100%;margin-bottom:16px;">
         <label style="display:block;font-size:11.5px;font-weight:600;color:var(--muted);margin-bottom:6px;">PAYMENT METHOD</label>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
@@ -631,7 +639,6 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
         </div>
       </div>
 
-      <!-- Dynamic UPI QR Container (Visible ONLY on UPI) -->
       <div id="upi-section" style="display:flex;flex-direction:column;align-items:center;width:100%;">
         <div style="background:#fff;padding:12px;border:2px dashed var(--border);border-radius:12px;margin-bottom:10px;display:flex;align-items:center;justify-content:center;min-height:180px;min-width:180px;">
           <div id="upi-qrcode"></div>
@@ -641,14 +648,12 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
         </div>
       </div>
 
-      <!-- Offline Cash / Card Confirmation Box (Visible ONLY on Cash/Card) -->
       <div id="offline-pay-section" style="display:none;width:100%;background:#FAF9F7;border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:16px;text-align:center;">
         <div id="offline-pay-icon" style="font-size:28px;margin-bottom:6px;">💵</div>
         <div id="offline-pay-title" style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;">Collect Cash at Counter</div>
         <div id="offline-pay-desc" style="font-size:12px;color:var(--muted);">Collect the bill amount from the diner and confirm below to close this ticket.</div>
       </div>
 
-      <!-- Action Buttons -->
       <div style="width:100%;display:flex;gap:10px;">
         <button type="button" onclick="closePaymentModal()" class="btn btn-ghost" style="flex:1;justify-content:center;">Cancel</button>
         <button type="button" id="btn-confirm-payment" onclick="confirmPaymentSettlement()" class="btn btn-primary" style="flex:2;justify-content:center;">Confirm &amp; Settle</button>
@@ -657,29 +662,128 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
   </div>
 </div>
 
-<!-- ── OFF-SCREEN THERMAL RECEIPT / KOT PRINT STAGING ── -->
+<!-- ── THERMAL RECEIPT / KOT PRINT STAGING ── -->
 <div id="thermal-receipt-area"></div>
+
+<!-- ── SILENT WAITER ASSISTANCE DRAWER ── -->
+<button id="call-waiter-btn" onclick="openServiceDrawer()" style="position:fixed;bottom:24px;right:20px;z-index:999;background:#1B2A4A;color:#fff;border:none;border-radius:28px;padding:12px 18px;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,0.25);cursor:pointer;">
+  🛎️ Assistance
+</button>
+
+<div id="service-drawer" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:flex-end;justify-content:center;">
+  <div style="background:#fff;width:100%;max-width:440px;border-radius:20px 20px 0 0;padding:24px 20px 30px;box-sizing:border-box;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <h3 style="margin:0;font-size:17px;color:#1B2A4A;">Need Table Assistance?</h3>
+      <button onclick="closeServiceDrawer()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#888;">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <button onclick="callStaff('Water / Cutlery Request')" class="service-action-btn">💧 Request Water / Cutlery</button>
+      <button onclick="callStaff('Call Server to Table')" class="service-action-btn">🙋‍♂️ Call Server to Table</button>
+      <button onclick="callStaff('Bill Request')" class="service-action-btn">🧾 Request Physical Bill / Cash</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 15-SECOND REVIEW MODAL ── -->
+<div id="review-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:1002;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#fff;width:100%;max-width:380px;border-radius:18px;padding:22px;box-sizing:border-box;box-shadow:0 12px 32px rgba(0,0,0,0.2);">
+    <div id="review-form-screen">
+      <h3 style="margin:0 0 6px 0;font-size:18px;color:#1B2A4A;text-align:center;">How was your visit?</h3>
+      <p style="margin:0 0 16px 0;font-size:12px;color:#666;text-align:center;">Quick 10-second rating helps us improve!</p>
+
+      <div class="rating-row">
+        <span>Food Quality</span>
+        <div class="star-group" data-cat="food">
+          <span onclick="setStars('food', 1)">★</span><span onclick="setStars('food', 2)">★</span><span onclick="setStars('food', 3)">★</span><span onclick="setStars('food', 4)">★</span><span onclick="setStars('food', 5)" class="active">★</span>
+        </div>
+      </div>
+
+      <div class="rating-row">
+        <span>Service Speed</span>
+        <div class="star-group" data-cat="service">
+          <span onclick="setStars('service', 1)">★</span><span onclick="setStars('service', 2)">★</span><span onclick="setStars('service', 3)">★</span><span onclick="setStars('service', 4)">★</span><span onclick="setStars('service', 5)" class="active">★</span>
+        </div>
+      </div>
+
+      <div class="rating-row">
+        <span>Ambiance</span>
+        <div class="star-group" data-cat="ambiance">
+          <span onclick="setStars('ambiance', 1)">★</span><span onclick="setStars('ambiance', 2)">★</span><span onclick="setStars('ambiance', 3)">★</span><span onclick="setStars('ambiance', 4)">★</span><span onclick="setStars('ambiance', 5)" class="active">★</span>
+        </div>
+      </div>
+
+      <div style="margin:16px 0 18px;">
+        <div style="font-size:11.5px;font-weight:700;color:#666;margin-bottom:8px;">Quick Highlights:</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;">
+          <span class="tag-pill" onclick="toggleTag(this)">Fast Service</span>
+          <span class="tag-pill" onclick="toggleTag(this)">Delicious Mandi</span>
+          <span class="tag-pill" onclick="toggleTag(this)">Great Music</span>
+          <span class="tag-pill" onclick="toggleTag(this)">Polite Staff</span>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;">
+        <button onclick="closeReviewModal()" style="flex:1;background:#F4F3F0;border:none;padding:12px;border-radius:8px;font-weight:600;color:#666;cursor:pointer;">Skip</button>
+        <button onclick="submitReview()" style="flex:2;background:#1B2A4A;border:none;padding:12px;border-radius:8px;font-weight:700;color:#fff;cursor:pointer;">Submit Review</button>
+      </div>
+    </div>
+
+    <div id="review-google-screen" style="display:none;text-align:center;padding:10px 0;">
+      <div style="font-size:42px;margin-bottom:10px;">🌟</div>
+      <h3 style="margin:0 0 8px 0;font-size:18px;color:#1B2A4A;">Glad you loved it!</h3>
+      <p style="font-size:13px;color:#555;margin-bottom:20px;">Could you take 5 seconds to post this on our official Google Profile?</p>
+      <a href="https://maps.google.com" target="_blank" style="display:block;background:#2E7D32;color:#fff;text-decoration:none;padding:12px;border-radius:8px;font-weight:700;font-size:14px;margin-bottom:10px;">
+        ⭐ Post on Google Reviews
+      </a>
+      <button onclick="closeReviewModal()" style="background:none;border:none;color:#888;font-size:12px;cursor:pointer;">Maybe next time</button>
+    </div>
+  </div>
+</div>
 
 <script>
 const API_BASE = 'https://sipsync-api-k9tz.onrender.com/api';
 const MANAGER_KEY = 'sipsync-admin-2026';
 
-// ── UPI Merchant Config ──
 const RESTAURANT_UPI_VPA = 'raidan@upi';
 const RESTAURANT_NAME = 'Raidan Restaurant';
 
-// ══════════════════════════════════════════════════════
-//  UNIFIED AUDIO ENGINE (KITCHEN & MANAGER SOUNDS)
-// ══════════════════════════════════════════════════════
+// ── Category Normalization Dictionary ──
+function cleanCategoryName(rawCat) {
+  if (!rawCat) return "Main Menu";
+  const c = rawCat.trim();
+  const lower = c.toLowerCase();
+  
+  const corrections = {
+    "mandi": "Mandi Specials",
+    "chicken": "Chicken Delicacies",
+    "chiken": "Chicken Delicacies",
+    "mutton": "Mutton Delicacies",
+    "veg": "Vegetarian",
+    "starters": "Starters & Appetizers",
+    "starter": "Starters & Appetizers",
+    "dessert": "Desserts",
+    "desserts": "Desserts",
+    "beverage": "Beverages",
+    "beverages": "Beverages",
+    "drinks": "Beverages",
+    "rotis": "Breads & Rotis",
+    "roti": "Breads & Rotis",
+    "bread": "Breads & Rotis",
+    "breads": "Breads & Rotis"
+  };
+
+  if (corrections[lower]) return corrections[lower];
+  return c.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+}
+
+// ── Audio Engine ──
 let audioCtx = null;
 let audioEnabled = true;
 
 function initAudioContext() {
   if (!audioCtx) {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    if (AudioContextClass) {
-      audioCtx = new AudioContextClass();
-    }
+    if (AudioContextClass) audioCtx = new AudioContextClass();
   }
   if (audioCtx && audioCtx.state === 'suspended') {
     audioCtx.resume();
@@ -692,7 +796,6 @@ function playKitchenChime() {
   if (!audioCtx) return;
 
   const now = audioCtx.currentTime;
-
   const osc1 = audioCtx.createOscillator();
   const gain1 = audioCtx.createGain();
   osc1.type = 'sine';
@@ -703,17 +806,6 @@ function playKitchenChime() {
   gain1.connect(audioCtx.destination);
   osc1.start(now);
   osc1.stop(now + 0.55);
-
-  const osc2 = audioCtx.createOscillator();
-  const gain2 = audioCtx.createGain();
-  osc2.type = 'sine';
-  osc2.frequency.setValueAtTime(1320, now + 0.14);
-  gain2.gain.setValueAtTime(0.35, now + 0.14);
-  gain2.gain.exponentialRampToValueAtTime(0.0001, now + 0.75);
-  osc2.connect(gain2);
-  gain2.connect(audioCtx.destination);
-  osc2.start(now + 0.14);
-  osc2.stop(now + 0.75);
 }
 
 function playReservationChime() {
@@ -722,21 +814,16 @@ function playReservationChime() {
   if (!audioCtx) return;
 
   const now = audioCtx.currentTime;
-  const notes = [523.25, 659.25, 783.99];
-
-  notes.forEach((freq, idx) => {
+  [523.25, 659.25, 783.99].forEach((freq, idx) => {
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     const startTime = now + (idx * 0.12);
-
     osc.type = 'sine';
     osc.frequency.setValueAtTime(freq, startTime);
     gain.gain.setValueAtTime(0.3, startTime);
     gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.7);
-
     osc.connect(gain);
     gain.connect(audioCtx.destination);
-
     osc.start(startTime);
     osc.stop(startTime + 0.7);
   });
@@ -761,9 +848,7 @@ document.addEventListener('click', () => {
   if (!audioCtx) initAudioContext();
 }, { once: true });
 
-// ══════════════════════════════════════════════════════
-//  FLOOR MATRIX & TABLE SEATING ENGINE (22 SPOTS)
-// ══════════════════════════════════════════════════════
+// ── Floor Matrix Engine ──
 const RESTAURANT_SPOTS = {
   ground: ['T-01','T-02','T-03','T-04','T-05','T-06','T-07','T-08','T-09','T-10','T-11','T-12','T-13','T-14'],
   majlis: ['M-01','M-02','M-03','M-04','M-05','M-06','M-07'],
@@ -780,23 +865,13 @@ function getSpotActiveState(spotId) {
 
   if (activeOrder) {
     const status = (activeOrder.status || 'pending').toLowerCase();
-    if (status === 'pending') {
-      return {
-        state: 'cooking',
-        label: 'Cooking',
-        desc: `#${activeOrder.id} · ${activeOrder.customer || 'Diner'}`,
-        amount: `₹${activeOrder.total}`,
-        orderId: activeOrder.id
-      };
-    } else {
-      return {
-        state: 'dining',
-        label: 'Dining',
-        desc: `#${activeOrder.id} · ${activeOrder.customer || 'Diner'}`,
-        amount: `₹${activeOrder.total}`,
-        orderId: activeOrder.id
-      };
-    }
+    return {
+      state: status === 'pending' ? 'cooking' : 'dining',
+      label: status === 'pending' ? 'Cooking' : 'Dining',
+      desc: `#${activeOrder.id} · ${activeOrder.customer || 'Diner'}`,
+      amount: `₹${activeOrder.total}`,
+      orderId: activeOrder.id
+    };
   }
 
   const todayStr = new Date().toISOString().split('T')[0];
@@ -837,7 +912,7 @@ function renderFloorMatrix() {
         : `onclick="window.open('order.html?table=${spotId}','_blank')"`;
 
       return `
-        <div class="spot-card spot-${info.state}" ${clickAction} title="${info.orderId ? 'View active order #' + info.orderId : 'Open digital menu for ' + spotId}">
+        <div class="spot-card spot-${info.state}" ${clickAction} title="${info.orderId ? 'View order #' + info.orderId : 'Open digital menu for ' + spotId}">
           <div>
             <div class="spot-header">
               <span class="spot-id">${spotId}</span>
@@ -859,9 +934,7 @@ function renderFloorMatrix() {
   renderContainer(RESTAURANT_SPOTS.vip, 'grid-vip', 'VIP Hall');
 }
 
-// ══════════════════════════════════════════════════════
-//  LIVE RESERVATIONS PIPELINE (WITH AUDIO ALERT)
-// ══════════════════════════════════════════════════════
+// ── Reservations Engine ──
 let reservationsCache = [];
 let currentResFilter = 'all';
 let knownReservationIds = new Set();
@@ -890,19 +963,7 @@ async function loadLiveReservations(filter = currentResFilter) {
         const newBookings = freshReservations.filter(r => 
           !knownReservationIds.has(r.id) && (r.status || '').toLowerCase() === 'confirmed'
         );
-
-        if (newBookings.length > 0) {
-          playReservationChime();
-          const pollBadge = document.getElementById('live-poll-badge');
-          if (pollBadge) {
-            pollBadge.classList.add('order-alert-pulse');
-            pollBadge.textContent = `📅 ${newBookings.length} New Booking!`;
-            setTimeout(() => {
-              pollBadge.classList.remove('order-alert-pulse');
-              pollBadge.textContent = '● Live Sync Active';
-            }, 5000);
-          }
-        }
+        if (newBookings.length > 0) playReservationChime();
       }
 
       freshReservations.forEach(r => knownReservationIds.add(r.id));
@@ -916,18 +977,12 @@ async function loadLiveReservations(filter = currentResFilter) {
 
   const todayStr = new Date().toISOString().split('T')[0];
   let data = reservationsCache;
+  if (currentResFilter === 'today') data = reservationsCache.filter(b => b.date === todayStr);
+  else if (currentResFilter === 'upcoming') data = reservationsCache.filter(b => b.date >= todayStr && b.status !== 'cancelled');
+  else if (currentResFilter === 'cancelled') data = reservationsCache.filter(b => b.status === 'cancelled');
 
-  if (currentResFilter === 'today') {
-    data = reservationsCache.filter(b => b.date === todayStr);
-  } else if (currentResFilter === 'upcoming') {
-    data = reservationsCache.filter(b => b.date >= todayStr && b.status !== 'cancelled');
-  } else if (currentResFilter === 'cancelled') {
-    data = reservationsCache.filter(b => b.status === 'cancelled');
-  }
-
-  const todayBookingsCount = reservationsCache.filter(b => b.date === todayStr && b.status !== 'cancelled').length;
   const statEl = document.getElementById('stat-bookings');
-  if (statEl) statEl.textContent = todayBookingsCount;
+  if (statEl) statEl.textContent = reservationsCache.filter(b => b.date === todayStr && b.status !== 'cancelled').length;
 
   const tb = document.getElementById('res-tbody');
   if (!tb) return;
@@ -939,18 +994,10 @@ async function loadLiveReservations(filter = currentResFilter) {
 
   tb.innerHTML = data.map(b => {
     const status = (b.status || 'confirmed').toLowerCase();
-    let action = '';
-
-    if (status === 'confirmed') {
-      action = `
-        <button class="btn btn-primary btn-sm" style="padding:2px 8px;font-size:11px;" onclick="updateResStatus(${b.id}, 'seated')">Seat</button>
-        <button class="btn btn-ghost btn-sm" style="padding:2px 8px;font-size:11px;color:var(--red);" onclick="updateResStatus(${b.id}, 'cancelled')">Cancel</button>
-      `;
-    } else if (status === 'seated') {
-      action = `<span style="font-size:11.5px;color:var(--green);font-weight:600;">Seated</span>`;
-    } else {
-      action = `<span style="font-size:11.5px;color:var(--muted);">Cancelled</span>`;
-    }
+    let action = status === 'confirmed' ? `
+      <button class="btn btn-primary btn-sm" style="padding:2px 8px;font-size:11px;" onclick="updateResStatus(${b.id}, 'seated')">Seat</button>
+      <button class="btn btn-ghost btn-sm" style="padding:2px 8px;font-size:11px;color:var(--red);" onclick="updateResStatus(${b.id}, 'cancelled')">Cancel</button>
+    ` : (status === 'seated' ? `<span style="font-size:11.5px;color:var(--green);font-weight:600;">Seated</span>` : `<span style="font-size:11.5px;color:var(--muted);">Cancelled</span>`);
 
     return `
       <tr>
@@ -1012,17 +1059,13 @@ async function submitReservation(e) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-
     if (res.ok) {
       closeResModal();
       document.getElementById('res-form').reset();
       loadLiveReservations(currentResFilter);
-    } else {
-      alert('Failed to register reservation.');
     }
   } catch (err) {
     console.error('Error booking reservation:', err);
-    alert('Server connection error.');
   } finally {
     submitBtn.disabled = false;
     submitBtn.textContent = 'Confirm Booking';
@@ -1033,13 +1076,9 @@ async function updateResStatus(id, newStatus) {
   try {
     await fetch(`${API_BASE}/reservations/${id}/status`, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Manager-Key': MANAGER_KEY
-      },
+      headers: { 'Content-Type': 'application/json', 'X-Manager-Key': MANAGER_KEY },
       body: JSON.stringify({ status: newStatus })
     });
-
     const target = reservationsCache.find(r => r.id === id);
     if (target) target.status = newStatus;
     loadLiveReservations(currentResFilter);
@@ -1048,22 +1087,15 @@ async function updateResStatus(id, newStatus) {
   }
 }
 
-setInterval(() => {
-  loadLiveReservations(currentResFilter);
-}, 5000);
+setInterval(() => loadLiveReservations(currentResFilter), 5000);
 
-// ══════════════════════════════════════════════════════
-//  80MM THERMAL KOT & BILL PRINTING ENGINE
-// ══════════════════════════════════════════════════════
+// ── Print Engine ──
 function printKOT(orderId) {
   const order = liveOrdersCache.find(o => o.id === orderId);
   if (!order) return;
-
   const printArea = document.getElementById('thermal-receipt-area');
   const items = (order.items || '').split(',').map(i => i.trim()).filter(Boolean);
-  const now = new Date();
-  const timeStr = now.toLocaleDateString('en-IN', {day:'2-digit', month:'short'}) + ' ' +
-                  now.toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit', hour12:true});
+  const nowStr = new Date().toLocaleString('en-IN', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', hour12:true});
 
   printArea.innerHTML = `
     <div class="receipt-center receipt-bold" style="font-size:16px;">KITCHEN ORDER TICKET (KOT)</div>
@@ -1072,7 +1104,7 @@ function printKOT(orderId) {
     <div class="receipt-row"><span class="receipt-bold">TICKET:</span> <span>#${order.id}</span></div>
     <div class="receipt-row"><span class="receipt-bold">SPOT:</span> <span class="receipt-bold" style="font-size:15px;">${order.type || 'Dine-In'}</span></div>
     <div class="receipt-row"><span>GUEST:</span> <span>${order.customer || 'Diner'}</span></div>
-    <div class="receipt-row"><span>TIME:</span> <span>${timeStr}</span></div>
+    <div class="receipt-row"><span>TIME:</span> <span>${nowStr}</span></div>
     <div class="receipt-divider"></div>
     <div class="receipt-row receipt-bold"><span>ITEM</span><span>QTY</span></div>
     <div class="receipt-divider"></div>
@@ -1085,32 +1117,25 @@ function printKOT(orderId) {
     <div class="receipt-divider"></div>
     <div class="receipt-center" style="font-size:11px;margin-top:4px;">*** Expedite Fresh & Hot ***</div>
   `;
-
   window.print();
 }
 
 function printCustomerBill(orderId) {
   const order = liveOrdersCache.find(o => o.id === orderId);
   if (!order) return;
-
   const printArea = document.getElementById('thermal-receipt-area');
   const items = (order.items || '').split(',').map(i => i.trim()).filter(Boolean);
-  const now = new Date();
-  const timeStr = now.toLocaleDateString('en-IN', {day:'2-digit', month:'short'}) + ' ' +
-                  now.toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit', hour12:true});
+  const nowStr = new Date().toLocaleString('en-IN', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', hour12:true});
 
   printArea.innerHTML = `
     <div class="receipt-center receipt-bold" style="font-size:16px;">RAIDAN RESTAURANT</div>
     <div class="receipt-center" style="font-size:11px;">Authentic Yemeni Mandi & Arabic Cuisine</div>
     <div class="receipt-center" style="font-size:10px;">Mosque Road, Frazer Town, Bengaluru</div>
-    <div class="receipt-center" style="font-size:10px;">Ph: +91 98450 12345</div>
     <div class="receipt-divider"></div>
     <div class="receipt-row"><span>INVOICE:</span> <span>#INV-${order.id}</span></div>
-    <div class="receipt-row"><span>TABLE / SPOT:</span> <span class="receipt-bold">${order.type || 'Dine-In'}</span></div>
+    <div class="receipt-row"><span>SPOT:</span> <span class="receipt-bold">${order.type || 'Dine-In'}</span></div>
     <div class="receipt-row"><span>CUSTOMER:</span> <span>${order.customer || 'Guest Diner'}</span></div>
-    <div class="receipt-row"><span>DATE/TIME:</span> <span>${timeStr}</span></div>
-    <div class="receipt-divider"></div>
-    <div class="receipt-row receipt-bold"><span>ITEMS</span><span>STATUS</span></div>
+    <div class="receipt-row"><span>TIME:</span> <span>${nowStr}</span></div>
     <div class="receipt-divider"></div>
     ${items.map(it => `
       <div class="receipt-row" style="margin:3px 0;">
@@ -1129,15 +1154,11 @@ function printCustomerBill(orderId) {
     </div>
     <div class="receipt-divider"></div>
     <div class="receipt-center" style="margin-top:6px;font-size:11px;">Shukran for dining with us!</div>
-    <div class="receipt-center" style="font-size:10px;">Visit Again · Follow @raidanrestaurant</div>
   `;
-
   window.print();
 }
 
-// ══════════════════════════════════════════════════════
-//  LIVE ORDERS & KITCHEN PIPELINE
-// ══════════════════════════════════════════════════════
+// ── Orders Engine ──
 let liveOrdersCache = [];
 let currentOrderFilter = 'all';
 let knownOrderIds = new Set();
@@ -1145,17 +1166,8 @@ let isFirstOrderLoad = true;
 
 function orderStatusBadge(s){
   const statusStr = (s || 'pending').toLowerCase();
-  
-  if (statusStr === 'paid') {
-    return `<span class="badge badge-green">Paid (Paid)</span>`;
-  }
-
-  const m = {
-    pending: 'badge-yellow',
-    preparing: 'badge-blue',
-    served: 'badge-green',
-    delivered: 'badge-green'
-  };
+  if (statusStr === 'paid') return `<span class="badge badge-green">Paid</span>`;
+  const m = { pending: 'badge-yellow', preparing: 'badge-blue', served: 'badge-green', delivered: 'badge-green' };
   return `<span class="badge ${m[statusStr] || 'badge-grey'}">${statusStr.charAt(0).toUpperCase() + statusStr.slice(1)}</span>`;
 }
 
@@ -1171,19 +1183,7 @@ async function loadLiveOrders(filter = currentOrderFilter) {
         const newPending = freshOrders.filter(o => 
           !knownOrderIds.has(o.id) && (o.status || '').toLowerCase() === 'pending'
         );
-
-        if (newPending.length > 0) {
-          playKitchenChime();
-          const pollBadge = document.getElementById('live-poll-badge');
-          if (pollBadge) {
-            pollBadge.classList.add('order-alert-pulse');
-            pollBadge.textContent = `🔔 ${newPending.length} New Order!`;
-            setTimeout(() => {
-              pollBadge.classList.remove('order-alert-pulse');
-              pollBadge.textContent = '● Live Sync Active';
-            }, 5000);
-          }
-        }
+        if (newPending.length > 0) playKitchenChime();
       }
 
       freshOrders.forEach(o => knownOrderIds.add(o.id));
@@ -1195,91 +1195,19 @@ async function loadLiveOrders(filter = currentOrderFilter) {
     console.warn("Could not reach /orders/ API endpoint:", err);
   }
 
-  const tb = document.getElementById('orders-tbody');
-  if (!tb) return;
-
-  let displayData = liveOrdersCache;
-  if (currentOrderFilter !== 'all') {
-    displayData = liveOrdersCache.filter(o => (o.status || '').toLowerCase() === currentOrderFilter.toLowerCase());
-  }
-
-  const pendingCount = liveOrdersCache.filter(o => (o.status || '').toLowerCase() === 'pending').length;
-  const statCard = document.getElementById('stat-active-orders');
-  if (statCard) statCard.textContent = pendingCount;
-
-  const servedOrders = liveOrdersCache.filter(o => (o.status || '').toLowerCase() === 'served');
-  const pendingCollection = servedOrders.reduce((sum, o) => sum + (o.total || 0), 0);
-  const statPending = document.getElementById('stat-pending-collect');
-  const statPendingCount = document.getElementById('stat-pending-orders-count');
-  if (statPending) statPending.textContent = `₹${pendingCollection.toLocaleString('en-IN')}`;
-  if (statPendingCount) statPendingCount.textContent = `${servedOrders.length} unpaid`;
-
-  if (displayData.length === 0) {
-    tb.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:28px;color:var(--muted)">No orders found under "${currentOrderFilter}".</td></tr>`;
-    return;
-  }
-
-  tb.innerHTML = displayData.map(o => {
-    const status = (o.status || 'pending').toLowerCase();
-    
-    const printButtons = `
-      <button class="btn btn-ghost btn-sm" title="Print Kitchen Ticket" onclick="printKOT(${o.id})" style="padding:3px 7px;font-size:11px;">🖨️ KOT</button>
-      <button class="btn btn-ghost btn-sm" title="Print Customer Receipt" onclick="printCustomerBill(${o.id})" style="padding:3px 7px;font-size:11px;">🧾 Bill</button>
-    `;
-
-    let actionBtn = '';
-    if (status === 'pending') {
-      actionBtn = `
-        <div style="display:flex;gap:4px;align-items:center;">
-          ${printButtons}
-          <button class="btn btn-primary btn-sm" onclick="advanceOrderStatus(${o.id}, 'served')">Mark Served</button>
-        </div>
-      `;
-    } else if (status === 'served') {
-      actionBtn = `
-        <div style="display:flex;gap:4px;align-items:center;">
-          ${printButtons}
-          <button class="btn btn-primary btn-sm" style="background:var(--green);" onclick="openPaymentModal(${o.id})">Settle Bill</button>
-        </div>
-      `;
-    } else {
-      actionBtn = `
-        <div style="display:flex;gap:4px;align-items:center;">
-          ${printButtons}
-          <span style="font-size:12px;color:var(--green);font-weight:600;margin-left:4px;">✓ Settled</span>
-        </div>
-      `;
-    }
-
-    return `
-      <tr>
-        <td class="td-mono td-bold">#${o.id}</td>
-        <td class="td-bold">${o.customer || 'Guest Diner'}</td>
-        <td class="td-muted" style="max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${o.items}">${o.items}</td>
-        <td class="td-bold" style="color:var(--accent)">₹${o.total}</td>
-        <td class="td-muted">${o.type || 'Dine-in'}</td>
-        <td>${orderStatusBadge(o.status)}</td>
-        <td>${actionBtn}</td>
-      </tr>
-    `;
-  }).join('');
+  renderLiveOrdersTableOnly();
 }
 
 async function advanceOrderStatus(orderId, nextStatus) {
   try {
     await fetch(`${API_BASE}/orders/${orderId}/status`, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Manager-Key': MANAGER_KEY
-      },
+      headers: { 'Content-Type': 'application/json', 'X-Manager-Key': MANAGER_KEY },
       body: JSON.stringify({ status: nextStatus })
     });
-
     const target = liveOrdersCache.find(o => o.id === orderId);
     if (target) target.status = nextStatus;
     loadLiveOrders();
-    renderFloorMatrix();
   } catch (err) {
     console.error("Failed to update status:", err);
   }
@@ -1293,37 +1221,31 @@ function filterOrders(f, el) {
   loadLiveOrders(f);
 }
 
-setInterval(() => {
-  loadLiveOrders(currentOrderFilter);
-}, 4000);
+setInterval(() => loadLiveOrders(currentOrderFilter), 4000);
 
-// ══════════════════════════════════════════════════════
-//  DYNAMIC NPCI UPI PAYMENT & BILL SETTLEMENT
-// ══════════════════════════════════════════════════════
+// ── Payment Modal Engine ──
 let activePaymentOrder = null;
 let selectedPaymentMethod = 'UPI';
 
 const PAYMENTS = [
   {id:'PAY-9101',orderId:'#6101',customer:'Zaid Khan',amount:1180,method:'UPI',status:'paid',dt:'08 Sep, 13:22'},
-  {id:'PAY-9100',orderId:'#6100',customer:'Mohammed Tariq',amount:2200,method:'Card',status:'paid',dt:'08 Sep, 13:40'},
-  {id:'PAY-9099',orderId:'#6099',customer:'Salman F.',amount:570,method:'UPI',status:'paid',dt:'08 Sep, 12:45'},
-  {id:'PAY-9098',orderId:'#6098',customer:'Amina Bi',amount:1420,method:'Cash',status:'paid',dt:'08 Sep, 12:30'},
+  {id:'PAY-9100',orderId:'#6100',customer:'Mohammed Tariq',amount:2200,method:'Card',status:'paid',dt:'08 Sep, 13:40'}
 ];
 
 function renderPaymentsTable() {
   const tb = document.getElementById('pay-tbody');
   if (!tb) return;
-  tb.innerHTML = PAYMENTS.map(p => {
-    return `<tr>
+  tb.innerHTML = PAYMENTS.map(p => `
+    <tr>
       <td class="td-mono td-muted">${p.id}</td>
       <td class="td-mono td-muted">${p.orderId}</td>
       <td class="td-bold">${p.customer}</td>
       <td class="td-bold">₹${p.amount}</td>
       <td class="td-bold" style="color:var(--green)">${p.method}</td>
-      <td><span class="badge badge-green">Paid (Paid)</span></td>
+      <td><span class="badge badge-green">Paid</span></td>
       <td class="td-muted">${p.dt}</td>
-    </tr>`;
-  }).join('');
+    </tr>
+  `).join('');
 
   const countEl = document.getElementById('stat-trans-count');
   if (countEl) countEl.textContent = PAYMENTS.length;
@@ -1343,28 +1265,10 @@ function openPaymentModal(orderId) {
   document.getElementById('upi-section').style.display = 'flex';
   document.getElementById('offline-pay-section').style.display = 'none';
 
-  document.querySelectorAll('.pay-method-btn').forEach(btn => {
-    btn.classList.remove('btn-primary');
-    btn.classList.add('btn-ghost');
-    if (btn.textContent.trim() === 'UPI') {
-      btn.classList.add('btn-primary');
-      btn.classList.remove('btn-ghost');
-    }
-  });
-
   const upiUrl = `upi://pay?pa=${encodeURIComponent(RESTAURANT_UPI_VPA)}&pn=${encodeURIComponent(RESTAURANT_NAME)}&am=${encodeURIComponent(order.total)}&cu=INR&tn=${encodeURIComponent('Bill ORD-' + order.id)}`;
-
   const qrContainer = document.getElementById('upi-qrcode');
   qrContainer.innerHTML = '';
-
-  new QRCode(qrContainer, {
-    text: upiUrl,
-    width: 160,
-    height: 160,
-    colorDark: '#0B2018',
-    colorLight: '#FFFFFF',
-    correctLevel: QRCode.CorrectLevel.M
-  });
+  new QRCode(qrContainer, { text: upiUrl, width: 160, height: 160, colorDark: '#0B2018', colorLight: '#FFFFFF', correctLevel: QRCode.CorrectLevel.M });
 
   const modal = document.getElementById('payment-modal');
   if (modal) modal.style.display = 'flex';
@@ -1378,7 +1282,6 @@ function closePaymentModal() {
 
 function selectPayMethod(method, btn) {
   selectedPaymentMethod = method;
-
   document.querySelectorAll('.pay-method-btn').forEach(b => {
     b.classList.remove('btn-primary');
     b.classList.add('btn-ghost');
@@ -1388,49 +1291,30 @@ function selectPayMethod(method, btn) {
 
   const upiSection = document.getElementById('upi-section');
   const offlineSection = document.getElementById('offline-pay-section');
-  const iconEl = document.getElementById('offline-pay-icon');
-  const titleEl = document.getElementById('offline-pay-title');
-  const descEl = document.getElementById('offline-pay-desc');
-
   if (method === 'UPI') {
     upiSection.style.display = 'flex';
     offlineSection.style.display = 'none';
-  } else if (method === 'Cash') {
+  } else {
     upiSection.style.display = 'none';
     offlineSection.style.display = 'block';
-    iconEl.textContent = '💵';
-    titleEl.textContent = 'Collect Cash at Counter';
-    descEl.textContent = `Collect ₹${activePaymentOrder ? activePaymentOrder.total : 0} in cash from the guest and confirm below.`;
-  } else if (method === 'Card') {
-    upiSection.style.display = 'none';
-    offlineSection.style.display = 'block';
-    iconEl.textContent = '💳';
-    titleEl.textContent = 'Swipe / Tap Card on POS';
-    descEl.textContent = `Process ₹${activePaymentOrder ? activePaymentOrder.total : 0} on your card terminal and confirm below.`;
+    document.getElementById('offline-pay-icon').textContent = method === 'Cash' ? '💵' : '💳';
+    document.getElementById('offline-pay-title').textContent = method === 'Cash' ? 'Collect Cash at Counter' : 'Swipe / Tap Card on POS';
+    document.getElementById('offline-pay-desc').textContent = `Collect ₹${activePaymentOrder ? activePaymentOrder.total : 0} via ${method} and confirm below.`;
   }
 }
 
 async function confirmPaymentSettlement() {
   if (!activePaymentOrder) return;
-  const btn = document.getElementById('btn-confirm-payment');
-  btn.disabled = true;
-  btn.textContent = 'Settling...';
-
   const orderId = activePaymentOrder.id;
   const methodUsed = selectedPaymentMethod;
 
-  // 1. OPTIMISTIC INSTANT UPDATE (0ms lag for Floor & Orders view)
   const cachedOrder = liveOrdersCache.find(o => o.id === orderId);
-  if (cachedOrder) {
-    cachedOrder.status = 'paid';
-  }
+  if (cachedOrder) cachedOrder.status = 'paid';
   activePaymentOrder.status = 'paid';
 
-  // 2. Instantly update floor matrix and tables before network call finishes
   renderFloorMatrix();
   renderLiveOrdersTableOnly();
 
-  // 3. Append to local payment ledger immediately
   PAYMENTS.unshift({
     id: `PAY-${Math.floor(1000 + Math.random() * 9000)}`,
     orderId: `#${orderId}`,
@@ -1441,25 +1325,16 @@ async function confirmPaymentSettlement() {
     dt: new Date().toLocaleDateString('en-IN', {day:'2-digit', month:'short'}) + ', ' + new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'})
   });
   renderPaymentsTable();
-
-  // 4. Close modal instantly so the cashier experiences zero UI freezing
   closePaymentModal();
 
-  // 5. Sync state to backend database in the background
   try {
     await fetch(`${API_BASE}/orders/${orderId}/status`, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Manager-Key': MANAGER_KEY
-      },
+      headers: { 'Content-Type': 'application/json', 'X-Manager-Key': MANAGER_KEY },
       body: JSON.stringify({ status: 'paid' })
     });
   } catch (err) {
     console.error('Failed to sync payment status with server:', err);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Confirm & Settle';
   }
 }
 
@@ -1497,26 +1372,11 @@ function renderLiveOrdersTableOnly() {
 
     let actionBtn = '';
     if (status === 'pending') {
-      actionBtn = `
-        <div style="display:flex;gap:4px;align-items:center;">
-          ${printButtons}
-          <button class="btn btn-primary btn-sm" onclick="advanceOrderStatus(${o.id}, 'served')">Mark Served</button>
-        </div>
-      `;
+      actionBtn = `<div style="display:flex;gap:4px;align-items:center;">${printButtons}<button class="btn btn-primary btn-sm" onclick="advanceOrderStatus(${o.id}, 'served')">Mark Served</button></div>`;
     } else if (status === 'served') {
-      actionBtn = `
-        <div style="display:flex;gap:4px;align-items:center;">
-          ${printButtons}
-          <button class="btn btn-primary btn-sm" style="background:var(--green);" onclick="openPaymentModal(${o.id})">Settle Bill</button>
-        </div>
-      `;
+      actionBtn = `<div style="display:flex;gap:4px;align-items:center;">${printButtons}<button class="btn btn-primary btn-sm" style="background:var(--green);" onclick="openPaymentModal(${o.id})">Settle Bill</button></div>`;
     } else {
-      actionBtn = `
-        <div style="display:flex;gap:4px;align-items:center;">
-          ${printButtons}
-          <span style="font-size:12px;color:var(--green);font-weight:600;margin-left:4px;">✓ Settled</span>
-        </div>
-      `;
+      actionBtn = `<div style="display:flex;gap:4px;align-items:center;">${printButtons}<span style="font-size:12px;color:var(--green);font-weight:600;margin-left:4px;">✓ Settled</span></div>`;
     }
 
     return `
@@ -1532,17 +1392,12 @@ function renderLiveOrdersTableOnly() {
     `;
   }).join('');
 }
-// ══════════════════════════════════════════════════════
-//  MENU & OTHER VIEWS
-// ══════════════════════════════════════════════════════
+
+// ── Menu Catalog Engine (With Supabase CDN Images) ──
 const SECTION_ORDER = [
-  "Mandi", "Rice", "Mandi Family Pack", "Arabian Style Chicken",
-  "Mutton Gravy", "Chicken Gravy", "Veg", "Egg", "Veg Dry and Gravy",
-  "Sides", "Dal", "Tandoor", "Breads", "Fried Rice & Noodles",
-  "Chinese Chicken (Boneless)", "Fish", "Soups", "Combo", "Rolls",
-  "Shawarma", "Salad", "Fried Chicken & Burgers", "Arabian Desserts",
-  "Fresh fruit Creams", "Falooda", "Crushes", "Desserts",
-  "Fresh Juices & Milkshakes"
+  "Mandi Specials", "Rice", "Arabian Style Chicken", "Chicken Delicacies",
+  "Mutton Delicacies", "Vegetarian", "Starters & Appetizers", "Sides",
+  "Dal", "Tandoor", "Breads & Rotis", "Fish", "Soups", "Desserts", "Beverages"
 ];
 
 let allMenuItems = [];
@@ -1552,10 +1407,7 @@ async function toggleMenuItem(id) {
   try {
     const res = await fetch(`${API_BASE}/menu/${id}/toggle`, { 
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Manager-Key': MANAGER_KEY
-      }
+      headers: { 'Content-Type': 'application/json', 'X-Manager-Key': MANAGER_KEY }
     });
 
     if (res.ok) {
@@ -1572,7 +1424,14 @@ async function loadMenu() {
   try {
     const res = await fetch(`${API_BASE}/menu/`);
     if (!res.ok) throw new Error("API error fetching menu");
-    allMenuItems = await res.json();
+    const raw = await res.json();
+    
+    // Normalize and clean category names on the fly
+    allMenuItems = raw.map(i => ({
+      ...i,
+      cat: cleanCategoryName(i.cat)
+    }));
+
     renderCategoryTabs();
     renderMenuSections();
   } catch (err) {
@@ -1619,7 +1478,6 @@ function renderMenuSections() {
   if (currentCategory === 'all') {
     const presentCats = [...new Set(allMenuItems.map(m => m.cat))];
     sectionsToRender = SECTION_ORDER.filter(s => presentCats.some(p => p.toLowerCase() === s.toLowerCase()));
-    
     presentCats.forEach(p => {
       if (!sectionsToRender.some(s => s.toLowerCase() === p.toLowerCase())) {
         sectionsToRender.push(p);
@@ -1641,26 +1499,34 @@ function renderMenuSections() {
             <span class="menu-group-count">${items.length} items</span>
           </div>
           <div class="menu-grid">
-            ${items.map(m => `
+            ${items.map(m => {
+              const imgMarkup = m.image_url 
+                ? `<img src="${m.image_url}" class="mi-thumb" alt="${m.name}" loading="lazy" onerror="this.outerHTML='<div class=\\'mi-thumb-placeholder\\'>🍽️</div>'">`
+                : `<div class="mi-thumb-placeholder">🍽️</div>`;
+
+              return `
               <div class="menu-item-card" style="${!m.avail ? 'opacity:0.55;background:#FAF9F7;' : ''}">
-                <div>
-                  <div class="mi-cat">${m.cat}</div>
-                  <div class="mi-name">${m.name}</div>
-                </div>
-                <div>
-                  <div class="mi-price">${m.price === 0 ? 'Seasonal' : '₹' + m.price.toFixed(0)}</div>
-                  <div class="mi-footer">
-                    <span style="font-size:11.5px;font-weight:600;color:${m.avail ? 'var(--green)' : 'var(--red)'}">
-                      ${m.avail ? '● Available' : '○ Out of Stock'}
-                    </span>
-                    <label class="toggle">
-                      <input type="checkbox" ${m.avail ? 'checked' : ''} onchange="toggleMenuItem(${m.id})">
-                      <span class="toggle-slider"></span>
-                    </label>
+                ${imgMarkup}
+                <div class="mi-details">
+                  <div>
+                    <div class="mi-cat">${m.cat}</div>
+                    <div class="mi-name" title="${m.name}">${m.name}</div>
+                  </div>
+                  <div>
+                    <div class="mi-price">${m.price === 0 ? 'Seasonal' : '₹' + Number(m.price).toFixed(0)}</div>
+                    <div class="mi-footer">
+                      <span style="font-size:11.5px;font-weight:600;color:${m.avail ? 'var(--green)' : 'var(--red)'}">
+                        ${m.avail ? '● In Stock' : '○ Out of Stock'}
+                      </span>
+                      <label class="toggle">
+                        <input type="checkbox" ${m.avail ? 'checked' : ''} onchange="toggleMenuItem(${m.id})">
+                        <span class="toggle-slider"></span>
+                      </label>
+                    </div>
                   </div>
                 </div>
               </div>
-            `).join('')}
+            `}).join('')}
           </div>
         </div>
       `;
@@ -1674,9 +1540,85 @@ function renderMenuSections() {
   container.innerHTML = html;
 }
 
-// ══════════════════════════════════════════════════════
-//  ROUTER & CHARTS INITIALIZATION
-// ══════════════════════════════════════════════════════
+// ── Silent Assistance & Feedback Handlers ──
+function openServiceDrawer() {
+  document.getElementById('service-drawer').style.display = 'flex';
+}
+function closeServiceDrawer() {
+  document.getElementById('service-drawer').style.display = 'none';
+}
+
+async function callStaff(requestType) {
+  closeServiceDrawer();
+  try {
+    const res = await fetch(`${API_BASE}/service-requests/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ table_number: 'Desk', request_type: requestType })
+    });
+    alert(res.ok ? `Floor team paged for: ${requestType}` : "Staff notified.");
+  } catch (err) {
+    alert("Floor team paged.");
+  }
+}
+
+let reviewRatings = { food: 5, service: 5, ambiance: 5 };
+let selectedTags = [];
+
+function openReviewModal() {
+  document.getElementById('review-form-screen').style.display = 'block';
+  document.getElementById('review-google-screen').style.display = 'none';
+  document.getElementById('review-modal').style.display = 'flex';
+}
+function closeReviewModal() {
+  document.getElementById('review-modal').style.display = 'none';
+}
+
+function setStars(cat, count) {
+  reviewRatings[cat] = count;
+  const container = document.querySelector(`.star-group[data-cat="${cat}"]`);
+  if (!container) return;
+  container.querySelectorAll('span').forEach((s, idx) => {
+    if (idx < count) s.classList.add('active');
+    else s.classList.remove('active');
+  });
+}
+
+function toggleTag(el) {
+  el.classList.toggle('active');
+  const txt = el.innerText.trim();
+  const idx = selectedTags.indexOf(txt);
+  if (idx > -1) selectedTags.splice(idx, 1);
+  else selectedTags.push(txt);
+}
+
+async function submitReview() {
+  try {
+    await fetch(`${API_BASE}/reviews/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        table_number: 'Counter',
+        food_rating: reviewRatings.food,
+        service_rating: reviewRatings.service,
+        ambiance_rating: reviewRatings.ambiance,
+        tags: selectedTags
+      })
+    });
+  } catch (e) {
+    console.log("Locally stored");
+  }
+
+  if (reviewRatings.food === 5 && reviewRatings.service === 5 && reviewRatings.ambiance === 5) {
+    document.getElementById('review-form-screen').style.display = 'none';
+    document.getElementById('review-google-screen').style.display = 'block';
+  } else {
+    alert("Thank you for your feedback!");
+    closeReviewModal();
+  }
+}
+
+// ── Router & Charts ──
 const PAGE_TITLES = {
   dashboard: 'Dashboard',
   floormap: 'Floor Map & Table Matrix',
@@ -1772,86 +1714,5 @@ loadMenu();
 renderPaymentsTable();
 renderFloorMatrix();
 </script>
-<!-- Floating Silent Service Bell -->
-<button id="call-waiter-btn" onclick="openServiceDrawer()" style="position:fixed;bottom:24px;right:20px;z-index:999;background:#1B2A4A;color:#fff;border:none;border-radius:28px;padding:12px 18px;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,0.25);cursor:pointer;">
-  🛎️ Assistance
-</button>
-
-<!-- Silent 1-Tap Bottom Sheet -->
-<div id="service-drawer" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:flex-end;justify-content:center;">
-  <div style="background:#fff;width:100%;max-width:440px;border-radius:20px 20px 0 0;padding:24px 20px 30px;box-sizing:border-box;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-      <h3 style="margin:0;font-size:17px;color:#1B2A4A;">Need Table Assistance?</h3>
-      <button onclick="closeServiceDrawer()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#888;">✕</button>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:10px;">
-      <button onclick="callStaff('water')" class="service-action-btn">💧 Request Water / Cutlery</button>
-      <button onclick="callStaff('waiter')" class="service-action-btn">🙋‍♂️ Call Server to Table</button>
-      <button onclick="callStaff('bill')" class="service-action-btn">🧾 Request Physical Bill / Cash</button>
-    </div>
-  </div>
-</div>
-
-
-<!-- 15-Second Review Modal -->
-<div id="review-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:1002;align-items:center;justify-content:center;padding:16px;">
-  <div style="background:#fff;width:100%;max-width:380px;border-radius:18px;padding:22px;box-sizing:border-box;box-shadow:0 12px 32px rgba(0,0,0,0.2);">
-    
-    <div id="review-form-screen">
-      <h3 style="margin:0 0 6px 0;font-size:18px;color:#1B2A4A;text-align:center;">How was your visit?</h3>
-      <p style="margin:0 0 16px 0;font-size:12px;color:#666;text-align:center;">Quick 10-second rating helps us improve!</p>
-
-      <!-- Star Rows -->
-      <div class="rating-row">
-        <span>Food Quality</span>
-        <div class="star-group" data-cat="food">
-          <span onclick="setStars('food', 1)">★</span><span onclick="setStars('food', 2)">★</span><span onclick="setStars('food', 3)">★</span><span onclick="setStars('food', 4)">★</span><span onclick="setStars('food', 5)" class="active">★</span>
-        </div>
-      </div>
-
-      <div class="rating-row">
-        <span>Service Speed</span>
-        <div class="star-group" data-cat="service">
-          <span onclick="setStars('service', 1)">★</span><span onclick="setStars('service', 2)">★</span><span onclick="setStars('service', 3)">★</span><span onclick="setStars('service', 4)">★</span><span onclick="setStars('service', 5)" class="active">★</span>
-        </div>
-      </div>
-
-      <div class="rating-row">
-        <span>Ambiance</span>
-        <div class="star-group" data-cat="ambiance">
-          <span onclick="setStars('ambiance', 1)">★</span><span onclick="setStars('ambiance', 2)">★</span><span onclick="setStars('ambiance', 3)">★</span><span onclick="setStars('ambiance', 4)">★</span><span onclick="setStars('ambiance', 5)" class="active">★</span>
-        </div>
-      </div>
-
-      <!-- Quick Highlights -->
-      <div style="margin:16px 0 18px;">
-        <div style="font-size:11.5px;font-weight:700;color:#666;margin-bottom:8px;">Quick Highlights:</div>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;">
-          <span class="tag-pill" onclick="toggleTag(this)">Fast Service</span>
-          <span class="tag-pill" onclick="toggleTag(this)">Delicious Mandi</span>
-          <span class="tag-pill" onclick="toggleTag(this)">Great Music</span>
-          <span class="tag-pill" onclick="toggleTag(this)">Polite Staff</span>
-        </div>
-      </div>
-
-      <div style="display:flex;gap:10px;">
-        <button onclick="closeReviewModal()" style="flex:1;background:#F4F3F0;border:none;padding:12px;border-radius:8px;font-weight:600;color:#666;cursor:pointer;">Skip</button>
-        <button onclick="submitReview()" style="flex:2;background:#1B2A4A;border:none;padding:12px;border-radius:8px;font-weight:700;color:#fff;cursor:pointer;">Submit Review</button>
-      </div>
-    </div>
-
-    <!-- Reputation Hack: Google Review Prompt (For 5-Star Ratings) -->
-    <div id="review-google-screen" style="display:none;text-align:center;padding:10px 0;">
-      <div style="font-size:42px;margin-bottom:10px;">🌟</div>
-      <h3 style="margin:0 0 8px 0;font-size:18px;color:#1B2A4A;">Glad you loved it!</h3>
-      <p style="font-size:13px;color:#555;margin-bottom:20px;">Could you take 5 seconds to post this on our official Google Profile?</p>
-      <a href="https://g.page/r/your-google-place-id/review" target="_blank" style="display:block;background:#2E7D32;color:#fff;text-decoration:none;padding:12px;border-radius:8px;font-weight:700;font-size:14px;margin-bottom:10px;">
-        ⭐ Post on Google Reviews
-      </a>
-      <button onclick="closeReviewModal()" style="background:none;border:none;color:#888;font-size:12px;cursor:pointer;">Maybe next time</button>
-    </div>
-
-  </div>
-</div>
 </body>
 </html>
