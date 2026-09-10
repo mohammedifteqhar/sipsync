@@ -139,4 +139,48 @@ async function handleReserve(e) {
 }
 </script>
 </body>
+
+<!-- Cancel Booking Modal / Drawer -->
+<div id="cancel-booking-box" style="margin-top: 24px; padding: 16px; border: 1px dashed #D0CECC; border-radius: 8px;">
+  <h4 style="font-size: 13px; font-weight: 600; margin-bottom: 8px;">Need to cancel your reservation?</h4>
+  <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+    <input type="number" id="cancel-res-id" placeholder="Booking ID (e.g. 14)" style="flex: 1; min-width: 120px; padding: 7px 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px;">
+    <input type="tel" id="cancel-res-phone" placeholder="Phone Number" style="flex: 1; min-width: 140px; padding: 7px 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px;">
+    <button type="button" onclick="cancelMyReservation()" class="btn btn-ghost" style="color: #C0392B; border-color: #C0392B;">Cancel Booking</button>
+  </div>
+</div>
+
+<script>
+async function cancelMyReservation() {
+  const id = document.getElementById('cancel-res-id').value.trim();
+  const phone = document.getElementById('cancel-res-phone').value.trim();
+
+  if (!id || !phone) {
+    alert("Please enter both your Booking ID and Phone Number.");
+    return;
+  }
+
+  if (!confirm(`Are you sure you want to cancel booking #RES-${id}?`)) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/reservations/${id}/cancel`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone })
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      alert(`Booking #RES-${id} has been successfully cancelled. Your table has been released.`);
+      document.getElementById('cancel-res-id').value = '';
+      document.getElementById('cancel-res-phone').value = '';
+    } else {
+      alert(`Could not cancel: ${data.detail || 'An error occurred'}`);
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Server error. Please call the restaurant directly.");
+  }
+}
+</script>
 </html>
