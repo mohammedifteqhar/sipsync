@@ -1538,11 +1538,11 @@ function renderLiveOrdersTableOnly() {
 const SECTION_ORDER = [
   "Mandi", "Rice", "Mandi Family Pack", "Arabian Style Chicken",
   "Mutton Gravy", "Chicken Gravy", "Veg", "Egg", "Veg Dry and Gravy",
-  "Sides", "Dal", "Tandoor", "Breads", "Fried Rice and Noddles",
-  "Chinese chi Boneless", "Fish", "soups", "Combo", "Rolls",
-  "Shawarma", "SAlad", "Fried chi an dBurgers", "Arabian Desserts",
-  "Fresh fruit Creams", "Falooda", "Crushes", "DEsert",
-  "FResh juices and Milk Shakes"
+  "Sides", "Dal", "Tandoor", "Breads", "Fried Rice & Noodles",
+  "Chinese Chicken (Boneless)", "Fish", "Soups", "Combo", "Rolls",
+  "Shawarma", "Salad", "Fried Chicken & Burgers", "Arabian Desserts",
+  "Fresh fruit Creams", "Falooda", "Crushes", "Desserts",
+  "Fresh Juices & Milkshakes"
 ];
 
 let allMenuItems = [];
@@ -1772,5 +1772,86 @@ loadMenu();
 renderPaymentsTable();
 renderFloorMatrix();
 </script>
+<!-- Floating Silent Service Bell -->
+<button id="call-waiter-btn" onclick="openServiceDrawer()" style="position:fixed;bottom:24px;right:20px;z-index:999;background:#1B2A4A;color:#fff;border:none;border-radius:28px;padding:12px 18px;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,0.25);cursor:pointer;">
+  🛎️ Assistance
+</button>
+
+<!-- Silent 1-Tap Bottom Sheet -->
+<div id="service-drawer" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:flex-end;justify-content:center;">
+  <div style="background:#fff;width:100%;max-width:440px;border-radius:20px 20px 0 0;padding:24px 20px 30px;box-sizing:border-box;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <h3 style="margin:0;font-size:17px;color:#1B2A4A;">Need Table Assistance?</h3>
+      <button onclick="closeServiceDrawer()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#888;">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <button onclick="callStaff('water')" class="service-action-btn">💧 Request Water / Cutlery</button>
+      <button onclick="callStaff('waiter')" class="service-action-btn">🙋‍♂️ Call Server to Table</button>
+      <button onclick="callStaff('bill')" class="service-action-btn">🧾 Request Physical Bill / Cash</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- 15-Second Review Modal -->
+<div id="review-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:1002;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#fff;width:100%;max-width:380px;border-radius:18px;padding:22px;box-sizing:border-box;box-shadow:0 12px 32px rgba(0,0,0,0.2);">
+    
+    <div id="review-form-screen">
+      <h3 style="margin:0 0 6px 0;font-size:18px;color:#1B2A4A;text-align:center;">How was your visit?</h3>
+      <p style="margin:0 0 16px 0;font-size:12px;color:#666;text-align:center;">Quick 10-second rating helps us improve!</p>
+
+      <!-- Star Rows -->
+      <div class="rating-row">
+        <span>Food Quality</span>
+        <div class="star-group" data-cat="food">
+          <span onclick="setStars('food', 1)">★</span><span onclick="setStars('food', 2)">★</span><span onclick="setStars('food', 3)">★</span><span onclick="setStars('food', 4)">★</span><span onclick="setStars('food', 5)" class="active">★</span>
+        </div>
+      </div>
+
+      <div class="rating-row">
+        <span>Service Speed</span>
+        <div class="star-group" data-cat="service">
+          <span onclick="setStars('service', 1)">★</span><span onclick="setStars('service', 2)">★</span><span onclick="setStars('service', 3)">★</span><span onclick="setStars('service', 4)">★</span><span onclick="setStars('service', 5)" class="active">★</span>
+        </div>
+      </div>
+
+      <div class="rating-row">
+        <span>Ambiance</span>
+        <div class="star-group" data-cat="ambiance">
+          <span onclick="setStars('ambiance', 1)">★</span><span onclick="setStars('ambiance', 2)">★</span><span onclick="setStars('ambiance', 3)">★</span><span onclick="setStars('ambiance', 4)">★</span><span onclick="setStars('ambiance', 5)" class="active">★</span>
+        </div>
+      </div>
+
+      <!-- Quick Highlights -->
+      <div style="margin:16px 0 18px;">
+        <div style="font-size:11.5px;font-weight:700;color:#666;margin-bottom:8px;">Quick Highlights:</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;">
+          <span class="tag-pill" onclick="toggleTag(this)">Fast Service</span>
+          <span class="tag-pill" onclick="toggleTag(this)">Delicious Mandi</span>
+          <span class="tag-pill" onclick="toggleTag(this)">Great Music</span>
+          <span class="tag-pill" onclick="toggleTag(this)">Polite Staff</span>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;">
+        <button onclick="closeReviewModal()" style="flex:1;background:#F4F3F0;border:none;padding:12px;border-radius:8px;font-weight:600;color:#666;cursor:pointer;">Skip</button>
+        <button onclick="submitReview()" style="flex:2;background:#1B2A4A;border:none;padding:12px;border-radius:8px;font-weight:700;color:#fff;cursor:pointer;">Submit Review</button>
+      </div>
+    </div>
+
+    <!-- Reputation Hack: Google Review Prompt (For 5-Star Ratings) -->
+    <div id="review-google-screen" style="display:none;text-align:center;padding:10px 0;">
+      <div style="font-size:42px;margin-bottom:10px;">🌟</div>
+      <h3 style="margin:0 0 8px 0;font-size:18px;color:#1B2A4A;">Glad you loved it!</h3>
+      <p style="font-size:13px;color:#555;margin-bottom:20px;">Could you take 5 seconds to post this on our official Google Profile?</p>
+      <a href="https://g.page/r/your-google-place-id/review" target="_blank" style="display:block;background:#2E7D32;color:#fff;text-decoration:none;padding:12px;border-radius:8px;font-weight:700;font-size:14px;margin-bottom:10px;">
+        ⭐ Post on Google Reviews
+      </a>
+      <button onclick="closeReviewModal()" style="background:none;border:none;color:#888;font-size:12px;cursor:pointer;">Maybe next time</button>
+    </div>
+
+  </div>
+</div>
 </body>
 </html>

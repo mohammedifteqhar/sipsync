@@ -178,7 +178,64 @@ def update_order_status(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to update order status: {str(err)}"
+        
         )
+        
+from app.models import CustomerReview, ServiceRequest
+
+class ReviewCreate(BaseModel):
+    table_number: str
+    order_id: Optional[int] = None
+    food_rating: int
+    service_rating: int
+    ambiance_rating: int
+    tags: List[str] = []
+
+class ServiceRequestCreate(BaseModel):
+    table_number: str
+    request_type: str
+
+# ── 1. Reviews Endpoint ──
+@app.post("/api/reviews/", status_code=status.HTTP_201_CREATED, tags=["Feedback"])
+def submit_review(data: ReviewCreate, db: Session = Depends(get_db)):
+    review = CustomerReview(
+        table_number=data.table_number,
+        order_id=data.order_id,
+        food_rating=data.food_rating,
+        service_rating=data.service_rating,
+        ambiance_rating=data.ambiance_rating,
+        tags=data.tags
+    )
+    db.add(review)
+    db.commit()
+    db.refresh(review)
+    return {"status": "success", "review_id": review.id}
+
+# ── 2. Silent Waiter Call Endpoints ──
+@app.post("/api/service-requests/", status_code=status.HTTP_201_CREATED, tags=["Assistance"])
+def create_service_request(data: ServiceRequestCreate, db: Session = Depends(get_db)):
+    req = ServiceRequest(
+        table_number=data.table_number,
+        request_type=data.request_type,
+        status="pending"
+    )
+    db.add(req)
+    db.commit()
+    db.refresh(req)
+    return req
+
+@app.get("/api/service-requests/active", tags=["Assistance"])
+def get_active_service_requests(db: Session = Depends(get_db)):
+    """Polled by manager dashboard to show active calls."""
+    return db.query(ServiceRequest).filter(ServiceRequest.status == "pending").all()
+
+@app.patch("/api/service-requests/{req_id}/attend", tags=["Assistance"])
+def attend_service_request(req_id: int, db: Session = Depends(get_db)):
+    req = db.query(ServiceRequest).filter(ServiceRequest.id == req_id).first()
+    if req:
+        req.status = "attended"
+        db.commit()
+    return {"status": "attended"}
 
 @app.get("/", tags=["Health"])
 def health_check():
