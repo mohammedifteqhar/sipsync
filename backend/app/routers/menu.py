@@ -1,96 +1,115 @@
-import os
-from fastapi import APIRouter, Depends, HTTPException, Header, status
-from pydantic import BaseModel
-from sqlalchemy.orm import Session
 from typing import List, Optional
+from fastapi import APIRouter, Depends, HTTPException, Header, status
+from sqlalchemy.orm import Session
+from pydantic import BaseModel
 from app.database import get_db
-from app import models, schemas
 from app.models import MenuItem
 
-router = APIRouter()
+router = APIRouter(prefix="/menu", tags=["Menu"])
 
-MANAGER_API_KEY = os.getenv("MANAGER_API_KEY", "sipsync-admin-2026")
+MANAGER_SECRET = "sipsync-admin-2026"
 
-def verify_manager_access(x_manager_key: Optional[str] = Header(None)):
-    """Guards administrative endpoints against unauthorized public modification."""
-    if x_manager_key != MANAGER_API_KEY:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Unauthorized: Valid manager access key required."
-        )
-    return True
-
-# ── Pydantic Request Models for Menu Operations ──
-class ItemImageUpdate(BaseModel):
+# Pydantic Schemas
+class MenuItemOut(BaseModel):
+    id: int
+    name: str
+    cat: str
+    price: float
+    avail: bool
     image_url: Optional[str] = None
 
-class ItemDetailsUpdate(BaseModel):
+    class Config:
+        from_attributes = True
+
+class MenuItemCreate(BaseModel):
+    name: str
+    cat: str
+    price: float
+    avail: bool = True
+    image_url: Optional[str] = None
+
+class MenuItemUpdate(BaseModel):
     name: Optional[str] = None
     cat: Optional[str] = None
     price: Optional[float] = None
+    avail: Optional[bool] = None
     image_url: Optional[str] = None
 
-@router.get("/")
-def get_public_menu(db: Session = Depends(get_db)):
-    """Public endpoint: Returns all menu items sorted by ID."""
-    return db.query(models.MenuItem).order_by(models.MenuItem.id.asc()).all()
+# 1. Fetch entire catalog
+@router.get("/", response_model=List[MenuItemOut])
+def get_all_menu_items(db: Session = Depends(get_db)):
+    items = db.query(MenuItem).order_by(MenuItem.cat.asc(), MenuItem.name.asc()).all()
+    return items
 
-@router.patch("/{item_id}/toggle")
-def toggle_item_availability(
-    item_id: int, 
-    db: Session = Depends(get_db),
-    _: bool = Depends(verify_manager_access)
-):
-    """Protected endpoint: Only managers can toggle item 86/in-stock availability."""
-    item = db.query(models.MenuItem).filter(models.MenuItem.id == item_id).first()
+# 2. Fetch single item
+@router.get("/{item_id}", response_model=MenuItemOut)
+def get_menu_item(item_id: int, db: Session = Depends(get_db)):
+    item = db.query(MenuItem).filter(MenuItem.id == item_id).first()
     if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return item
+
+# 3. Toggle availability (Manager Action)
+@router.patch("/{item_id}/toggle", response_model=MenuItemOut)
+def toggle_menu_item(
+    item_id: int,
+    db: Session = Depends(get_db),
+    x_manager_key: Optional[str] = Header(None)
+):
+    if x_manager_key != MANAGER_SECRET:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
-            detail=f"Menu item with ID {item_id} does not exist."
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or missing manager key"
         )
+    
+    item = db.query(MenuItem).filter(MenuItem.id == item_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Menu item not found")
     
     item.avail = not item.avail
     db.commit()
     db.refresh(item)
     return item
 
-@router.patch("/{item_id}/image")
-def update_item_image(
-    item_id: int,
-    payload: ItemImageUpdate,
+# 4. Create new menu item
+@router.post("/", response_model=MenuItemOut, status_code=status.HTTP_201_CREATED)
+def create_menu_item(
+    payload: MenuItemCreate,
     db: Session = Depends(get_db),
-    _: bool = Depends(verify_manager_access)
+    x_manager_key: Optional[str] = Header(None)
 ):
-    """Protected endpoint: Allows floor manager to attach or update a dish photo URL."""
-    item = db.query(models.MenuItem).filter(models.MenuItem.id == item_id).first()
-    if not item:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Menu item with ID {item_id} does not exist."
-        )
+    if x_manager_key != MANAGER_SECRET:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
 
-    item.image_url = payload.image_url
+    new_item = MenuItem(
+        name=payload.name,
+        cat=payload.cat,
+        price=payload.price,
+        avail=payload.avail,
+        image_url=payload.image_url
+    )
+    db.add(new_item)
     db.commit()
-    db.refresh(item)
-    return item
+    db.refresh(new_item)
+    return new_item
 
-@router.put("/{item_id}")
+# 5. Update existing menu item
+@router.patch("/{item_id}", response_model=MenuItemOut)
 def update_menu_item(
     item_id: int,
-    payload: ItemDetailsUpdate,
+    payload: MenuItemUpdate,
     db: Session = Depends(get_db),
-    _: bool = Depends(verify_manager_access)
+    x_manager_key: Optional[str] = Header(None)
 ):
-    """Protected endpoint: Allows editing dish name, price, category typos, and image."""
-    item = db.query(models.MenuItem).filter(models.MenuItem.id == item_id).first()
-    if not item:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Menu item with ID {item_id} does not exist."
-        )
+    if x_manager_key != MANAGER_SECRET:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
 
-    update_dict = payload.model_dump(exclude_unset=True)
-    for key, value in update_dict.items():
+    item = db.query(MenuItem).filter(MenuItem.id == item_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    update_data = payload.dict(exclude_unset=True)
+    for key, value in update_data.items():
         setattr(item, key, value)
 
     db.commit()
