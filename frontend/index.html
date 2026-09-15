@@ -863,10 +863,12 @@ const RESTAURANT_SPOTS = {
   vip: ['VIP-01']
 };
 
+// 1. Detect both active orders AND seated/confirmed reservations on table spots
 function getSpotActiveState(spotId) {
   const cleanSpot = spotId.trim().toUpperCase();
   const spotRegex = new RegExp(`(^|[^A-Z0-9])${cleanSpot}([^A-Z0-9]|$)`, 'i');
 
+  // Check live kitchen orders first
   const activeOrder = liveOrdersCache.find(o => {
     const status = (o.status || '').toLowerCase();
     const isUnsettled = status === 'pending' || status === 'served' || status === 'cooking' || status === 'dining';
@@ -874,10 +876,92 @@ function getSpotActiveState(spotId) {
 
     const typeStr = (o.type || '').toUpperCase();
     const custStr = (o.customer || '').toUpperCase();
-
     return spotRegex.test(typeStr) || spotRegex.test(custStr);
   });
 
+  if (activeOrder) {
+    const status = (activeOrder.status || 'pending').toLowerCase();
+    const isCooking = status === 'pending' || status === 'cooking';
+    return {
+      state: isCooking ? 'cooking' : 'dining',
+      label: isCooking ? 'Cooking' : 'Dining',
+      desc: `#${activeOrder.id} · ${activeOrder.customer || 'Diner'}`,
+      amount: `₹${activeOrder.total}`,
+      orderId: activeOrder.id
+    };
+  }
+
+  // Check today's reservations (both 'seated' and 'confirmed')
+  const todayStr = new Date().toISOString().split('T')[0];
+  const activeRes = reservationsCache.find(r => 
+    r.date === todayStr &&
+    ((r.status || '').toLowerCase() === 'seated' || (r.status || '').toLowerCase() === 'confirmed') &&
+    spotRegex.test((r.seating_area || '').toUpperCase())
+  );
+
+  if (activeRes) {
+    const isSeated = (activeRes.status || '').toLowerCase() === 'seated';
+    return {
+      state: isSeated ? 'dining' : 'reserved',
+      label: isSeated ? 'Seated (Dining)' : 'Reserved',
+      desc: `${activeRes.time} · ${activeRes.name} (${activeRes.guests}p)`,
+      amount: '',
+      orderId: null
+    };
+  }
+
+  return {
+    state: 'vacant',
+    label: 'Vacant',
+    desc: 'Available for seating',
+    amount: '',
+    orderId: null
+  };
+}
+
+// 2. Prompt manager to assign table when seating a guest
+async function updateResStatus(id, newStatus) {
+  let assignedTable = null;
+
+  if (newStatus === 'seated') {
+    const target = reservationsCache.find(r => r.id === id);
+    const defaultSuggestion = target && target.seating_area && target.seating_area.includes('Majlis') ? 'M-01' : 'T-01';
+    
+    const input = prompt(`Assign table for ${target ? target.name : 'guest'} (e.g. T-01 to T-14, M-01 to M-07, VIP-01):`, defaultSuggestion);
+    if (!input) return; // Manager cancelled prompt
+    
+    assignedTable = input.trim().toUpperCase();
+  }
+
+  try {
+    const payload = { status: newStatus };
+    if (assignedTable) {
+      const target = reservationsCache.find(r => r.id === id);
+      payload.seating_area = `${assignedTable} · ${target ? target.seating_area : ''}`;
+    }
+
+    const res = await fetch(`${API_BASE}/reservations/${id}/status`, {
+      method: 'PATCH',
+      headers: { 
+        'Content-Type': 'application/json', 
+        'X-Manager-Key': MANAGER_KEY 
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (res.ok) {
+      const target = reservationsCache.find(r => r.id === id);
+      if (target) {
+        target.status = newStatus;
+        if (assignedTable) target.seating_area = payload.seating_area;
+      }
+      loadLiveReservations(currentResFilter);
+      renderFloorMatrix();
+    }
+  } catch (err) {
+    console.error('Error updating reservation status:', err);
+  }
+}
   if (activeOrder) {
     const status = (activeOrder.status || 'pending').toLowerCase();
     const isCooking = status === 'pending' || status === 'cooking';
@@ -914,7 +998,6 @@ function getSpotActiveState(spotId) {
     amount: '',
     orderId: null
   };
-}
 
 function renderFloorMatrix() {
   const renderContainer = (spotList, containerId, labelPrefix) => {
