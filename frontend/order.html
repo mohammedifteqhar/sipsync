@@ -92,7 +92,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-
 .tag-pill{background:#F4F3F0;border:1px solid #D6D4CE;border-radius:14px;padding:5px 10px;font-size:11.5px;cursor:pointer}
 .tag-pill.active{background:#1B2A4A;color:#fff;border-color:#1B2A4A}
 
-/* Success Confirmation Screen */
+/* Success Confirmation Banner */
 .success-screen{position:fixed;inset:0;background:#fff;z-index:400;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
 .success-icon{width:56px;height:56px;border-radius:50%;background:var(--green-bg);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:16px}
 </style>
@@ -271,16 +271,16 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-
 const API_BASE = 'https://sipsync-api-k9tz.onrender.com/api';
 
 const urlParams = new URLSearchParams(window.location.search);
-const TABLE_ID = urlParams.get('table') || 'T-01';
+const TABLE_ID = (urlParams.get('table') || 'T-01').trim().toUpperCase();
 document.getElementById('display-table').textContent = TABLE_ID.startsWith('M') ? `Majlis ${TABLE_ID}` : `Table ${TABLE_ID}`;
 
 let catalog = [];
 let cart = {};
 
-// Clean common spelling mistakes and normalize category strings
 function cleanCategoryName(rawCat) {
   if (!rawCat) return "Main Menu";
   let c = rawCat.trim();
+  const lower = c.toLowerCase();
   
   const corrections = {
     "mandi": "Mandi Specials",
@@ -301,18 +301,10 @@ function cleanCategoryName(rawCat) {
     "breads": "Breads & Rotis"
   };
 
-  const lower = c.toLowerCase();
-  for (const [key, clean] of Object.entries(corrections)) {
-    if (lower === key) return clean;
-  }
-  
-  // Format words nicely if not matched above
-  return c.split(' ')
-          .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-          .join(' ');
+  if (corrections[lower]) return corrections[lower];
+  return c.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
 }
 
-// Generate web-safe alphanumeric DOM ID for scrolling
 function catToId(cat) {
   return 'group-' + cat.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
@@ -323,7 +315,6 @@ async function init() {
     if (!res.ok) throw new Error("Could not fetch menu catalog");
     const rawData = await res.json();
 
-    // Clean category typos on load
     catalog = rawData.map(item => ({
       ...item,
       cat: cleanCategoryName(item.cat)
@@ -361,7 +352,7 @@ function scrollToCategory(targetId, btn) {
 
   const targetEl = document.getElementById(targetId);
   if (targetEl) {
-    const headerOffset = 118; // Sticky header + category nav height
+    const headerOffset = 118;
     const elementPosition = targetEl.getBoundingClientRect().top;
     const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
 
@@ -482,11 +473,12 @@ async function submitOrderToKitchen() {
 
   const itemSummary = items.map(c => `${c.item.name} x${c.qty}`).join(', ') + (orderNotes ? ` (${orderNotes})` : '');
 
+  // Guaranteed matching format for dashboard
   const payload = {
-    customer: `${customerName} (${TABLE_ID})`,
+    customer: `${customerName} [${TABLE_ID}]`,
     items: itemSummary,
     total: grandTotal,
-    type: TABLE_ID.startsWith('M') ? `Majlis (${TABLE_ID})` : `Table (${TABLE_ID})`,
+    type: TABLE_ID,
     status: 'pending'
   };
 
