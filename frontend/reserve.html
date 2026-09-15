@@ -18,6 +18,7 @@
   --muted:#73716D;
   --green:#2E7D55;
   --green-bg:rgba(46,125,85,.1);
+  --red:#C0392B;
 }
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-height:1.4;padding-bottom:60px}
 
@@ -31,7 +32,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-
 .container{max-width:480px;margin:24px auto;padding:0 16px}
 .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;box-shadow:0 4px 18px rgba(0,0,0,.03)}
 .page-heading{font-size:20px;font-weight:700;color:var(--primary);margin-bottom:6px}
-.page-desc{font-size:13px;color:var(--muted);margin-bottom:20px}
+.page-desc{font-size:13px;color:var(--muted);margin-bottom:16px}
+
+/* Landline & Support Desk Bar */
+.desk-bar{background:#FAF9F6;border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--muted);margin-bottom:20px;display:flex;flex-direction:column;gap:3px}
+.desk-bar strong{color:var(--primary)}
 
 /* Form Controls */
 .form-group{margin-bottom:18px}
@@ -45,19 +50,20 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-
 .stepper-btn:active{background:#E9E7E2}
 .stepper-val{flex:1;text-align:center;font-size:15px;font-weight:700}
 
-/* Area Select Pill Grid */
+/* Seating Unit Selection */
 .area-grid{display:grid;grid-template-columns:1fr;gap:10px}
 .area-pill{border:1px solid var(--border);border-radius:10px;padding:12px 14px;cursor:pointer;background:#fff;transition:all .15s}
 .area-pill.active{border-color:var(--accent);background:rgba(184,115,51,0.06)}
 .area-name{font-size:13.5px;font-weight:700;color:var(--primary)}
 .area-desc{font-size:11.5px;color:var(--muted);margin-top:2px}
+.capacity-badge{display:inline-block;background:var(--bg);color:var(--muted);font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;margin-top:4px}
 
 /* Submit Button */
 .btn-submit{width:100%;background:var(--accent);color:#fff;border:none;padding:14px;border-radius:10px;font-size:14.5px;font-weight:700;cursor:pointer;transition:background .15s;margin-top:8px}
 .btn-submit:hover{background:var(--accent-lt)}
 .btn-submit:disabled{background:#D0CECC;cursor:not-allowed}
 
-/* Confirmation Screen */
+/* Confirmation Box */
 .confirm-box{display:none;text-align:center;padding:36px 20px}
 .confirm-icon{width:64px;height:64px;border-radius:50%;background:var(--green-bg);color:var(--green);display:inline-flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:16px}
 .badge-ref{display:inline-block;padding:6px 14px;background:var(--bg);border-radius:6px;font-size:12.5px;font-weight:600;margin:16px 0 24px}
@@ -78,6 +84,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-
     <h1 class="page-heading">Reserve Table / Majlis</h1>
     <p class="page-desc">Reserve your spot in advance for family dining or authentic floor Majlis seating.</p>
 
+    <div class="desk-bar">
+      <div>📞 Front Desk Landline: <strong>+91 80 2548 1234</strong></div>
+      <div>📱 Floor Support: <strong>+91 98450 12345</strong></div>
+    </div>
+
     <form id="booking-form" onsubmit="submitReservation(event)">
       <div class="form-group">
         <label class="label">Your Full Name</label>
@@ -85,8 +96,15 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-
       </div>
 
       <div class="form-group">
-        <label class="label">Contact Phone Number</label>
-        <input type="tel" id="b-phone" class="input-control" required placeholder="e.g. 98450 12345" pattern="[0-9+\s\-]{8,15}">
+        <label class="label">Contact Phone Number (10 Digits)</label>
+        <input type="tel" 
+               id="b-phone" 
+               class="input-control" 
+               required 
+               maxlength="10"
+               pattern="[0-9]{10}"
+               placeholder="10-digit mobile number (e.g. 9845012345)"
+               oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,10)">
       </div>
 
       <div class="form-group">
@@ -118,21 +136,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-
       </div>
 
       <div class="form-group">
-        <label class="label">Seating Preference</label>
-        <div class="area-grid">
-          <div class="area-pill active" onclick="selectArea(this, 'Majlis Cabin (Floor Seating · 6-8 Pax)')">
-            <div class="area-name">🛋️ First Floor Majlis Cabin</div>
-            <div class="area-desc">Authentic Yemeni carpet floor dining (6 to 8 Pax)</div>
-          </div>
-          <div class="area-pill" onclick="selectArea(this, 'Ground Floor Dining (Standard Table)')">
-            <div class="area-name">🪑 Ground Floor Dining Table</div>
-            <div class="area-desc">Standard 4 to 6 seater chair dining</div>
-          </div>
-          <div class="area-pill" onclick="selectArea(this, 'VIP Family Room (Private · 10+ Pax)')">
-            <div class="area-name">👑 VIP Private Family Hall</div>
-            <div class="area-desc">Private secluded hall for large gatherings (10+ Pax)</div>
-          </div>
-        </div>
+        <label class="label">Recommended Seating Unit</label>
+        <div class="area-grid" id="seating-options"></div>
       </div>
 
       <button type="submit" class="btn-submit" id="btn-submit-booking">Confirm Reservation &rarr;</button>
@@ -143,7 +148,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-
     <div class="confirm-icon">&#10003;</div>
     <h2 style="font-size:20px;font-weight:700;margin-bottom:6px">Reservation Confirmed!</h2>
     <p style="font-size:13px;color:var(--muted);max-width:320px;margin:0 auto">
-      We look forward to hosting you at Raidan Restaurant. Your spot has been scheduled on our active floor matrix.
+      We look forward to hosting you at Raidan Restaurant. Your spot has been secured on our floor matrix.
     </p>
     <div class="badge-ref" id="confirm-ref">Booking Ref: #RES-PENDING</div>
     <div>
@@ -157,17 +162,75 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-
 <script>
 const API_BASE = 'https://sipsync-api-k9tz.onrender.com/api';
 
-// Constrain minimum booking date to today
 const today = new Date().toISOString().split('T')[0];
 document.getElementById('b-date').min = today;
 document.getElementById('b-date').value = today;
 
 let currentGuests = 4;
-let selectedAreaText = 'Majlis Cabin (Floor Seating · 6-8 Pax)';
+let selectedAreaText = '';
+
+// Seating units with capacities
+const SEATING_UNITS = [
+  {
+    id: 'table',
+    title: '🪑 Ground Floor Dining Table',
+    desc: 'Standard chair dining (Tables T-01 to T-14)',
+    badge: 'Best for 1 to 6 Pax',
+    min: 1,
+    max: 6,
+    codePrefix: 'T'
+  },
+  {
+    id: 'majlis',
+    title: '🛋️ First Floor Majlis Cabin',
+    desc: 'Authentic Yemeni carpet floor dining (Cabins M-01 to M-07)',
+    badge: 'Ideal for 6 to 8 Pax',
+    min: 5,
+    max: 8,
+    codePrefix: 'M'
+  },
+  {
+    id: 'vip',
+    title: '👑 VIP Private Family Hall',
+    desc: 'Private secluded hall for large gatherings (VIP-01)',
+    badge: 'Designed for 9 to 25 Pax',
+    min: 8,
+    max: 25,
+    codePrefix: 'VIP'
+  }
+];
+
+function renderSeatingOptions() {
+  const container = document.getElementById('seating-options');
+  
+  // Rank seating options by guest count
+  const sorted = [...SEATING_UNITS].sort((a, b) => {
+    const aFits = currentGuests >= a.min && currentGuests <= a.max;
+    const bFits = currentGuests >= b.min && currentGuests <= b.max;
+    return bFits - aFits;
+  });
+
+  container.innerHTML = sorted.map((unit, idx) => {
+    const isRecommended = currentGuests >= unit.min && currentGuests <= unit.max;
+    const isSelected = idx === 0;
+    if (isSelected) {
+      selectedAreaText = `${unit.title} (${unit.badge})`;
+    }
+
+    return `
+      <div class="area-pill ${isSelected ? 'active' : ''}" onclick="selectArea(this, '${unit.title} (${unit.badge})')">
+        <div class="area-name">${unit.title}</div>
+        <div class="area-desc">${unit.desc}</div>
+        <span class="capacity-badge">${isRecommended ? '★ Recommended: ' : ''}${unit.badge}</span>
+      </div>
+    `;
+  }).join('');
+}
 
 function adjustGuests(delta) {
   currentGuests = Math.max(1, Math.min(25, currentGuests + delta));
   document.getElementById('guest-count').textContent = `${currentGuests} Pax`;
+  renderSeatingOptions();
 }
 
 function selectArea(element, areaText) {
@@ -178,13 +241,20 @@ function selectArea(element, areaText) {
 
 async function submitReservation(e) {
   e.preventDefault();
+
+  const phoneInput = document.getElementById('b-phone').value.trim();
+  if (phoneInput.length !== 10) {
+    alert("Please enter a valid 10-digit mobile number.");
+    return;
+  }
+
   const btn = document.getElementById('btn-submit-booking');
   btn.disabled = true;
   btn.textContent = 'Securing spot...';
 
   const payload = {
     name: document.getElementById('b-name').value.trim(),
-    phone: document.getElementById('b-phone').value.trim(),
+    phone: phoneInput,
     guests: currentGuests,
     date: document.getElementById('b-date').value,
     time: document.getElementById('b-time').value,
@@ -207,12 +277,15 @@ async function submitReservation(e) {
     document.getElementById('confirm-ref').textContent = `Booking Ref: #RES-${bookingId} · ${payload.date} at ${payload.time}`;
     document.getElementById('confirm-box').style.display = 'block';
   } catch (err) {
-    alert("Network error. Please try again or call the restaurant directly.");
+    alert("Network error. Please try again or call our front desk directly at +91 80 2548 1234.");
   } finally {
     btn.disabled = false;
     btn.textContent = 'Confirm Reservation →';
   }
 }
+
+// Initial render
+renderSeatingOptions();
 </script>
 </body>
 </html>
