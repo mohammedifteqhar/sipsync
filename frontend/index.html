@@ -37,7 +37,7 @@
 html,body{height:100%;font-family:'Inter',sans-serif;font-size:14px;background:var(--bg);color:var(--text);line-height:1.5}
 input,select,button{font-family:inherit;font-size:inherit}
 
-/* ── 80mm Thermal Receipt & KOT Print Styling ── */
+/* 80mm Thermal Receipt & KOT Print Styling */
 #thermal-receipt-area {
   display: none;
 }
@@ -73,7 +73,7 @@ input,select,button{font-family:inherit;font-size:inherit}
   .receipt-item-name { flex: 1; padding-right: 4px; word-break: break-word; }
 }
 
-/* ── Pulse Alert Animation ── */
+/* Alert Pulse */
 @keyframes pulseBadge {
   0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(184,115,51,0.6); }
   70% { transform: scale(1.05); box-shadow: 0 0 0 8px rgba(184,115,51,0); }
@@ -85,7 +85,7 @@ input,select,button{font-family:inherit;font-size:inherit}
   color: #fff !important;
 }
 
-/* ── Floor Matrix Grid & Units ── */
+/* Floor Matrix Grid */
 .floor-section-header {
   display: flex;
   align-items: center;
@@ -162,24 +162,21 @@ input,select,button{font-family:inherit;font-size:inherit}
 /* Spot state border accents */
 .spot-vacant { border-top: 3px solid var(--green); }
 .spot-vacant .spot-status-dot { background: var(--green); }
-
 .spot-cooking { border-top: 3px solid var(--yellow); background: #FFFCF2; }
 .spot-cooking .spot-status-dot { background: var(--yellow); }
-
 .spot-dining { border-top: 3px solid var(--blue); background: #F8FAFF; }
 .spot-dining .spot-status-dot { background: var(--blue); }
-
 .spot-reserved { border-top: 3px solid #8E44AD; background: #FAF5FF; }
 .spot-reserved .spot-status-dot { background: #8E44AD; }
 
-/* ── Layout ── */
+/* Layout */
 .shell{display:flex;height:100vh;overflow:hidden}
 .sidebar{width:var(--sidebar-w);background:var(--sidebar);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
 .topbar{height:var(--header-h);background:var(--card);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0}
 .content{flex:1;overflow-y:auto;padding:24px}
 
-/* ── Sidebar ── */
+/* Sidebar Elements */
 .sb-brand{padding:20px 18px 16px;border-bottom:1px solid rgba(255,255,255,.08)}
 .sb-brand-name{font-size:17px;font-weight:700;color:#fff;letter-spacing:-.3px}
 .sb-brand-tag{font-size:11px;color:rgba(255,255,255,.38);margin-top:2px;font-weight:300}
@@ -195,14 +192,14 @@ input,select,button{font-family:inherit;font-size:inherit}
 .sb-ava-name{font-size:12.5px;color:rgba(255,255,255,.7);font-weight:500}
 .sb-ava-role{font-size:11px;color:rgba(255,255,255,.3)}
 
-/* ── Topbar ── */
+/* Topbar */
 .topbar-left{display:flex;align-items:center;gap:8px}
 .page-title{font-size:15px;font-weight:600;color:var(--text)}
 .topbar-right{display:flex;align-items:center;gap:12px}
 .topbar-badge{font-size:11.5px;background:var(--accent-dim);color:var(--accent);padding:3px 10px;border-radius:20px;font-weight:500}
 .topbar-time{font-size:12px;color:var(--muted);font-weight:400}
 
-/* ── Stats Cards ── */
+/* Stats Cards */
 .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
 .stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px 20px;position:relative;overflow:hidden}
 .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent);opacity:.4}
@@ -212,7 +209,7 @@ input,select,button{font-family:inherit;font-size:inherit}
 .stat-delta.up{color:var(--green)}
 .stat-delta.dn{color:var(--red)}
 
-/* ── Charts Grid ── */
+/* Charts Grid */
 .charts-grid{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:22px}
 .chart-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px 20px}
 .chart-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px}
@@ -220,7 +217,7 @@ input,select,button{font-family:inherit;font-size:inherit}
 .chart-wrap{position:relative;height:180px;overflow:hidden}
 .chart-wrap-sm{position:relative;height:160px;overflow:hidden}
 
-/* ── Tables ── */
+/* Tables */
 .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
 .section-title{font-size:13.5px;font-weight:600}
 .table-card{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
@@ -234,7 +231,7 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
 .td-bold{font-weight:600}
 .td-mono{font-family:'Inter',monospace;font-size:12px}
 
-/* ── Badges ── */
+/* Badges */
 .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:11.5px;font-weight:600;white-space:nowrap}
 .badge::before{content:'';width:6px;height:6px;border-radius:50%;flex-shrink:0}
 .badge-green{background:var(--green-bg);color:var(--green)}.badge-green::before{background:var(--green)}
@@ -243,23 +240,23 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
 .badge-blue{background:var(--blue-bg);color:var(--blue)}.badge-blue::before{background:var(--blue)}
 .badge-grey{background:#F0EFED;color:var(--muted)}.badge-grey::before{background:#B0AFAC}
 
-/* ── Buttons ── */
+/* Buttons */
 .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;white-space:nowrap}
 .btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent-lt)}
 .btn-ghost{background:transparent;color:var(--text);border:1px solid var(--border)}.btn-ghost:hover{background:var(--bg)}
 .btn-sm{padding:4px 10px;font-size:12px}
 
-/* ── Filter Tabs ── */
+/* Filter Tabs */
 .filter-tabs{display:flex;gap:6px;margin-bottom:16px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:5px;width:100%;overflow-x:auto;white-space:nowrap}
 .ftab{padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12.5px;font-weight:500;color:var(--muted);transition:all .15s;user-select:none;border:none;background:transparent;flex-shrink:0}
 .ftab.active{background:var(--accent);color:#fff}
 .ftab:hover:not(.active){background:var(--bg)}
 
-/* ── Page sections ── */
+/* Page visibility */
 [data-page]{display:none}
 [data-page].active{display:block}
 
-/* ── Menu Section Render ── */
+/* Menu Grid */
 .menu-group-title{display:flex;align-items:center;gap:10px;margin:28px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
 .menu-group-title h3{font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.2px}
 .menu-group-count{font-size:11px;background:var(--accent-dim);color:var(--accent);font-weight:600;padding:2px 8px;border-radius:12px}
@@ -279,7 +276,7 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
 .toggle input:checked+.toggle-slider{background:var(--green)}
 .toggle input:checked+.toggle-slider::before{transform:translateX(18px)}
 
-/* ── Service Actions & Modal ── */
+/* Service Actions */
 .service-action-btn{width:100%;background:#FAF9F7;border:1px solid #E2E0DB;border-radius:10px;padding:12px;font-size:13.5px;font-weight:600;color:#1B2A4A;text-align:left;cursor:pointer;display:flex;align-items:center;gap:8px}
 .service-action-btn:active{background:#ECEAE4}
 .rating-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:13.5px;font-weight:600;color:#333}
@@ -288,7 +285,7 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
 .tag-pill{background:#F4F3F0;border:1px solid #D6D4CE;border-radius:14px;padding:5px 10px;font-size:11.5px;cursor:pointer}
 .tag-pill.active{background:#1B2A4A;color:#fff;border-color:#1B2A4A}
 
-/* ── Activity / Misc ── */
+/* Activity */
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px}
 .activity-item{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
 .activity-item:last-child{border:none}
@@ -304,7 +301,7 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
 <body>
 <div class="shell">
 
-<!-- ── SIDEBAR ── -->
+<!-- SIDEBAR -->
 <nav class="sidebar">
   <div class="sb-brand">
     <div class="sb-brand-name">Raidan Restaurant</div>
@@ -356,7 +353,7 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
   </div>
 </nav>
 
-<!-- ── MAIN ── -->
+<!-- MAIN -->
 <div class="main">
   <div class="topbar">
     <div class="topbar-left">
@@ -567,7 +564,7 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
 </div>
 </div>
 
-<!-- ── RESERVATION MODAL ── -->
+<!-- RESERVATION MODAL -->
 <div id="res-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:10000;align-items:center;justify-content:center;padding:16px;">
   <div style="background:#fff;border-radius:12px;width:100%;max-width:440px;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,0.2);">
     <div style="background:#0B2018;color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;">
@@ -616,7 +613,7 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
   </div>
 </div>
 
-<!-- ── DYNAMIC UPI PAYMENT & BILL SETTLEMENT MODAL ── -->
+<!-- DYNAMIC UPI PAYMENT & BILL SETTLEMENT MODAL -->
 <div id="payment-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10001;align-items:center;justify-content:center;padding:16px;">
   <div style="background:#fff;border-radius:14px;width:100%;max-width:400px;overflow:hidden;box-shadow:0 24px 48px rgba(0,0,0,0.25);display:flex;flex-direction:column;">
     <div style="background:#0B2018;color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;">
@@ -662,10 +659,10 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
   </div>
 </div>
 
-<!-- ── THERMAL RECEIPT / KOT PRINT STAGING ── -->
+<!-- THERMAL RECEIPT / KOT PRINT STAGING -->
 <div id="thermal-receipt-area"></div>
 
-<!-- ── SILENT WAITER ASSISTANCE DRAWER ── -->
+<!-- SILENT WAITER ASSISTANCE DRAWER -->
 <button id="call-waiter-btn" onclick="openServiceDrawer()" style="position:fixed;bottom:24px;right:20px;z-index:999;background:#1B2A4A;color:#fff;border:none;border-radius:28px;padding:12px 18px;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,0.25);cursor:pointer;">
   🛎️ Assistance
 </button>
@@ -684,7 +681,7 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
   </div>
 </div>
 
-<!-- ── 15-SECOND REVIEW MODAL ── -->
+<!-- 15-SECOND REVIEW MODAL -->
 <div id="review-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:1002;align-items:center;justify-content:center;padding:16px;">
   <div style="background:#fff;width:100%;max-width:380px;border-radius:18px;padding:22px;box-sizing:border-box;box-shadow:0 12px 32px rgba(0,0,0,0.2);">
     <div id="review-form-screen">
@@ -747,7 +744,7 @@ const MANAGER_KEY = 'sipsync-admin-2026';
 const RESTAURANT_UPI_VPA = 'raidan@upi';
 const RESTAURANT_NAME = 'Raidan Restaurant';
 
-// ── Category Normalization Dictionary ──
+// Category Normalization Dictionary
 function cleanCategoryName(rawCat) {
   if (!rawCat) return "Main Menu";
   const c = rawCat.trim();
@@ -776,7 +773,7 @@ function cleanCategoryName(rawCat) {
   return c.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
 }
 
-// ── Audio Engine ──
+// Audio Engine
 let audioCtx = null;
 let audioEnabled = true;
 
@@ -806,6 +803,17 @@ function playKitchenChime() {
   gain1.connect(audioCtx.destination);
   osc1.start(now);
   osc1.stop(now + 0.55);
+
+  const osc2 = audioCtx.createOscillator();
+  const gain2 = audioCtx.createGain();
+  osc2.type = 'sine';
+  osc2.frequency.setValueAtTime(1320, now + 0.14);
+  gain2.gain.setValueAtTime(0.35, now + 0.14);
+  gain2.gain.exponentialRampToValueAtTime(0.0001, now + 0.75);
+  osc2.connect(gain2);
+  gain2.connect(audioCtx.destination);
+  osc2.start(now + 0.14);
+  osc2.stop(now + 0.75);
 }
 
 function playReservationChime() {
@@ -848,7 +856,7 @@ document.addEventListener('click', () => {
   if (!audioCtx) initAudioContext();
 }, { once: true });
 
-// ── Floor Matrix Engine ──
+// Floor Matrix Engine
 const RESTAURANT_SPOTS = {
   ground: ['T-01','T-02','T-03','T-04','T-05','T-06','T-07','T-08','T-09','T-10','T-11','T-12','T-13','T-14'],
   majlis: ['M-01','M-02','M-03','M-04','M-05','M-06','M-07'],
@@ -942,7 +950,7 @@ function renderFloorMatrix() {
   renderContainer(RESTAURANT_SPOTS.vip, 'grid-vip', 'VIP Hall');
 }
 
-// ── Reservations Engine ──
+// Reservations Engine
 let reservationsCache = [];
 let currentResFilter = 'all';
 let knownReservationIds = new Set();
@@ -1097,7 +1105,7 @@ async function updateResStatus(id, newStatus) {
 
 setInterval(() => loadLiveReservations(currentResFilter), 5000);
 
-// ── Print Engine ──
+// Print Engine
 function printKOT(orderId) {
   const order = liveOrdersCache.find(o => o.id === orderId);
   if (!order) return;
@@ -1166,7 +1174,7 @@ function printCustomerBill(orderId) {
   window.print();
 }
 
-// ── Orders Engine ──
+// Orders Engine
 let liveOrdersCache = [];
 let currentOrderFilter = 'all';
 let knownOrderIds = new Set();
@@ -1231,7 +1239,7 @@ function filterOrders(f, el) {
 
 setInterval(() => loadLiveOrders(currentOrderFilter), 4000);
 
-// ── Payment Modal Engine ──
+// Payment Modal Engine
 let activePaymentOrder = null;
 let selectedPaymentMethod = 'UPI';
 
@@ -1403,7 +1411,7 @@ function renderLiveOrdersTableOnly() {
   }).join('');
 }
 
-// ── Menu Catalog Engine (With Supabase CDN Images) ──
+// Menu Catalog Engine (With Supabase CDN Images)
 const SECTION_ORDER = [
   "Mandi Specials", "Rice", "Arabian Style Chicken", "Chicken Delicacies",
   "Mutton Delicacies", "Vegetarian", "Starters & Appetizers", "Sides",
@@ -1549,7 +1557,7 @@ function renderMenuSections() {
   container.innerHTML = html;
 }
 
-// ── Silent Assistance & Feedback Handlers ──
+// Silent Assistance & Feedback Handlers
 function openServiceDrawer() {
   document.getElementById('service-drawer').style.display = 'flex';
 }
@@ -1627,7 +1635,7 @@ async function submitReview() {
   }
 }
 
-// ── Router & Charts ──
+// Router & Charts
 const PAGE_TITLES = {
   dashboard: 'Dashboard',
   floormap: 'Floor Map & Table Matrix',
