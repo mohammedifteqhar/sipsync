@@ -61,7 +61,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-
 /* Submit Button */
 .btn-submit{width:100%;background:var(--accent);color:#fff;border:none;padding:14px;border-radius:10px;font-size:14.5px;font-weight:700;cursor:pointer;transition:background .15s;margin-top:8px}
 .btn-submit:hover{background:var(--accent-lt)}
-.btn-submit:disabled{background:#D0CECC;cursor:not-allowed}
+.btn-submit:disabled{background:#D1D0CC;cursor:not-allowed}
 
 /* Confirmation Box */
 .confirm-box{display:none;text-align:center;padding:36px 20px}
@@ -96,7 +96,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-
       </div>
 
       <div class="form-group">
-        <label class="label">Contact Phone Number (10 Digits)</label>
+        <label class="label">Contact Phone Number (10 Digits Required)</label>
         <input type="tel" 
                id="b-phone" 
                class="input-control" 
@@ -169,41 +169,33 @@ document.getElementById('b-date').value = today;
 let currentGuests = 4;
 let selectedAreaText = '';
 
-// Seating units with capacities
 const SEATING_UNITS = [
   {
-    id: 'table',
     title: '🪑 Ground Floor Dining Table',
     desc: 'Standard chair dining (Tables T-01 to T-14)',
     badge: 'Best for 1 to 6 Pax',
     min: 1,
-    max: 6,
-    codePrefix: 'T'
+    max: 6
   },
   {
-    id: 'majlis',
     title: '🛋️ First Floor Majlis Cabin',
     desc: 'Authentic Yemeni carpet floor dining (Cabins M-01 to M-07)',
     badge: 'Ideal for 6 to 8 Pax',
     min: 5,
-    max: 8,
-    codePrefix: 'M'
+    max: 8
   },
   {
-    id: 'vip',
     title: '👑 VIP Private Family Hall',
     desc: 'Private secluded hall for large gatherings (VIP-01)',
     badge: 'Designed for 9 to 25 Pax',
-    min: 8,
-    max: 25,
-    codePrefix: 'VIP'
+    min: 9,
+    max: 25
   }
 ];
 
 function renderSeatingOptions() {
   const container = document.getElementById('seating-options');
   
-  // Rank seating options by guest count
   const sorted = [...SEATING_UNITS].sort((a, b) => {
     const aFits = currentGuests >= a.min && currentGuests <= a.max;
     const bFits = currentGuests >= b.min && currentGuests <= b.max;
@@ -221,7 +213,7 @@ function renderSeatingOptions() {
       <div class="area-pill ${isSelected ? 'active' : ''}" onclick="selectArea(this, '${unit.title} (${unit.badge})')">
         <div class="area-name">${unit.title}</div>
         <div class="area-desc">${unit.desc}</div>
-        <span class="capacity-badge">${isRecommended ? '★ Recommended: ' : ''}${unit.badge}</span>
+        <span class="capacity-badge">${isRecommended ? '★ Recommended for your group: ' : ''}${unit.badge}</span>
       </div>
     `;
   }).join('');
@@ -243,8 +235,8 @@ async function submitReservation(e) {
   e.preventDefault();
 
   const phoneInput = document.getElementById('b-phone').value.trim();
-  if (phoneInput.length !== 10) {
-    alert("Please enter a valid 10-digit mobile number.");
+  if (phoneInput.length !== 10 || !/^\d{10}$/.test(phoneInput)) {
+    alert("Please enter a valid 10-digit mobile phone number.");
     return;
   }
 
@@ -284,7 +276,6 @@ async function submitReservation(e) {
   }
 }
 
-// Initial render
 renderSeatingOptions();
 </script>
 </body>
