@@ -863,12 +863,10 @@ const RESTAURANT_SPOTS = {
   vip: ['VIP-01']
 };
 
-// 1. Detect both active orders AND seated/confirmed reservations on table spots
 function getSpotActiveState(spotId) {
   const cleanSpot = spotId.trim().toUpperCase();
   const spotRegex = new RegExp(`(^|[^A-Z0-9])${cleanSpot}([^A-Z0-9]|$)`, 'i');
 
-  // Check live kitchen orders first
   const activeOrder = liveOrdersCache.find(o => {
     const status = (o.status || '').toLowerCase();
     const isUnsettled = status === 'pending' || status === 'served' || status === 'cooking' || status === 'dining';
@@ -891,7 +889,6 @@ function getSpotActiveState(spotId) {
     };
   }
 
-  // Check today's reservations (both 'seated' and 'confirmed')
   const todayStr = new Date().toISOString().split('T')[0];
   const activeRes = reservationsCache.find(r => 
     r.date === todayStr &&
@@ -919,7 +916,6 @@ function getSpotActiveState(spotId) {
   };
 }
 
-// 2. Prompt manager to assign table when seating a guest
 async function updateResStatus(id, newStatus) {
   let assignedTable = null;
 
@@ -928,7 +924,7 @@ async function updateResStatus(id, newStatus) {
     const defaultSuggestion = target && target.seating_area && target.seating_area.includes('Majlis') ? 'M-01' : 'T-01';
     
     const input = prompt(`Assign table for ${target ? target.name : 'guest'} (e.g. T-01 to T-14, M-01 to M-07, VIP-01):`, defaultSuggestion);
-    if (!input) return; // Manager cancelled prompt
+    if (!input) return;
     
     assignedTable = input.trim().toUpperCase();
   }
@@ -942,10 +938,7 @@ async function updateResStatus(id, newStatus) {
 
     const res = await fetch(`${API_BASE}/reservations/${id}/status`, {
       method: 'PATCH',
-      headers: { 
-        'Content-Type': 'application/json', 
-        'X-Manager-Key': MANAGER_KEY 
-      },
+      headers: { 'Content-Type': 'application/json', 'X-Manager-Key': MANAGER_KEY },
       body: JSON.stringify(payload)
     });
 
@@ -962,42 +955,6 @@ async function updateResStatus(id, newStatus) {
     console.error('Error updating reservation status:', err);
   }
 }
-  if (activeOrder) {
-    const status = (activeOrder.status || 'pending').toLowerCase();
-    const isCooking = status === 'pending' || status === 'cooking';
-    return {
-      state: isCooking ? 'cooking' : 'dining',
-      label: isCooking ? 'Cooking' : 'Dining',
-      desc: `#${activeOrder.id} · ${activeOrder.customer || 'Diner'}`,
-      amount: `₹${activeOrder.total}`,
-      orderId: activeOrder.id
-    };
-  }
-
-  const todayStr = new Date().toISOString().split('T')[0];
-  const reserved = reservationsCache.find(r => 
-    r.date === todayStr && 
-    (r.status || '').toLowerCase() === 'confirmed' &&
-    spotRegex.test((r.seating_area || '').toUpperCase())
-  );
-
-  if (reserved) {
-    return {
-      state: 'reserved',
-      label: 'Reserved',
-      desc: `${reserved.time} · ${reserved.name} (${reserved.guests}p)`,
-      amount: '',
-      orderId: null
-    };
-  }
-
-  return {
-    state: 'vacant',
-    label: 'Vacant',
-    desc: 'Available for seating',
-    amount: '',
-    orderId: null
-  };
 
 function renderFloorMatrix() {
   const renderContainer = (spotList, containerId, labelPrefix) => {
@@ -1168,21 +1125,6 @@ async function submitReservation(e) {
   } finally {
     submitBtn.disabled = false;
     submitBtn.textContent = 'Confirm Booking';
-  }
-}
-
-async function updateResStatus(id, newStatus) {
-  try {
-    await fetch(`${API_BASE}/reservations/${id}/status`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', 'X-Manager-Key': MANAGER_KEY },
-      body: JSON.stringify({ status: newStatus })
-    });
-    const target = reservationsCache.find(r => r.id === id);
-    if (target) target.status = newStatus;
-    loadLiveReservations(currentResFilter);
-  } catch (err) {
-    console.error('Error updating reservation:', err);
   }
 }
 
@@ -1718,7 +1660,7 @@ async function submitReview() {
   }
 }
 
-// Router & Charts
+// ── Hardened Router & Page Switching Engine ──
 const PAGE_TITLES = {
   dashboard: 'Dashboard',
   floormap: 'Floor Map & Table Matrix',
@@ -1730,19 +1672,45 @@ const PAGE_TITLES = {
 };
 
 function navigateTo(page, el) {
-  document.querySelectorAll('[data-page]').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
-  
-  const targetPage = document.querySelector('[data-page="' + page + '"]');
-  if (targetPage) targetPage.classList.add('active');
-  
-  if (el) el.classList.add('active');
-  document.getElementById('page-title').textContent = PAGE_TITLES[page] || 'Dashboard';
+  // 1. Hide all pages
+  document.querySelectorAll('[data-page]').forEach(p => {
+    p.classList.remove('active');
+    p.style.display = 'none';
+  });
 
+  // 2. Remove active state from all sidebar items
+  document.querySelectorAll('.sidebar .sb-item').forEach(i => i.classList.remove('active'));
+  
+  // 3. Activate target page
+  const targetPage = document.querySelector(`[data-page="${page}"]`);
+  if (targetPage) {
+    targetPage.classList.add('active');
+    targetPage.style.display = 'block';
+  }
+  
+  // 4. Highlight clicked sidebar link
+  if (el) {
+    el.classList.add('active');
+  } else {
+    document.querySelectorAll('.sidebar .sb-item').forEach(i => {
+      if (i.getAttribute('onclick') && i.getAttribute('onclick').includes(page)) {
+        i.classList.add('active');
+      }
+    });
+  }
+
+  // 5. Update Topbar title
+  const titleEl = document.getElementById('page-title');
+  if (titleEl) {
+    titleEl.textContent = PAGE_TITLES[page] || 'Dashboard';
+  }
+
+  // 6. Trigger page-specific data loaders
   if (page === 'floormap') renderFloorMatrix();
   if (page === 'orders') loadLiveOrders();
-  if (page === 'reservations') loadLiveReservations();
+  if (page === 'reservations') loadLiveReservations('all');
   if (page === 'payments') renderPaymentsTable();
+  if (page === 'menu') loadMenu();
 }
 
 function tick() {
