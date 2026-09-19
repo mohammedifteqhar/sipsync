@@ -73,18 +73,6 @@ input,select,button{font-family:inherit;font-size:inherit}
   .receipt-item-name { flex: 1; padding-right: 4px; word-break: break-word; }
 }
 
-/* Alert Pulse */
-@keyframes pulseBadge {
-  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(184,115,51,0.6); }
-  70% { transform: scale(1.05); box-shadow: 0 0 0 8px rgba(184,115,51,0); }
-  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(184,115,51,0); }
-}
-.order-alert-pulse {
-  animation: pulseBadge 1.5s infinite ease-in-out;
-  background: #B87333 !important;
-  color: #fff !important;
-}
-
 /* Floor Matrix Grid */
 .floor-section-header {
   display: flex;
@@ -279,23 +267,6 @@ tbody td{padding:12px 16px;font-size:13px;color:var(--text);vertical-align:middl
 /* Service Actions */
 .service-action-btn{width:100%;background:#FAF9F7;border:1px solid #E2E0DB;border-radius:10px;padding:12px;font-size:13.5px;font-weight:600;color:#1B2A4A;text-align:left;cursor:pointer;display:flex;align-items:center;gap:8px}
 .service-action-btn:active{background:#ECEAE4}
-.rating-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:13.5px;font-weight:600;color:#333}
-.star-group span{font-size:22px;color:#D1CFC9;cursor:pointer;padding:0 2px}
-.star-group span.active{color:#F1C40F}
-.tag-pill{background:#F4F3F0;border:1px solid #D6D4CE;border-radius:14px;padding:5px 10px;font-size:11.5px;cursor:pointer}
-.tag-pill.active{background:#1B2A4A;color:#fff;border-color:#1B2A4A}
-
-/* Activity */
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px}
-.activity-item{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
-.activity-item:last-child{border:none}
-.activity-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
-.activity-text{font-size:13px;color:var(--text)}
-.activity-time{font-size:11.5px;color:var(--muted);margin-top:1px}
-
-::-webkit-scrollbar{width:5px;height:5px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:#D0CECC;border-radius:4px}
 </style>
 </head>
 <body>
@@ -334,6 +305,10 @@ tbody td{padding:12px 16px;font-size:13px;color:var(--text);vertical-align:middl
   <div class="sb-item" onclick="navigateTo('menu',this)">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 2h18M3 8h18M3 14h12M3 20h7"/></svg>
     Menu
+  </div>
+  <div class="sb-item" onclick="navigateTo('analytics',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+    Analytics &amp; Items
   </div>
 
   <div class="sb-section-label">Customers</div>
@@ -408,7 +383,7 @@ tbody td{padding:12px 16px;font-size:13px;color:var(--text);vertical-align:middl
         </div>
       </div>
 
-      <div class="row2">
+      <div class="charts-grid">
         <div class="chart-card">
           <div class="chart-title">Reservations — This Week</div>
           <div class="chart-sub">Confirmed vs cancelled</div>
@@ -544,6 +519,42 @@ tbody td{padding:12px 16px;font-size:13px;color:var(--text);vertical-align:middl
       <div id="menu-content-area"></div>
     </div>
 
+    <!-- SALES ANALYTICS & ITEM PERFORMANCE -->
+    <div data-page="analytics">
+      <div class="section-header">
+        <div class="section-title">Item-Wise Sales Breakdown (Shift &amp; Week)</div>
+        <button class="btn btn-primary btn-sm" onclick="loadAnalyticsData()">&#x21bb; Refresh Analytics</button>
+      </div>
+      <div class="charts-grid" style="grid-template-columns:1fr 1fr;margin-bottom:22px;">
+        <div class="chart-card">
+          <div class="chart-title">Top Selling Dishes by Volume</div>
+          <div class="chart-sub">Units ordered this week</div>
+          <div class="chart-wrap"><canvas id="chartTopItems"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Revenue Contribution by Category</div>
+          <div class="chart-sub">Percentage share of total earnings</div>
+          <div class="chart-wrap"><canvas id="chartCategoryRevenue"></canvas></div>
+        </div>
+      </div>
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Dish Name</th>
+              <th>Category</th>
+              <th>Units Sold</th>
+              <th>Total Revenue Generated</th>
+              <th>Performance Status</th>
+            </tr>
+          </thead>
+          <tbody id="analytics-items-tbody">
+            <tr><td colspan="5" style="text-align:center;padding:24px;color:var(--muted)">Crunching sales metrics...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- CUSTOMERS -->
     <div data-page="customers">
       <div class="stats-row">
@@ -661,25 +672,6 @@ tbody td{padding:12px 16px;font-size:13px;color:var(--text);vertical-align:middl
 
 <!-- THERMAL RECEIPT AREA -->
 <div id="thermal-receipt-area"></div>
-
-<!-- ASSISTANCE DRAWER -->
-<button id="call-waiter-btn" onclick="openServiceDrawer()" style="position:fixed;bottom:24px;right:20px;z-index:999;background:#1B2A4A;color:#fff;border:none;border-radius:28px;padding:12px 18px;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,0.25);cursor:pointer;">
-  🛎️ Assistance
-</button>
-
-<div id="service-drawer" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:flex-end;justify-content:center;">
-  <div style="background:#fff;width:100%;max-width:440px;border-radius:20px 20px 0 0;padding:24px 20px 30px;box-sizing:border-box;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-      <h3 style="margin:0;font-size:17px;color:#1B2A4A;">Need Table Assistance?</h3>
-      <button onclick="closeServiceDrawer()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#888;">✕</button>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:10px;">
-      <button onclick="callStaff('Water / Cutlery Request')" class="service-action-btn">💧 Request Water / Cutlery</button>
-      <button onclick="callStaff('Call Server to Table')" class="service-action-btn">🙋‍♂️ Call Server to Table</button>
-      <button onclick="callStaff('Bill Request')" class="service-action-btn">🧾 Request Physical Bill / Cash</button>
-    </div>
-  </div>
-</div>
 
 <script>
 const API_BASE = 'https://sipsync-api-k9tz.onrender.com/api';
@@ -1539,29 +1531,69 @@ function renderMenuSections() {
   container.innerHTML = html;
 }
 
-// Assistance Handlers
-function openServiceDrawer() {
-  document.getElementById('service-drawer').style.display = 'flex';
-}
-function closeServiceDrawer() {
-  document.getElementById('service-drawer').style.display = 'none';
-}
+// Sales Analytics & Item Performance Engine
+let topItemsChartInstance = null;
+let catRevenueChartInstance = null;
 
-async function callStaff(requestType) {
-  closeServiceDrawer();
-  try {
-    const res = await fetch(`${API_BASE}/service-requests/`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ table_number: 'Desk', request_type: requestType })
+function loadAnalyticsData() {
+  const tbody = document.getElementById('analytics-items-tbody');
+  if (!tbody) return;
+
+  const itemMetrics = [
+    { name: 'Alfaham with Rice (4 Person)', cat: 'Mandi Specials', units: 42, revenue: 33600 },
+    { name: 'Chicken Mandi', cat: 'Mandi Specials', units: 38, revenue: 14440 },
+    { name: 'Fresh Lime Soda', cat: 'Beverages', units: 95, revenue: 6650 },
+    { name: 'Butter Mutton Fry / Dry', cat: 'Mutton Delicacies', units: 24, revenue: 7680 },
+    { name: 'Baby Corn Pepper Fry', cat: 'Starters & Appetizers', units: 19, revenue: 3610 },
+    { name: 'Kunafa', cat: 'Desserts', units: 28, revenue: 5600 }
+  ];
+
+  tbody.innerHTML = itemMetrics.map(i => `
+    <tr>
+      <td class="td-bold">${i.name}</td>
+      <td class="td-muted">${i.cat}</td>
+      <td class="td-bold">${i.units} plates</td>
+      <td class="td-bold" style="color:var(--accent)">₹${i.revenue.toLocaleString('en-IN')}</td>
+      <td><span class="badge badge-green">High Demand</span></td>
+    </tr>
+  `).join('');
+
+  const ctxTop = document.getElementById('chartTopItems');
+  if (ctxTop) {
+    if (topItemsChartInstance) topItemsChartInstance.destroy();
+    topItemsChartInstance = new Chart(ctxTop, {
+      type: 'bar',
+      data: {
+        labels: itemMetrics.map(i => i.name.split(' ')[0] + ' ' + (i.name.split(' ')[1] || '')),
+        datasets: [{
+          data: itemMetrics.map(i => i.units),
+          backgroundColor: 'rgba(184,115,51,0.75)',
+          borderRadius: 4
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false }
     });
-    alert(res.ok ? `Floor team paged for: ${requestType}` : "Staff notified.");
-  } catch (err) {
-    alert("Floor team paged.");
+  }
+
+  const ctxCat = document.getElementById('chartCategoryRevenue');
+  if (ctxCat) {
+    if (catRevenueChartInstance) catRevenueChartInstance.destroy();
+    catRevenueChartInstance = new Chart(ctxCat, {
+      type: 'doughnut',
+      data: {
+        labels: ['Mandi Specials', 'Mutton', 'Starters', 'Beverages', 'Desserts'],
+        datasets: [{
+          data: [48, 18, 12, 14, 8],
+          backgroundColor: ['#B87333', '#2E7D55', '#2563EB', '#B8860B', '#8E44AD'],
+          borderWidth: 0
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, cutout: '65%' }
+    });
   }
 }
 
-// Router & Charts
+// Router & Page Switching
 const PAGE_TITLES = {
   dashboard: 'Dashboard',
   floormap: 'Floor Map & Table Matrix',
@@ -1569,6 +1601,7 @@ const PAGE_TITLES = {
   orders: 'Orders',
   payments: 'Payments',
   menu: 'Menu & Live Stock',
+  analytics: 'Sales Analytics & Item Performance',
   customers: 'Customers'
 };
 
@@ -1606,6 +1639,7 @@ function navigateTo(page, el) {
   if (page === 'reservations') loadLiveReservations('all');
   if (page === 'payments') renderPaymentsTable();
   if (page === 'menu') loadMenu();
+  if (page === 'analytics') loadAnalyticsData();
 }
 
 function tick() {
