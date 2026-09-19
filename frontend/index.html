@@ -217,16 +217,16 @@ input,select,button{font-family:inherit;font-size:inherit}
 .chart-wrap{position:relative;height:180px;overflow:hidden}
 .chart-wrap-sm{position:relative;height:160px;overflow:hidden}
 
-/* Tables */
+/* Tables & Actions Layout Fix */
 .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
 .section-title{font-size:13.5px;font-weight:600}
-.table-card{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
-table{width:100%;border-collapse:collapse}
-thead th{font-size:11.5px;font-weight:600;color:var(--muted);text-align:left;padding:10px 16px;background:#FAFAF9;border-bottom:1px solid var(--border);white-space:nowrap}
+.table-card{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:750px}
+thead th{font-size:11.5px;font-weight:600;color:var(--muted);text-align:left;padding:12px 16px;background:#FAFAF9;border-bottom:1px solid var(--border);white-space:nowrap}
 tbody tr{border-bottom:1px solid var(--border)}
 tbody tr:last-child{border-bottom:none}
 tbody tr:hover{background:#FAFAF9}
-tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middle}
+tbody td{padding:12px 16px;font-size:13px;color:var(--text);vertical-align:middle;white-space:nowrap}
 .td-muted{color:var(--muted)}
 .td-bold{font-weight:600}
 .td-mono{font-family:'Inter',monospace;font-size:12px}
@@ -241,10 +241,10 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
 .badge-grey{background:#F0EFED;color:var(--muted)}.badge-grey::before{background:#B0AFAC}
 
 /* Buttons */
-.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:6px;font-size:12.5px;font-weight:500;cursor:pointer;border:none;transition:all .15s;white-space:nowrap;flex-shrink:0}
 .btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent-lt)}
 .btn-ghost{background:transparent;color:var(--text);border:1px solid var(--border)}.btn-ghost:hover{background:var(--bg)}
-.btn-sm{padding:4px 10px;font-size:12px}
+.btn-sm{padding:4px 8px;font-size:11.5px}
 
 /* Filter Tabs */
 .filter-tabs{display:flex;gap:6px;margin-bottom:16px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:5px;width:100%;overflow-x:auto;white-space:nowrap}
@@ -431,7 +431,7 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
           <span class="badge badge-blue">● Dining</span>
           <span class="badge badge-grey" style="color:#8E44AD;background:rgba(142,68,173,0.12);">● Reserved</span>
         </div>
-        <button class="btn btn-ghost btn-sm" onclick="renderFloorMatrix()">&#x21bb; Refresh Grid</button>
+        <button class="btn btn-primary btn-sm" onclick="triggerFloorRefresh(this)">&#x21bb; Refresh Grid</button>
       </div>
 
       <div class="floor-section-header">
@@ -536,7 +536,7 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
       </div>
     </div>
 
-    <!-- MENU (SECTION-GROUPED WITH IMAGES) -->
+    <!-- MENU -->
     <div data-page="menu">
       <div class="section-header">
         <div class="filter-tabs" id="menu-tabs"></div>
@@ -613,7 +613,7 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
   </div>
 </div>
 
-<!-- DYNAMIC UPI PAYMENT & BILL SETTLEMENT MODAL -->
+<!-- DYNAMIC UPI PAYMENT MODAL -->
 <div id="payment-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10001;align-items:center;justify-content:center;padding:16px;">
   <div style="background:#fff;border-radius:14px;width:100%;max-width:400px;overflow:hidden;box-shadow:0 24px 48px rgba(0,0,0,0.25);display:flex;flex-direction:column;">
     <div style="background:#0B2018;color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;">
@@ -659,10 +659,10 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
   </div>
 </div>
 
-<!-- THERMAL RECEIPT / KOT PRINT STAGING -->
+<!-- THERMAL RECEIPT AREA -->
 <div id="thermal-receipt-area"></div>
 
-<!-- SILENT WAITER ASSISTANCE DRAWER -->
+<!-- ASSISTANCE DRAWER -->
 <button id="call-waiter-btn" onclick="openServiceDrawer()" style="position:fixed;bottom:24px;right:20px;z-index:999;background:#1B2A4A;color:#fff;border:none;border-radius:28px;padding:12px 18px;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,0.25);cursor:pointer;">
   🛎️ Assistance
 </button>
@@ -681,62 +681,6 @@ tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middl
   </div>
 </div>
 
-<!-- 15-SECOND REVIEW MODAL -->
-<div id="review-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:1002;align-items:center;justify-content:center;padding:16px;">
-  <div style="background:#fff;width:100%;max-width:380px;border-radius:18px;padding:22px;box-sizing:border-box;box-shadow:0 12px 32px rgba(0,0,0,0.2);">
-    <div id="review-form-screen">
-      <h3 style="margin:0 0 6px 0;font-size:18px;color:#1B2A4A;text-align:center;">How was your visit?</h3>
-      <p style="margin:0 0 16px 0;font-size:12px;color:#666;text-align:center;">Quick 10-second rating helps us improve!</p>
-
-      <div class="rating-row">
-        <span>Food Quality</span>
-        <div class="star-group" data-cat="food">
-          <span onclick="setStars('food', 1)">★</span><span onclick="setStars('food', 2)">★</span><span onclick="setStars('food', 3)">★</span><span onclick="setStars('food', 4)">★</span><span onclick="setStars('food', 5)" class="active">★</span>
-        </div>
-      </div>
-
-      <div class="rating-row">
-        <span>Service Speed</span>
-        <div class="star-group" data-cat="service">
-          <span onclick="setStars('service', 1)">★</span><span onclick="setStars('service', 2)">★</span><span onclick="setStars('service', 3)">★</span><span onclick="setStars('service', 4)">★</span><span onclick="setStars('service', 5)" class="active">★</span>
-        </div>
-      </div>
-
-      <div class="rating-row">
-        <span>Ambiance</span>
-        <div class="star-group" data-cat="ambiance">
-          <span onclick="setStars('ambiance', 1)">★</span><span onclick="setStars('ambiance', 2)">★</span><span onclick="setStars('ambiance', 3)">★</span><span onclick="setStars('ambiance', 4)">★</span><span onclick="setStars('ambiance', 5)" class="active">★</span>
-        </div>
-      </div>
-
-      <div style="margin:16px 0 18px;">
-        <div style="font-size:11.5px;font-weight:700;color:#666;margin-bottom:8px;">Quick Highlights:</div>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;">
-          <span class="tag-pill" onclick="toggleTag(this)">Fast Service</span>
-          <span class="tag-pill" onclick="toggleTag(this)">Delicious Mandi</span>
-          <span class="tag-pill" onclick="toggleTag(this)">Great Music</span>
-          <span class="tag-pill" onclick="toggleTag(this)">Polite Staff</span>
-        </div>
-      </div>
-
-      <div style="display:flex;gap:10px;">
-        <button onclick="closeReviewModal()" style="flex:1;background:#F4F3F0;border:none;padding:12px;border-radius:8px;font-weight:600;color:#666;cursor:pointer;">Skip</button>
-        <button onclick="submitReview()" style="flex:2;background:#1B2A4A;border:none;padding:12px;border-radius:8px;font-weight:700;color:#fff;cursor:pointer;">Submit Review</button>
-      </div>
-    </div>
-
-    <div id="review-google-screen" style="display:none;text-align:center;padding:10px 0;">
-      <div style="font-size:42px;margin-bottom:10px;">🌟</div>
-      <h3 style="margin:0 0 8px 0;font-size:18px;color:#1B2A4A;">Glad you loved it!</h3>
-      <p style="font-size:13px;color:#555;margin-bottom:20px;">Could you take 5 seconds to post this on our official Google Profile?</p>
-      <a href="https://maps.google.com" target="_blank" style="display:block;background:#2E7D32;color:#fff;text-decoration:none;padding:12px;border-radius:8px;font-weight:700;font-size:14px;margin-bottom:10px;">
-        ⭐ Post on Google Reviews
-      </a>
-      <button onclick="closeReviewModal()" style="background:none;border:none;color:#888;font-size:12px;cursor:pointer;">Maybe next time</button>
-    </div>
-  </div>
-</div>
-
 <script>
 const API_BASE = 'https://sipsync-api-k9tz.onrender.com/api';
 const MANAGER_KEY = 'sipsync-admin-2026';
@@ -744,7 +688,6 @@ const MANAGER_KEY = 'sipsync-admin-2026';
 const RESTAURANT_UPI_VPA = 'raidan@upi';
 const RESTAURANT_NAME = 'Raidan Restaurant';
 
-// Category Normalization Dictionary
 function cleanCategoryName(rawCat) {
   if (!rawCat) return "Main Menu";
   const c = rawCat.trim();
@@ -890,11 +833,15 @@ function getSpotActiveState(spotId) {
   }
 
   const todayStr = new Date().toISOString().split('T')[0];
-  const activeRes = reservationsCache.find(r => 
-    r.date === todayStr &&
-    ((r.status || '').toLowerCase() === 'seated' || (r.status || '').toLowerCase() === 'confirmed') &&
-    spotRegex.test((r.seating_area || '').toUpperCase())
-  );
+  const activeRes = reservationsCache.find(r => {
+    const rDate = (r.date || '').split('T')[0];
+    const rStatus = (r.status || '').toLowerCase();
+    const isToday = rDate === todayStr || !rDate;
+    const isActiveStatus = rStatus === 'seated' || rStatus === 'confirmed';
+    const areaStr = (r.seating_area || '').toUpperCase();
+
+    return isToday && isActiveStatus && (spotRegex.test(areaStr) || areaStr.includes(cleanSpot));
+  });
 
   if (activeRes) {
     const isSeated = (activeRes.status || '').toLowerCase() === 'seated';
@@ -916,44 +863,14 @@ function getSpotActiveState(spotId) {
   };
 }
 
-async function updateResStatus(id, newStatus) {
-  let assignedTable = null;
-
-  if (newStatus === 'seated') {
-    const target = reservationsCache.find(r => r.id === id);
-    const defaultSuggestion = target && target.seating_area && target.seating_area.includes('Majlis') ? 'M-01' : 'T-01';
-    
-    const input = prompt(`Assign table for ${target ? target.name : 'guest'} (e.g. T-01 to T-14, M-01 to M-07, VIP-01):`, defaultSuggestion);
-    if (!input) return;
-    
-    assignedTable = input.trim().toUpperCase();
-  }
-
-  try {
-    const payload = { status: newStatus };
-    if (assignedTable) {
-      const target = reservationsCache.find(r => r.id === id);
-      payload.seating_area = `${assignedTable} · ${target ? target.seating_area : ''}`;
-    }
-
-    const res = await fetch(`${API_BASE}/reservations/${id}/status`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', 'X-Manager-Key': MANAGER_KEY },
-      body: JSON.stringify(payload)
-    });
-
-    if (res.ok) {
-      const target = reservationsCache.find(r => r.id === id);
-      if (target) {
-        target.status = newStatus;
-        if (assignedTable) target.seating_area = payload.seating_area;
-      }
-      loadLiveReservations(currentResFilter);
-      renderFloorMatrix();
-    }
-  } catch (err) {
-    console.error('Error updating reservation status:', err);
-  }
+// Explicit Refresh Handlers
+function triggerFloorRefresh(btn) {
+  const origText = btn.innerHTML;
+  btn.innerHTML = '🔄 Refreshing...';
+  renderFloorMatrix();
+  setTimeout(() => {
+    btn.innerHTML = origText;
+  }, 400);
 }
 
 function renderFloorMatrix() {
@@ -1125,6 +1042,46 @@ async function submitReservation(e) {
   } finally {
     submitBtn.disabled = false;
     submitBtn.textContent = 'Confirm Booking';
+  }
+}
+
+async function updateResStatus(id, newStatus) {
+  let assignedTable = null;
+
+  if (newStatus === 'seated') {
+    const target = reservationsCache.find(r => r.id === id);
+    const defaultSuggestion = target && target.seating_area && target.seating_area.includes('Majlis') ? 'M-01' : 'T-01';
+    
+    const input = prompt(`Assign table for ${target ? target.name : 'guest'} (e.g. T-01 to T-14, M-01 to M-07, VIP-01):`, defaultSuggestion);
+    if (!input) return;
+    
+    assignedTable = input.trim().toUpperCase();
+  }
+
+  try {
+    const payload = { status: newStatus };
+    if (assignedTable) {
+      const target = reservationsCache.find(r => r.id === id);
+      payload.seating_area = `${assignedTable} · ${target ? target.seating_area : ''}`;
+    }
+
+    const res = await fetch(`${API_BASE}/reservations/${id}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'X-Manager-Key': MANAGER_KEY },
+      body: JSON.stringify(payload)
+    });
+
+    if (res.ok) {
+      const target = reservationsCache.find(r => r.id === id);
+      if (target) {
+        target.status = newStatus;
+        if (assignedTable) target.seating_area = payload.seating_area;
+      }
+      loadLiveReservations(currentResFilter);
+      renderFloorMatrix();
+    }
+  } catch (err) {
+    console.error('Error updating reservation status:', err);
   }
 }
 
@@ -1409,24 +1366,24 @@ function renderLiveOrdersTableOnly() {
   tb.innerHTML = displayData.map(o => {
     const status = (o.status || 'pending').toLowerCase();
     const printButtons = `
-      <button class="btn btn-ghost btn-sm" title="Print Kitchen Ticket" onclick="printKOT(${o.id})" style="padding:3px 7px;font-size:11px;">🖨️ KOT</button>
-      <button class="btn btn-ghost btn-sm" title="Print Customer Receipt" onclick="printCustomerBill(${o.id})" style="padding:3px 7px;font-size:11px;">🧾 Bill</button>
+      <button class="btn btn-ghost btn-sm" title="Print Kitchen Ticket" onclick="printKOT(${o.id})">🖨️ KOT</button>
+      <button class="btn btn-ghost btn-sm" title="Print Customer Receipt" onclick="printCustomerBill(${o.id})">🧾 Bill</button>
     `;
 
     let actionBtn = '';
     if (status === 'pending') {
-      actionBtn = `<div style="display:flex;gap:4px;align-items:center;">${printButtons}<button class="btn btn-primary btn-sm" onclick="advanceOrderStatus(${o.id}, 'served')">Mark Served</button></div>`;
+      actionBtn = `<div style="display:flex;gap:6px;align-items:center;white-space:nowrap;">${printButtons}<button class="btn btn-primary btn-sm" onclick="advanceOrderStatus(${o.id}, 'served')">Mark Served</button></div>`;
     } else if (status === 'served') {
-      actionBtn = `<div style="display:flex;gap:4px;align-items:center;">${printButtons}<button class="btn btn-primary btn-sm" style="background:var(--green);" onclick="openPaymentModal(${o.id})">Settle Bill</button></div>`;
+      actionBtn = `<div style="display:flex;gap:6px;align-items:center;white-space:nowrap;">${printButtons}<button class="btn btn-primary btn-sm" style="background:var(--green);" onclick="openPaymentModal(${o.id})">Settle Bill</button></div>`;
     } else {
-      actionBtn = `<div style="display:flex;gap:4px;align-items:center;">${printButtons}<span style="font-size:12px;color:var(--green);font-weight:600;margin-left:4px;">✓ Settled</span></div>`;
+      actionBtn = `<div style="display:flex;gap:6px;align-items:center;white-space:nowrap;">${printButtons}<span style="font-size:12px;color:var(--green);font-weight:600;margin-left:4px;">✓ Settled</span></div>`;
     }
 
     return `
       <tr>
         <td class="td-mono td-bold">#${o.id}</td>
         <td class="td-bold">${o.customer || 'Guest Diner'}</td>
-        <td class="td-muted" style="max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${o.items}">${o.items}</td>
+        <td class="td-muted" style="max-width:240px;overflow:hidden;text-overflow:ellipsis;" title="${o.items}">${o.items}</td>
         <td class="td-bold" style="color:var(--accent)">₹${o.total}</td>
         <td class="td-muted">${o.type || 'Dine-in'}</td>
         <td>${orderStatusBadge(o.status)}</td>
@@ -1436,7 +1393,7 @@ function renderLiveOrdersTableOnly() {
   }).join('');
 }
 
-// Menu Catalog Engine (With Supabase CDN Images)
+// Menu Catalog Engine
 const SECTION_ORDER = [
   "Mandi Specials", "Rice", "Arabian Style Chicken", "Chicken Delicacies",
   "Mutton Delicacies", "Vegetarian", "Starters & Appetizers", "Sides",
@@ -1582,7 +1539,7 @@ function renderMenuSections() {
   container.innerHTML = html;
 }
 
-// Silent Assistance & Feedback Handlers
+// Assistance Handlers
 function openServiceDrawer() {
   document.getElementById('service-drawer').style.display = 'flex';
 }
@@ -1604,63 +1561,7 @@ async function callStaff(requestType) {
   }
 }
 
-let reviewRatings = { food: 5, service: 5, ambiance: 5 };
-let selectedTags = [];
-
-function openReviewModal() {
-  document.getElementById('review-form-screen').style.display = 'block';
-  document.getElementById('review-google-screen').style.display = 'none';
-  document.getElementById('review-modal').style.display = 'flex';
-}
-function closeReviewModal() {
-  document.getElementById('review-modal').style.display = 'none';
-}
-
-function setStars(cat, count) {
-  reviewRatings[cat] = count;
-  const container = document.querySelector(`.star-group[data-cat="${cat}"]`);
-  if (!container) return;
-  container.querySelectorAll('span').forEach((s, idx) => {
-    if (idx < count) s.classList.add('active');
-    else s.classList.remove('active');
-  });
-}
-
-function toggleTag(el) {
-  el.classList.toggle('active');
-  const txt = el.innerText.trim();
-  const idx = selectedTags.indexOf(txt);
-  if (idx > -1) selectedTags.splice(idx, 1);
-  else selectedTags.push(txt);
-}
-
-async function submitReview() {
-  try {
-    await fetch(`${API_BASE}/reviews/`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        table_number: 'Counter',
-        food_rating: reviewRatings.food,
-        service_rating: reviewRatings.service,
-        ambiance_rating: reviewRatings.ambiance,
-        tags: selectedTags
-      })
-    });
-  } catch (e) {
-    console.log("Locally stored");
-  }
-
-  if (reviewRatings.food === 5 && reviewRatings.service === 5 && reviewRatings.ambiance === 5) {
-    document.getElementById('review-form-screen').style.display = 'none';
-    document.getElementById('review-google-screen').style.display = 'block';
-  } else {
-    alert("Thank you for your feedback!");
-    closeReviewModal();
-  }
-}
-
-// ── Hardened Router & Page Switching Engine ──
+// Router & Charts
 const PAGE_TITLES = {
   dashboard: 'Dashboard',
   floormap: 'Floor Map & Table Matrix',
@@ -1672,23 +1573,19 @@ const PAGE_TITLES = {
 };
 
 function navigateTo(page, el) {
-  // 1. Hide all pages
   document.querySelectorAll('[data-page]').forEach(p => {
     p.classList.remove('active');
     p.style.display = 'none';
   });
 
-  // 2. Remove active state from all sidebar items
   document.querySelectorAll('.sidebar .sb-item').forEach(i => i.classList.remove('active'));
   
-  // 3. Activate target page
   const targetPage = document.querySelector(`[data-page="${page}"]`);
   if (targetPage) {
     targetPage.classList.add('active');
     targetPage.style.display = 'block';
   }
   
-  // 4. Highlight clicked sidebar link
   if (el) {
     el.classList.add('active');
   } else {
@@ -1699,13 +1596,11 @@ function navigateTo(page, el) {
     });
   }
 
-  // 5. Update Topbar title
   const titleEl = document.getElementById('page-title');
   if (titleEl) {
     titleEl.textContent = PAGE_TITLES[page] || 'Dashboard';
   }
 
-  // 6. Trigger page-specific data loaders
   if (page === 'floormap') renderFloorMatrix();
   if (page === 'orders') loadLiveOrders();
   if (page === 'reservations') loadLiveReservations('all');
