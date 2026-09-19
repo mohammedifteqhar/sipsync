@@ -1,2 +1,7 @@
 menu-images/ 
 qr_codes/ 
+backend/.venv/
+backend/sipsync.db
+__pycache__/
+*.pyc
+.env
