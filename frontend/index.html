@@ -354,9 +354,9 @@ tbody td{padding:12px 16px;font-size:13px;color:var(--text);vertical-align:middl
           <div class="stat-delta up">Live auto-updating</div>
         </div>
         <div class="stat-card">
-          <div class="stat-value" id="stat-revenue">₹38,420</div>
+          <div class="stat-value" id="stat-revenue">₹0</div>
           <div class="stat-label">Revenue Today</div>
-          <div class="stat-delta up">+18% from yesterday</div>
+          <div class="stat-delta up">Ready for service</div>
         </div>
         <div class="stat-card">
           <div class="stat-value" id="stat-active-orders">0</div>
@@ -364,9 +364,9 @@ tbody td{padding:12px 16px;font-size:13px;color:var(--text);vertical-align:middl
           <div class="stat-delta up">Live auto-refreshing</div>
         </div>
         <div class="stat-card">
-          <div class="stat-value">63</div>
+          <div class="stat-value">0</div>
           <div class="stat-label">AI Queries Today</div>
-          <div class="stat-delta up">94% auto-resolved</div>
+          <div class="stat-delta up">Standby mode</div>
         </div>
       </div>
 
@@ -498,10 +498,10 @@ tbody td{padding:12px 16px;font-size:13px;color:var(--text);vertical-align:middl
     <!-- PAYMENTS -->
     <div data-page="payments">
       <div class="stats-row" style="grid-template-columns:repeat(4,1fr)">
-        <div class="stat-card"><div class="stat-value">₹6.8L</div><div class="stat-label">This Month Revenue</div><div class="stat-delta up">+21% vs last month</div></div>
+        <div class="stat-card"><div class="stat-value">₹0</div><div class="stat-label">This Month Revenue</div><div class="stat-delta up">Ready to launch</div></div>
         <div class="stat-card"><div class="stat-value" id="stat-pending-collect">₹0</div><div class="stat-label">Pending Collection</div><div class="stat-delta dn" id="stat-pending-orders-count">0 unpaid</div></div>
         <div class="stat-card"><div class="stat-value" id="stat-trans-count">0</div><div class="stat-label">Transactions</div><div class="stat-delta up">Live tracked</div></div>
-        <div class="stat-card"><div class="stat-value">₹1,140</div><div class="stat-label">Average Ticket Size</div><div class="stat-delta up">+12% vs last month</div></div>
+        <div class="stat-card"><div class="stat-value">₹0</div><div class="stat-label">Average Ticket Size</div><div class="stat-delta up">Awaiting first order</div></div>
       </div>
       <div class="table-card">
         <table>
@@ -549,7 +549,7 @@ tbody td{padding:12px 16px;font-size:13px;color:var(--text);vertical-align:middl
             </tr>
           </thead>
           <tbody id="analytics-items-tbody">
-            <tr><td colspan="5" style="text-align:center;padding:24px;color:var(--muted)">Crunching sales metrics...</td></tr>
+            <tr><td colspan="5" style="text-align:center;padding:24px;color:var(--muted)">Awaiting initial order logs...</td></tr>
           </tbody>
         </table>
       </div>
@@ -558,10 +558,10 @@ tbody td{padding:12px 16px;font-size:13px;color:var(--text);vertical-align:middl
     <!-- CUSTOMERS -->
     <div data-page="customers">
       <div class="stats-row">
-        <div class="stat-card"><div class="stat-value">1,420</div><div class="stat-label">Total Customers</div><div class="stat-delta up">+65 this month</div></div>
-        <div class="stat-card"><div class="stat-value">492</div><div class="stat-label">Active (30 days)</div><div class="stat-delta up">35% of base</div></div>
-        <div class="stat-card"><div class="stat-value">72%</div><div class="stat-label">Retention Rate</div><div class="stat-delta up">+4pp vs last quarter</div></div>
-        <div class="stat-card"><div class="stat-value">4.6</div><div class="stat-label">Avg Visits / Month</div><div class="stat-delta up">+0.2 vs prev</div></div>
+        <div class="stat-card"><div class="stat-value">0</div><div class="stat-label">Total Customers</div><div class="stat-delta up">Ready for onboarding</div></div>
+        <div class="stat-card"><div class="stat-value">0</div><div class="stat-label">Active (30 days)</div><div class="stat-delta up">Clean slate</div></div>
+        <div class="stat-card"><div class="stat-value">0%</div><div class="stat-label">Retention Rate</div><div class="stat-delta up">Ready to track</div></div>
+        <div class="stat-card"><div class="stat-value">0.0</div><div class="stat-label">Avg Visits / Month</div><div class="stat-delta up">Standby mode</div></div>
       </div>
       <div class="table-card">
         <table>
@@ -1217,14 +1217,15 @@ setInterval(() => loadLiveOrders(currentOrderFilter), 4000);
 let activePaymentOrder = null;
 let selectedPaymentMethod = 'UPI';
 
-const PAYMENTS = [
-  {id:'PAY-9101',orderId:'#6101',customer:'Zaid Khan',amount:1180,method:'UPI',status:'paid',dt:'08 Sep, 13:22'},
-  {id:'PAY-9100',orderId:'#6100',customer:'Mohammed Tariq',amount:2200,method:'Card',status:'paid',dt:'08 Sep, 13:40'}
-];
+const PAYMENTS = [];
 
 function renderPaymentsTable() {
   const tb = document.getElementById('pay-tbody');
   if (!tb) return;
+  if (PAYMENTS.length === 0) {
+    tb.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted)">No transactions recorded yet.</td></tr>`;
+    return;
+  }
   tb.innerHTML = PAYMENTS.map(p => `
     <tr>
       <td class="td-mono td-muted">${p.id}</td>
@@ -1539,38 +1540,18 @@ function loadAnalyticsData() {
   const tbody = document.getElementById('analytics-items-tbody');
   if (!tbody) return;
 
-  const itemMetrics = [
-    { name: 'Alfaham with Rice (4 Person)', cat: 'Mandi Specials', units: 42, revenue: 33600 },
-    { name: 'Chicken Mandi', cat: 'Mandi Specials', units: 38, revenue: 14440 },
-    { name: 'Fresh Lime Soda', cat: 'Beverages', units: 95, revenue: 6650 },
-    { name: 'Butter Mutton Fry / Dry', cat: 'Mutton Delicacies', units: 24, revenue: 7680 },
-    { name: 'Baby Corn Pepper Fry', cat: 'Starters & Appetizers', units: 19, revenue: 3610 },
-    { name: 'Kunafa', cat: 'Desserts', units: 28, revenue: 5600 }
-  ];
+  const itemMetrics = [];
 
-  tbody.innerHTML = itemMetrics.map(i => `
-    <tr>
-      <td class="td-bold">${i.name}</td>
-      <td class="td-muted">${i.cat}</td>
-      <td class="td-bold">${i.units} plates</td>
-      <td class="td-bold" style="color:var(--accent)">₹${i.revenue.toLocaleString('en-IN')}</td>
-      <td><span class="badge badge-green">High Demand</span></td>
-    </tr>
-  `).join('');
+  if (itemMetrics.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--muted)">No sales recorded yet. Analytics will populate as orders are completed.</td></tr>`;
+  }
 
   const ctxTop = document.getElementById('chartTopItems');
   if (ctxTop) {
     if (topItemsChartInstance) topItemsChartInstance.destroy();
     topItemsChartInstance = new Chart(ctxTop, {
       type: 'bar',
-      data: {
-        labels: itemMetrics.map(i => i.name.split(' ')[0] + ' ' + (i.name.split(' ')[1] || '')),
-        datasets: [{
-          data: itemMetrics.map(i => i.units),
-          backgroundColor: 'rgba(184,115,51,0.75)',
-          borderRadius: 4
-        }]
-      },
+      data: { labels: [], datasets: [{ data: [], backgroundColor: 'rgba(184,115,51,0.75)' }] },
       options: { responsive: true, maintainAspectRatio: false }
     });
   }
@@ -1580,14 +1561,7 @@ function loadAnalyticsData() {
     if (catRevenueChartInstance) catRevenueChartInstance.destroy();
     catRevenueChartInstance = new Chart(ctxCat, {
       type: 'doughnut',
-      data: {
-        labels: ['Mandi Specials', 'Mutton', 'Starters', 'Beverages', 'Desserts'],
-        datasets: [{
-          data: [48, 18, 12, 14, 8],
-          backgroundColor: ['#B87333', '#2E7D55', '#2563EB', '#B8860B', '#8E44AD'],
-          borderWidth: 0
-        }]
-      },
+      data: { labels: ['Mandi', 'Mutton', 'Starters', 'Beverages', 'Desserts'], datasets: [{ data: [0,0,0,0,0], backgroundColor: ['#B87333', '#2E7D55', '#2563EB', '#B8860B', '#8E44AD'] }] },
       options: { responsive: true, maintainAspectRatio: false, cutout: '65%' }
     });
   }
@@ -1661,7 +1635,7 @@ new Chart(document.getElementById('chartRevenue'), {
   data:{
     labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
     datasets:[{
-      data:[21000,24500,22800,29600,34200,41800,38420],
+      data:[0,0,0,0,0,0,0],
       borderColor:ACCENT, borderWidth:2,
       backgroundColor:'rgba(184,115,51,0.08)',
       fill:true, tension:.4, pointRadius:3, pointBackgroundColor:ACCENT
@@ -1681,7 +1655,7 @@ new Chart(document.getElementById('chartCategory'), {
   data:{
     labels:['Mandi','Grills','Family Packs','Gravies & Breads','Beverages'],
     datasets:[{
-      data:[44,22,18,10,6],
+      data:[0,0,0,0,0],
       backgroundColor:['#B87333','#2E7D55','#2563EB','#B8860B','#8E44AD'],
       borderWidth:0
     }]
@@ -1697,8 +1671,8 @@ new Chart(document.getElementById('chartBookings'), {
   data:{
     labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
     datasets:[
-      {label:'Confirmed', data:[12,14,16,18,24,32,30], backgroundColor:'rgba(184,115,51,0.7)', borderRadius:3},
-      {label:'Cancelled', data:[1,0,1,2,1,2,0], backgroundColor:'rgba(192,57,43,0.4)', borderRadius:3}
+      {label:'Confirmed', data:[0,0,0,0,0,0,0], backgroundColor:'rgba(184,115,51,0.7)', borderRadius:3},
+      {label:'Cancelled', data:[0,0,0,0,0,0,0], backgroundColor:'rgba(192,57,43,0.4)', borderRadius:3}
     ]
   },
   options:{responsive:true, maintainAspectRatio:false}
