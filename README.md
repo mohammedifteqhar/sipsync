@@ -75,10 +75,8 @@ Development Tools
 >Postman (for API testing)
 
 ---
-
-## 📁 Project Structure
-
 ```text
+## 📁 Project Structure
 sipsync/
 │
 ├── backend/
@@ -87,15 +85,22 @@ sipsync/
 │   │   │   ├── chat.py
 │   │   │   ├── menu.py
 │   │   │   └── reservations.py
-│   │   ├── __init__.py
+│   │   ├── .env
 │   │   ├── config.py
 │   │   ├── database.py
 │   │   ├── main.py
 │   │   ├── models.py
-│   │   └── schemas.py
-│   ├── .gitignore
+│   │   ├── schemas.py
+│   │   └── __init__.py
+│   ├── Force/
+│   ├── auto_map_images.py
+│   ├── backfill_missing_images.py
+│   ├── clean_categories.py
+│   ├── generate_table_qrs.py
 │   ├── Procfile
-│   └── requirements.txt
+│   ├── requirements.txt
+│   ├── seed.py
+│   └── seed_raidan.py
 │
 ├── frontend/
 │   ├── index.html
@@ -103,7 +108,19 @@ sipsync/
 │   └── reserve.html
 │
 ├── menu-images/
-│   └── [dish images and assets]
+│   └── [150+ authentic culinary dish assets & item icons]
+│
+├── qr_codes/
+│   ├── all_table_qrs.pdf
+│   ├── floor_qrs_print.html
+│   └── [Table & Majlis specific PNG assets]
+│
+├── Screenshots/
+│   ├── Dashboard.png
+│   ├── Floor-Management-Table.png
+│   ├── Menu.png
+│   ├── Order.png
+│   └── Payment.png
 │
 ├── .gitignore
 └── README.md
